@@ -1,0 +1,112 @@
+@model StockApp.Models.StockTrade
+
+@{
+    ViewData["Title"] = "Trade";
+    string? finnhubToken = ViewBag.FinnhubToken;
+}
+
+<div class="breadcrumb">
+    Stocks &#9654; @Model.StockName
+</div>
+
+<div class="trade-container">
+    <div class="stock-info">
+        <h1 class="stock-name">@Model.StockName (@Model.StockSymbol)</h1>
+        <div class="stock-price">
+            <span class="currency">$</span>
+            <span id="stock-price" class="price-value">@Model.Price.ToString("F2")</span>
+        </div>
+        <div class="stock-price-label">Stock Price</div>
+    </div>
+
+    <div class="order-panel">
+        <h3 class="order-title">New Order</h3>
+        <div class="order-form">
+            <label for="quantity">Quantity:</label>
+            <input type="number" id="quantity" name="Quantity" value="@Model.Quantity" min="1" max="100000" />
+        </div>
+
+        <div class="order-buttons">
+            <form asp-controller="Trade" asp-action="SellOrder" method="post">
+                <input type="hidden" name="StockSymbol" value="@Model.StockSymbol" />
+                <input type="hidden" name="StockName" value="@Model.StockName" />
+                <input type="hidden" name="Quantity" id="sell-quantity" value="@Model.Quantity" />
+                <input type="hidden" name="Price" id="sell-price" value="@Model.Price" />
+                <button type="submit" class="btn-sell">&#8595; Sell</button>
+            </form>
+
+            <form asp-controller="Trade" asp-action="BuyOrder" method="post">
+                <input type="hidden" name="StockSymbol" value="@Model.StockSymbol" />
+                <input type="hidden" name="StockName" value="@Model.StockName" />
+                <input type="hidden" name="Quantity" id="buy-quantity" value="@Model.Quantity" />
+                <input type="hidden" name="Price" id="buy-price" value="@Model.Price" />
+                <button type="submit" class="btn-buy">&#8593; Buy</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="stock-symbol" value="@Model.StockSymbol" />
+<input type="hidden" id="finnhub-token" value="@finnhubToken" />
+
+@section Scripts {
+<script>
+    // Update hidden quantity fields when the quantity input changes
+    document.getElementById("quantity").addEventListener("change", function () {
+        document.getElementById("buy-quantity").value = this.value;
+        document.getElementById("sell-quantity").value = this.value;
+    });
+
+    document.getElementById("quantity").addEventListener("input", function () {
+        document.getElementById("buy-quantity").value = this.value;
+        document.getElementById("sell-quantity").value = this.value;
+    });
+
+    // WebSocket connection for live stock price
+    const stockSymbol = document.getElementById("stock-symbol").value;
+    const token = document.getElementById("finnhub-token").value;
+    const priceElement = document.getElementById("stock-price");
+
+    let socket = null;
+
+    if (token && stockSymbol) {
+        socket = new WebSocket(`wss://ws.finnhub.io?token=${token}`);
+
+        socket.addEventListener("open", function (event) {
+            socket.send(JSON.stringify({ type: "subscribe", symbol: stockSymbol }));
+        });
+
+        socket.addEventListener("message", function (event) {
+            const message = JSON.parse(event.data);
+            if (message.type === "trade" && message.data && message.data.length > 0) {
+                // Get the highest price from all trades in the data array
+                let maxPrice = 0;
+                for (let i = 0; i < message.data.length; i++) {
+                    if (message.data[i].p > maxPrice) {
+                        maxPrice = message.data[i].p;
+                    }
+                }
+
+                if (maxPrice > 0) {
+                    priceElement.textContent = maxPrice.toFixed(2);
+                    // Update the hidden price fields for buy/sell forms
+                    document.getElementById("buy-price").value = maxPrice.toFixed(2);
+                    document.getElementById("sell-price").value = maxPrice.toFixed(2);
+                }
+            }
+        });
+
+        socket.addEventListener("error", function (error) {
+            console.error("WebSocket error:", error);
+        });
+    }
+
+    // Cleanup: unsubscribe and close when page is closed
+    window.addEventListener("beforeunload", function () {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: "unsubscribe", symbol: stockSymbol }));
+            socket.close();
+        }
+    });
+</script>
+}

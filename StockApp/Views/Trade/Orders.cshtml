@@ -1,0 +1,67 @@
+@model StockApp.Models.Orders
+
+@{
+    ViewData["Title"] = "Orders";
+}
+
+<div class="breadcrumb">
+    Stocks &#9654; Orders
+</div>
+
+<div class="orders-container">
+    <div class="orders-column">
+        <h3 class="orders-heading">Buy Orders</h3>
+        @if (Model.BuyOrders.Count == 0)
+        {
+            <p class="no-orders">No buy orders yet.</p>
+        }
+        else
+        {
+            @foreach (var buyOrder in Model.BuyOrders)
+            {
+                <div class="order-card">
+                    <div class="order-stock-name">@buyOrder.StockName (@buyOrder.StockSymbol)</div>
+                    <div class="order-details">
+                        <span class="order-quantity">@buyOrder.Quantity shares</span> at
+                        <span class="order-price">$@buyOrder.Price.ToString("F2")</span>
+                    </div>
+                    <div class="order-trade-amount">
+                        Trade Amount: <strong>$@buyOrder.TradeAmount.ToString("F2")</strong>
+                    </div>
+                    <hr />
+                    <div class="order-date">
+                        @buyOrder.DateAndTimeOfOrder.ToString("dd MMMM yyyy hh:mm:ss tt")
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="orders-column">
+        <h3 class="orders-heading">Sell Orders</h3>
+        @if (Model.SellOrders.Count == 0)
+        {
+            <p class="no-orders">No sell orders yet.</p>
+        }
+        else
+        {
+            @foreach (var sellOrder in Model.SellOrders)
+            {
+                <div class="order-card">
+                    <div class="order-stock-name">@sellOrder.StockName (@sellOrder.StockSymbol)</div>
+                    <div class="order-details">
+                        <span class="order-quantity">@sellOrder.Quantity shares</span> at
+                        <span class="order-price">$@sellOrder.Price.ToString("F2")</span>
+                    </div>
+                    <div class="order-trade-amount">
+                        Trade Amount: <strong>$@sellOrder.TradeAmount.ToString("F2")</strong>
+                    </div>
+                    <hr />
+                    <div class="order-date">
+                        @sellOrder.DateAndTimeOfOrder.ToString("dd MMMM yyyy hh:mm:ss tt")
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
