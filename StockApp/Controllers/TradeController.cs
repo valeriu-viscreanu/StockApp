@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using StockApp.DTO;
+using StockApp.Filters;
 using StockApp.Models;
 using StockApp.Options;
 using StockApp.ServiceContracts;
@@ -70,30 +71,9 @@ namespace StockApp.Controllers
 
         [Route("[action]")]
         [HttpPost]
+        [TypeFilter(typeof(CreateOrderActionFilter))]
         public async Task<IActionResult> BuyOrder(BuyOrderRequest buyOrderRequest)
         {
-            buyOrderRequest.DateAndTimeOfOrder = DateTime.Now;
-            ModelState.Remove("DateAndTimeOfOrder");
-
-            if (!ModelState.IsValid)
-            {
-                ViewBag.FinnhubToken = _configuration["FinnhubToken"];
-                ViewBag.Errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-
-                StockTrade stockTrade = new StockTrade
-                {
-                    StockSymbol = buyOrderRequest.StockSymbol,
-                    StockName = buyOrderRequest.StockName,
-                    Price = buyOrderRequest.Price,
-                    Quantity = buyOrderRequest.Quantity
-                };
-
-                return View("Index", stockTrade);
-            }
-
             BuyOrderResponse buyOrderResponse = await _stocksService.CreateBuyOrder(buyOrderRequest);
 
             return RedirectToAction("Orders");
@@ -101,30 +81,9 @@ namespace StockApp.Controllers
 
         [Route("[action]")]
         [HttpPost]
+        [TypeFilter(typeof(CreateOrderActionFilter))]
         public async Task<IActionResult> SellOrder(SellOrderRequest sellOrderRequest)
         {
-            sellOrderRequest.DateAndTimeOfOrder = DateTime.Now;
-            ModelState.Remove("DateAndTimeOfOrder");
-
-            if (!ModelState.IsValid)
-            {
-                ViewBag.FinnhubToken = _configuration["FinnhubToken"];
-                ViewBag.Errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-
-                StockTrade stockTrade = new StockTrade
-                {
-                    StockSymbol = sellOrderRequest.StockSymbol,
-                    StockName = sellOrderRequest.StockName,
-                    Price = sellOrderRequest.Price,
-                    Quantity = sellOrderRequest.Quantity
-                };
-
-                return View("Index", stockTrade);
-            }
-
             SellOrderResponse sellOrderResponse = await _stocksService.CreateSellOrder(sellOrderRequest);
 
             return RedirectToAction("Orders");
