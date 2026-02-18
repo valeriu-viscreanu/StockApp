@@ -1,8 +1,17 @@
 using StockApp.Options;
 using StockApp.ServiceContracts;
 using StockApp.Services;
+using StockApp.Middleware;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, loggerConfiguration) =>
+{
+    loggerConfiguration
+        .ReadFrom.Configuration(context.Configuration)
+        .Enrich.FromLogContext();
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -17,6 +26,7 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+    app.UseMiddleware<ExceptionHandlingMiddleware>();
 }
 
 app.UseStaticFiles();
