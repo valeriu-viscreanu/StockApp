@@ -28,12 +28,17 @@ namespace StockApp.Controllers
             _configuration = configuration;
         }
 
-        [Route("[action]")]
+        [Route("[action]/{stock?}")]
         [Route("/")]
         [HttpGet]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? stock)
         {
-            string? stockSymbol = _tradingOptions.DefaultStockSymbol;
+            string? stockSymbol = stock;
+            if (string.IsNullOrWhiteSpace(stockSymbol))
+            {
+                stockSymbol = _tradingOptions.DefaultStockSymbol;
+            }
+
             if (string.IsNullOrEmpty(stockSymbol))
             {
                 stockSymbol = "MSFT";
