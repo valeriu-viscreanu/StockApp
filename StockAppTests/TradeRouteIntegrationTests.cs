@@ -33,7 +33,12 @@ public class TradeRouteIntegrationTests
             builder.ConfigureServices(services =>
             {
                 services.RemoveAll<IFinnhubService>();
-                services.AddSingleton<IFinnhubService, FakeFinnhubService>();
+                services.RemoveAll<IStockProfileService>();
+                services.RemoveAll<IStockQuoteService>();
+                services.AddSingleton<FakeFinnhubService>();
+                services.AddSingleton<IFinnhubService>(sp => sp.GetRequiredService<FakeFinnhubService>());
+                services.AddSingleton<IStockProfileService>(sp => sp.GetRequiredService<FakeFinnhubService>());
+                services.AddSingleton<IStockQuoteService>(sp => sp.GetRequiredService<FakeFinnhubService>());
             });
         }
     }

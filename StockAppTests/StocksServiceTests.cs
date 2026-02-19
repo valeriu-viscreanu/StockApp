@@ -1,4 +1,6 @@
 using StockApp.DTO;
+using StockApp.Mappers;
+using StockApp.Repositories;
 using StockApp.ServiceContracts;
 using StockApp.Services;
 
@@ -10,7 +12,13 @@ namespace StockAppTests
 
         public StocksServiceTests()
         {
-            _stocksService = new StocksService();
+            _stocksService = new StocksService(
+                new InMemoryBuyOrderRepository(),
+                new InMemorySellOrderRepository(),
+                new DataAnnotationsRequestValidator<BuyOrderRequest>(),
+                new DataAnnotationsRequestValidator<SellOrderRequest>(),
+                new BuyOrderMapper(),
+                new SellOrderMapper());
         }
 
         #region CreateBuyOrder

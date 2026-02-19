@@ -1,12 +1,6 @@
-using StockApp.DTO;
-
 namespace StockApp.ServiceContracts
 {
-    public interface IStocksService
+    public interface IStocksService : IBuyOrdersService, ISellOrdersService
     {
-        Task<BuyOrderResponse> CreateBuyOrder(BuyOrderRequest? buyOrderRequest);
-        Task<SellOrderResponse> CreateSellOrder(SellOrderRequest? sellOrderRequest);
-        Task<List<BuyOrderResponse>> GetBuyOrders();
-        Task<List<SellOrderResponse>> GetSellOrders();
     }
 }

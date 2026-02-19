@@ -21,15 +21,18 @@ public class TradeControllerTests
         const double expectedPrice = 410.25;
         const uint expectedQuantity = 100;
 
-        Mock<IFinnhubService> finnhubServiceMock = new();
-        finnhubServiceMock
+        Mock<IStockProfileService> stockProfileServiceMock = new();
+        stockProfileServiceMock
             .Setup(service => service.GetCompanyProfile(expectedStockSymbol))
             .ReturnsAsync(new Dictionary<string, object> { ["name"] = expectedStockName });
-        finnhubServiceMock
+
+        Mock<IStockQuoteService> stockQuoteServiceMock = new();
+        stockQuoteServiceMock
             .Setup(service => service.GetStockPriceQuote(expectedStockSymbol))
             .ReturnsAsync(new Dictionary<string, object> { ["c"] = expectedPrice });
 
-        Mock<IStocksService> stocksServiceMock = new();
+        Mock<IBuyOrdersService> buyOrdersServiceMock = new();
+        Mock<ISellOrdersService> sellOrdersServiceMock = new();
         IOptions<TradingOptions> tradingOptions = Options.Create(new TradingOptions
         {
             DefaultStockSymbol = expectedStockSymbol,
@@ -41,8 +44,10 @@ public class TradeControllerTests
             .Build();
 
         TradeController controller = new(
-            finnhubServiceMock.Object,
-            stocksServiceMock.Object,
+            stockProfileServiceMock.Object,
+            stockQuoteServiceMock.Object,
+            buyOrdersServiceMock.Object,
+            sellOrdersServiceMock.Object,
             tradingOptions,
             configuration);
 

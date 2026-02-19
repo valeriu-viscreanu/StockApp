@@ -11,19 +11,25 @@ namespace StockApp.Controllers
     [Route("[controller]")]
     public class TradeController : Controller
     {
-        private readonly IFinnhubService _finnhubService;
-        private readonly IStocksService _stocksService;
+        private readonly IStockProfileService _stockProfileService;
+        private readonly IStockQuoteService _stockQuoteService;
+        private readonly IBuyOrdersService _buyOrdersService;
+        private readonly ISellOrdersService _sellOrdersService;
         private readonly TradingOptions _tradingOptions;
         private readonly IConfiguration _configuration;
 
         public TradeController(
-            IFinnhubService finnhubService,
-            IStocksService stocksService,
+            IStockProfileService stockProfileService,
+            IStockQuoteService stockQuoteService,
+            IBuyOrdersService buyOrdersService,
+            ISellOrdersService sellOrdersService,
             IOptions<TradingOptions> tradingOptions,
             IConfiguration configuration)
         {
-            _finnhubService = finnhubService;
-            _stocksService = stocksService;
+            _stockProfileService = stockProfileService;
+            _stockQuoteService = stockQuoteService;
+            _buyOrdersService = buyOrdersService;
+            _sellOrdersService = sellOrdersService;
             _tradingOptions = tradingOptions.Value;
             _configuration = configuration;
         }
@@ -44,8 +50,8 @@ namespace StockApp.Controllers
                 stockSymbol = "MSFT";
             }
 
-            Dictionary<string, object>? companyProfile = await _finnhubService.GetCompanyProfile(stockSymbol);
-            Dictionary<string, object>? stockPriceQuote = await _finnhubService.GetStockPriceQuote(stockSymbol);
+            Dictionary<string, object>? companyProfile = await _stockProfileService.GetCompanyProfile(stockSymbol);
+            Dictionary<string, object>? stockPriceQuote = await _stockQuoteService.GetStockPriceQuote(stockSymbol);
 
             StockTrade stockTrade = new StockTrade
             {
@@ -79,7 +85,7 @@ namespace StockApp.Controllers
         [TypeFilter(typeof(CreateOrderActionFilter))]
         public async Task<IActionResult> BuyOrder(BuyOrderRequest buyOrderRequest)
         {
-            BuyOrderResponse buyOrderResponse = await _stocksService.CreateBuyOrder(buyOrderRequest);
+            BuyOrderResponse buyOrderResponse = await _buyOrdersService.CreateBuyOrder(buyOrderRequest);
 
             return RedirectToAction("Orders");
         }
@@ -89,7 +95,7 @@ namespace StockApp.Controllers
         [TypeFilter(typeof(CreateOrderActionFilter))]
         public async Task<IActionResult> SellOrder(SellOrderRequest sellOrderRequest)
         {
-            SellOrderResponse sellOrderResponse = await _stocksService.CreateSellOrder(sellOrderRequest);
+            SellOrderResponse sellOrderResponse = await _sellOrdersService.CreateSellOrder(sellOrderRequest);
 
             return RedirectToAction("Orders");
         }
@@ -98,8 +104,8 @@ namespace StockApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Orders()
         {
-            List<BuyOrderResponse> buyOrders = await _stocksService.GetBuyOrders();
-            List<SellOrderResponse> sellOrders = await _stocksService.GetSellOrders();
+            List<BuyOrderResponse> buyOrders = await _buyOrdersService.GetBuyOrders();
+            List<SellOrderResponse> sellOrders = await _sellOrdersService.GetSellOrders();
 
             Models.Orders orders = new Models.Orders
             {
