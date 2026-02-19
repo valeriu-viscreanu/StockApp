@@ -50,8 +50,8 @@ namespace StockApp.Controllers
                 stockSymbol = "MSFT";
             }
 
-            Dictionary<string, object>? companyProfile = await _stockProfileService.GetCompanyProfile(stockSymbol);
-            Dictionary<string, object>? stockPriceQuote = await _stockQuoteService.GetStockPriceQuote(stockSymbol);
+            FinnhubCompanyProfileResponse? companyProfile = await _stockProfileService.GetCompanyProfile(stockSymbol);
+            FinnhubStockQuoteResponse? stockPriceQuote = await _stockQuoteService.GetStockPriceQuote(stockSymbol);
 
             StockTrade stockTrade = new StockTrade
             {
@@ -61,18 +61,12 @@ namespace StockApp.Controllers
 
             if (companyProfile != null)
             {
-                if (companyProfile.ContainsKey("name"))
-                {
-                    stockTrade.StockName = companyProfile["name"].ToString();
-                }
+                stockTrade.StockName = companyProfile.Name;
             }
 
             if (stockPriceQuote != null)
             {
-                if (stockPriceQuote.ContainsKey("c"))
-                {
-                    stockTrade.Price = Convert.ToDouble(stockPriceQuote["c"].ToString());
-                }
+                stockTrade.Price = stockPriceQuote.CurrentPrice;
             }
 
             ViewBag.FinnhubToken = _configuration["FinnhubToken"];

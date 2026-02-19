@@ -1,4 +1,5 @@
 using FluentAssertions;
+using StockApp.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -24,12 +25,12 @@ public class TradeControllerTests
         Mock<IStockProfileService> stockProfileServiceMock = new();
         stockProfileServiceMock
             .Setup(service => service.GetCompanyProfile(expectedStockSymbol))
-            .ReturnsAsync(new Dictionary<string, object> { ["name"] = expectedStockName });
+            .ReturnsAsync(new FinnhubCompanyProfileResponse { Name = expectedStockName });
 
         Mock<IStockQuoteService> stockQuoteServiceMock = new();
         stockQuoteServiceMock
             .Setup(service => service.GetStockPriceQuote(expectedStockSymbol))
-            .ReturnsAsync(new Dictionary<string, object> { ["c"] = expectedPrice });
+            .ReturnsAsync(new FinnhubStockQuoteResponse { CurrentPrice = expectedPrice });
 
         Mock<IBuyOrdersService> buyOrdersServiceMock = new();
         Mock<ISellOrdersService> sellOrdersServiceMock = new();

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using StockApp.DTO;
 using StockApp.ServiceContracts;
 
 namespace StockAppTests;
@@ -63,34 +64,30 @@ public class TradeRouteIntegrationTests
                 ["TSLA"] = 207.10
             };
 
-        public Task<Dictionary<string, object>?> GetCompanyProfile(string stockSymbol)
+        public Task<FinnhubCompanyProfileResponse?> GetCompanyProfile(string stockSymbol)
         {
             if (!CompanyNames.TryGetValue(stockSymbol, out string? companyName))
             {
-                return Task.FromResult<Dictionary<string, object>?>(null);
+                return Task.FromResult<FinnhubCompanyProfileResponse?>(null);
             }
 
-            Dictionary<string, object> profile = new()
+            return Task.FromResult<FinnhubCompanyProfileResponse?>(new FinnhubCompanyProfileResponse
             {
-                { "name", companyName }
-            };
-
-            return Task.FromResult<Dictionary<string, object>?>(profile);
+                Name = companyName
+            });
         }
 
-        public Task<Dictionary<string, object>?> GetStockPriceQuote(string stockSymbol)
+        public Task<FinnhubStockQuoteResponse?> GetStockPriceQuote(string stockSymbol)
         {
             if (!LastPrices.TryGetValue(stockSymbol, out double currentPrice))
             {
-                return Task.FromResult<Dictionary<string, object>?>(null);
+                return Task.FromResult<FinnhubStockQuoteResponse?>(null);
             }
 
-            Dictionary<string, object> quote = new()
+            return Task.FromResult<FinnhubStockQuoteResponse?>(new FinnhubStockQuoteResponse
             {
-                { "c", currentPrice }
-            };
-
-            return Task.FromResult<Dictionary<string, object>?>(quote);
+                CurrentPrice = currentPrice
+            });
         }
     }
 }

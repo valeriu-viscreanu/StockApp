@@ -1,7 +1,9 @@
+using StockApp.DTO;
+
 namespace StockApp.ServiceContracts
 {
     public interface IStockProfileService
     {
-        Task<Dictionary<string, object>?> GetCompanyProfile(string stockSymbol);
+        Task<FinnhubCompanyProfileResponse?> GetCompanyProfile(string stockSymbol);
     }
 }

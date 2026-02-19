@@ -30,9 +30,8 @@ builder.Services.AddSingleton<IRequestValidator<BuyOrderRequest>, DataAnnotation
 builder.Services.AddSingleton<IRequestValidator<SellOrderRequest>, DataAnnotationsRequestValidator<SellOrderRequest>>();
 builder.Services.AddSingleton<IBuyOrderMapper, BuyOrderMapper>();
 builder.Services.AddSingleton<ISellOrderMapper, SellOrderMapper>();
-builder.Services.AddSingleton<IStocksService, StocksService>();
-builder.Services.AddSingleton<IBuyOrdersService>(sp => sp.GetRequiredService<IStocksService>());
-builder.Services.AddSingleton<ISellOrdersService>(sp => sp.GetRequiredService<IStocksService>());
+builder.Services.AddSingleton<IBuyOrdersService, BuyOrdersService>();
+builder.Services.AddSingleton<ISellOrdersService, SellOrdersService>();
 
 var app = builder.Build();
 

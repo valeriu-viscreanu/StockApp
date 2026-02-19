@@ -1,7 +1,9 @@
+using StockApp.DTO;
+
 namespace StockApp.ServiceContracts
 {
     public interface IStockQuoteService
     {
-        Task<Dictionary<string, object>?> GetStockPriceQuote(string stockSymbol);
+        Task<FinnhubStockQuoteResponse?> GetStockPriceQuote(string stockSymbol);
     }
 }

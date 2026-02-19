@@ -1,4 +1,5 @@
 using System.Text.Json;
+using StockApp.DTO;
 using StockApp.ServiceContracts;
 
 namespace StockApp.Services
@@ -14,7 +15,7 @@ namespace StockApp.Services
             _configuration = configuration;
         }
 
-        public async Task<Dictionary<string, object>?> GetCompanyProfile(string stockSymbol)
+        public async Task<FinnhubCompanyProfileResponse?> GetCompanyProfile(string stockSymbol)
         {
             string? token = _configuration["FinnhubToken"];
             string url = $"https://finnhub.io/api/v1/stock/profile2?symbol={stockSymbol}&token={token}";
@@ -23,12 +24,12 @@ namespace StockApp.Services
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            Dictionary<string, object>? result = JsonSerializer.Deserialize<Dictionary<string, object>>(responseBody);
+            FinnhubCompanyProfileResponse? result = JsonSerializer.Deserialize<FinnhubCompanyProfileResponse>(responseBody);
 
             return result;
         }
 
-        public async Task<Dictionary<string, object>?> GetStockPriceQuote(string stockSymbol)
+        public async Task<FinnhubStockQuoteResponse?> GetStockPriceQuote(string stockSymbol)
         {
             string? token = _configuration["FinnhubToken"];
             string url = $"https://finnhub.io/api/v1/quote?symbol={stockSymbol}&token={token}";
@@ -37,7 +38,7 @@ namespace StockApp.Services
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            Dictionary<string, object>? result = JsonSerializer.Deserialize<Dictionary<string, object>>(responseBody);
+            FinnhubStockQuoteResponse? result = JsonSerializer.Deserialize<FinnhubStockQuoteResponse>(responseBody);
 
             return result;
         }
