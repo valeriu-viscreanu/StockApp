@@ -1,5 +1,7 @@
 /* ===== Reset & Base ===== */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -283,7 +285,7 @@ body {
 }
 
 /* ===== Responsive ===== */
-@@media (max-width: 768px) {
+@media (max-width: 768px) {
     .trade-container {
         flex-direction: column;
     }
