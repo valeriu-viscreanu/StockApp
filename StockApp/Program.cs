@@ -18,7 +18,7 @@ builder.Host.UseSerilog((context, loggerConfiguration) =>
         .Enrich.FromLogContext();
 });
 
-// Add services to the container.
+
 builder.Services.AddControllersWithViews();
 builder.Services.AddCors(options =>
 {
@@ -30,7 +30,6 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<TradingOptions>(builder.Configuration.GetSection("TradingOptions"));
 builder.Services.AddHttpClient();
 
-// Infrastructure Services
 builder.Services.AddSingleton<IFinnhubService, FinnhubService>();
 builder.Services.AddSingleton<IStockProfileService>(sp => sp.GetRequiredService<IFinnhubService>());
 builder.Services.AddSingleton<IStockQuoteService>(sp => sp.GetRequiredService<IFinnhubService>());
@@ -38,7 +37,6 @@ builder.Services.AddSingleton<IStockQuoteService>(sp => sp.GetRequiredService<IF
 builder.Services.AddSingleton<IBuyOrderRepository, InMemoryBuyOrderRepository>();
 builder.Services.AddSingleton<ISellOrderRepository, InMemorySellOrderRepository>();
 
-// Application Services
 builder.Services.AddSingleton<IRequestValidator<BuyOrderRequest>, DataAnnotationsRequestValidator<BuyOrderRequest>>();
 builder.Services.AddSingleton<IRequestValidator<SellOrderRequest>, DataAnnotationsRequestValidator<SellOrderRequest>>();
 builder.Services.AddSingleton<IBuyOrderMapper, BuyOrderMapper>();
@@ -48,7 +46,6 @@ builder.Services.AddSingleton<ISellOrdersService, SellOrdersService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
