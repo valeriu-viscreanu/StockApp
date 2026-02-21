@@ -13,4 +13,9 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\StockApp.Application\StockApp.Application.csproj" />
+    <ProjectReference Include="..\StockApp.Infrastructure\StockApp.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using StockApp.DTO;
+using StockApp.Application.DTO;
 using StockApp.Filters;
 using StockApp.Models;
 using StockApp.Options;
-using StockApp.ServiceContracts;
+using StockApp.Application.ServiceContracts;
 
 namespace StockApp.Controllers
 {

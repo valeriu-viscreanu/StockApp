@@ -1,5 +1,3 @@
-using StockApp.DTO;
-
 namespace StockApp.Models
 {
     public class StockTrade

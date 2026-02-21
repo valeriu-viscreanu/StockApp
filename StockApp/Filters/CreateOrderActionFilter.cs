@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using StockApp.DTO;
+using StockApp.Application.DTO;
 using StockApp.Models;
 
 namespace StockApp.Filters

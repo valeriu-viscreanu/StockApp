@@ -26,6 +26,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StockApp\StockApp.csproj" />
+    <ProjectReference Include="..\StockApp.Domain\StockApp.Domain.csproj" />
+    <ProjectReference Include="..\StockApp.Application\StockApp.Application.csproj" />
+    <ProjectReference Include="..\StockApp.Infrastructure\StockApp.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

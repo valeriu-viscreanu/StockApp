@@ -1,4 +1,4 @@
-using StockApp.DTO;
+using StockApp.Application.DTO;
 
 namespace StockApp.Models
 {

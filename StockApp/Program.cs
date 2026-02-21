@@ -1,10 +1,12 @@
 using StockApp.Options;
-using StockApp.ServiceContracts;
-using StockApp.Services;
+using StockApp.Application.ServiceContracts;
+using StockApp.Application.Services;
+using StockApp.Application.Mappers;
+using StockApp.Application.DTO;
+using StockApp.Domain.RepositoryContracts;
+using StockApp.Infrastructure.Repositories;
+using StockApp.Infrastructure.Services;
 using StockApp.Middleware;
-using StockApp.Repositories;
-using StockApp.Mappers;
-using StockApp.DTO;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,12 +29,16 @@ builder.Services.AddCors(options =>
 });
 builder.Services.Configure<TradingOptions>(builder.Configuration.GetSection("TradingOptions"));
 builder.Services.AddHttpClient();
+
+// Infrastructure Services
 builder.Services.AddSingleton<IFinnhubService, FinnhubService>();
 builder.Services.AddSingleton<IStockProfileService>(sp => sp.GetRequiredService<IFinnhubService>());
 builder.Services.AddSingleton<IStockQuoteService>(sp => sp.GetRequiredService<IFinnhubService>());
 
 builder.Services.AddSingleton<IBuyOrderRepository, InMemoryBuyOrderRepository>();
 builder.Services.AddSingleton<ISellOrderRepository, InMemorySellOrderRepository>();
+
+// Application Services
 builder.Services.AddSingleton<IRequestValidator<BuyOrderRequest>, DataAnnotationsRequestValidator<BuyOrderRequest>>();
 builder.Services.AddSingleton<IRequestValidator<SellOrderRequest>, DataAnnotationsRequestValidator<SellOrderRequest>>();
 builder.Services.AddSingleton<IBuyOrderMapper, BuyOrderMapper>();

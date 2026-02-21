@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using StockApp.DTO;
-using StockApp.ServiceContracts;
+using StockApp.Application.DTO;
+using StockApp.Application.ServiceContracts;
 
 namespace StockApp.Controllers
 {

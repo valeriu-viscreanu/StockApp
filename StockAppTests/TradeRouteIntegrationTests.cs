@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using StockApp.DTO;
-using StockApp.ServiceContracts;
+using StockApp.Application.DTO;
+using StockApp.Application.ServiceContracts;
 
 namespace StockAppTests;
 

@@ -1,8 +1,8 @@
-using StockApp.DTO;
-using StockApp.Mappers;
-using StockApp.Repositories;
-using StockApp.ServiceContracts;
-using StockApp.Services;
+using StockApp.Application.DTO;
+using StockApp.Application.Mappers;
+using StockApp.Infrastructure.Repositories;
+using StockApp.Application.ServiceContracts;
+using StockApp.Application.Services;
 
 namespace StockAppTests
 {

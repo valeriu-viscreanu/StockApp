@@ -1,13 +1,13 @@
-using FluentAssertions;
-using StockApp.DTO;
+using StockApp.Application.DTO;
+using StockApp.Application.ServiceContracts;
+using StockApp.Controllers;
+using StockApp.Models;
+using StockApp.Options;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Moq;
-using StockApp.Controllers;
-using StockApp.Models;
-using StockApp.Options;
-using StockApp.ServiceContracts;
+using FluentAssertions;
 
 namespace StockAppTests;
 
