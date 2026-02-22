@@ -20,7 +20,15 @@
             <div class="navbar-right">
                 <input type="text" placeholder="Search Stocks" class="search-input" />
                 <button class="btn-settings">&#9881;</button>
-                <a asp-controller="Account" asp-action="Login" class="btn-login" style="text-decoration: none; display: inline-block; text-align: center;">Login</a>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <span class="user-info">Hello, @User.Identity.Name</span>
+                    <a asp-controller="Account" asp-action="Logout" class="btn-logout" style="text-decoration: none; display: inline-block; text-align: center; margin-left: 10px;">Logout</a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn-login" style="text-decoration: none; display: inline-block; text-align: center;">Login</a>
+                }
             </div>
         </nav>
     </header>

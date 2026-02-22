@@ -20,6 +20,23 @@ builder.Host.UseSerilog((context, loggerConfiguration) =>
 
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = "Cookies";
+    options.DefaultSignInScheme = "Cookies";
+    options.DefaultChallengeScheme = "Cookies";
+})
+.AddCookie("Cookies", options =>
+{
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+});
+
+builder.Services.AddAuthorization();
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -57,6 +74,8 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 app.UseRouting();
 app.UseCors();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using StockApp.Application.DTO;
 using StockApp.Application.ServiceContracts;
+using System.Security.Claims;
 
 namespace StockApp.Controllers
 {
@@ -23,7 +25,7 @@ namespace StockApp.Controllers
 
         [HttpPost]
         [Route("[action]")]
-        public IActionResult Login(LoginRequest loginRequest)
+        public async Task<IActionResult> Login(LoginRequest loginRequest)
         {
             if (!ModelState.IsValid)
             {
@@ -34,8 +36,22 @@ namespace StockApp.Controllers
             bool isSuccess = _accountService.Login(loginRequest);
             if (isSuccess)
             {
-                // Note: Auth session setup is skipped per user request.
-                // Normally we would call HttpContext.SignInAsync(...) here.
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.Name, loginRequest.Email!),
+                    new Claim(ClaimTypes.Email, loginRequest.Email!),
+                    new Claim(ClaimTypes.Role, "Admin")
+                };
+
+                var claimsIdentity = new ClaimsIdentity(claims, "Cookies");
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true,
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60)
+                };
+
+                await HttpContext.SignInAsync("Cookies", new ClaimsPrincipal(claimsIdentity), authProperties);
+
                 return RedirectToAction("Index", "Trade");
             }
 
@@ -45,9 +61,9 @@ namespace StockApp.Controllers
 
         [HttpGet]
         [Route("[action]")]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            // Note: Auth session clear is skipped per user request.
+            await HttpContext.SignOutAsync("Cookies");
             return RedirectToAction("Index", "Trade");
         }
     }
