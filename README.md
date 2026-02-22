@@ -5,6 +5,7 @@ An ASP.NET Core MVC application that displays live stock prices using the **Finn
 ## Features
 - **Live Updates**: Real-time stock price updates via Finnhub WebSockets.
 - **Order Management**: Create buy and sell orders with full server-side validation.
+- **Login**: Basic in-memory login functionality for demonstration.
 - **Orders View**: View a clear list of all executed buy and sell orders with calculated trade amounts.
 - **N-Layer Architecture**: Clean separation of concerns with Controllers, Services, DTOs, and Entities.
 - **Unit Testing**: Comprehensive test suite with 20 xUnit test cases covering all service logic.
@@ -26,6 +27,12 @@ An ASP.NET Core MVC application that displays live stock prices using the **Finn
    ```bash
    dotnet run --project StockApp
    ```
+
+## Login Demonstration
+The application includes a basic login feature for demonstration purposes:
+- **Email**: `admin@test.com`
+- **Password**: `admin123`
+- *Note: Session persistence is currently not implemented, so the authenticated state is not maintained across requests.*
 
 ## Testing
 Run the unit tests:

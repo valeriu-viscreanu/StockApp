@@ -43,9 +43,11 @@ builder.Services.AddSingleton<IBuyOrderMapper, BuyOrderMapper>();
 builder.Services.AddSingleton<ISellOrderMapper, SellOrderMapper>();
 builder.Services.AddSingleton<IBuyOrdersService, BuyOrdersService>();
 builder.Services.AddSingleton<ISellOrdersService, SellOrdersService>();
+builder.Services.AddSingleton<IAccountService, InMemoryAccountService>();
 
 var app = builder.Build();
 
+// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
