@@ -62,14 +62,24 @@ builder.Services.AddSingleton<IBuyOrdersService, BuyOrdersService>();
 builder.Services.AddSingleton<ISellOrdersService, SellOrdersService>();
 builder.Services.AddSingleton<IAccountService, InMemoryAccountService>();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+else
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseMiddleware<ExceptionHandlingMiddleware>();
 }
+
 
 app.UseStaticFiles();
 app.UseRouting();
