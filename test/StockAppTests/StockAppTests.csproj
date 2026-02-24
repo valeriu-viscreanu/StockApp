@@ -25,10 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StockApp\StockApp.csproj" />
-    <ProjectReference Include="..\StockApp.Domain\StockApp.Domain.csproj" />
-    <ProjectReference Include="..\StockApp.Application\StockApp.Application.csproj" />
-    <ProjectReference Include="..\StockApp.Infrastructure\StockApp.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\StockApp.Web\StockApp.Web.csproj" />
+    <ProjectReference Include="..\..\src\StockApp.Domain\StockApp.Domain.csproj" />
+    <ProjectReference Include="..\..\src\StockApp.Application\StockApp.Application.csproj" />
+    <ProjectReference Include="..\..\src\StockApp.Infrastructure\StockApp.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>
