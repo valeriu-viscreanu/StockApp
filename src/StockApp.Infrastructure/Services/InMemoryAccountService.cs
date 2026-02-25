@@ -7,7 +7,7 @@ namespace StockApp.Infrastructure.Services
     {
         public bool Login(LoginRequest loginRequest)
         {
-            if (loginRequest.Email == "admin@test.com" && loginRequest.Password == "admin123")
+            if (loginRequest.Email == "admin@test.com" && loginRequest.Password == "123")
             {
                 return true;
             }

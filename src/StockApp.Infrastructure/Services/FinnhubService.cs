@@ -43,5 +43,19 @@ namespace StockApp.Infrastructure.Services
 
             return result;
         }
+
+        public async Task<FinnhubSearchResponse?> SearchStocks(string query)
+        {
+            string? token = _configuration["FinnhubToken"];
+            string url = $"https://finnhub.io/api/v1/search?q={query}&token={token}";
+
+            HttpResponseMessage response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+            FinnhubSearchResponse? result = JsonSerializer.Deserialize<FinnhubSearchResponse>(responseBody);
+
+            return result;
+        }
     }
 }

@@ -89,5 +89,24 @@ public class TradeRouteIntegrationTests
                 CurrentPrice = currentPrice
             });
         }
+
+        public Task<FinnhubSearchResponse?> SearchStocks(string query)
+        {
+            var results = CompanyNames
+                .Where(kvp => kvp.Value.Contains(query, StringComparison.OrdinalIgnoreCase) || kvp.Key.Equals(query, StringComparison.OrdinalIgnoreCase))
+                .Select(kvp => new FinnhubSearchResult
+                {
+                    Symbol = kvp.Key,
+                    Description = kvp.Value,
+                    DisplaySymbol = kvp.Key
+                })
+                .ToList();
+
+            return Task.FromResult<FinnhubSearchResponse?>(new FinnhubSearchResponse
+            {
+                Count = results.Count,
+                Result = results
+            });
+        }
     }
 }

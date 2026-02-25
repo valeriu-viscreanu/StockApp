@@ -31,7 +31,7 @@ An ASP.NET Core MVC application that displays live stock prices using the **Finn
 ## Login Demonstration
 The application includes a basic login feature for demonstration purposes:
 - **Email**: `admin@test.com`
-- **Password**: `admin123`
+- **Password**: `123`
 - *Note: Session persistence is currently not implemented, so the authenticated state is not maintained across requests.*
 
 ## Testing

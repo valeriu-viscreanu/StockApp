@@ -18,7 +18,10 @@
                 <a asp-controller="Trade" asp-action="Orders">Orders</a>
             </div>
             <div class="navbar-right">
-                <input type="text" placeholder="Search Stocks" class="search-input" />
+                <form asp-controller="Trade" asp-action="Index" method="get" style="display: flex; align-items: center;">
+                    <input type="text" name="stock" placeholder="Search Stocks" class="search-input" />
+                    <button type="submit" class="btn-search" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0 10px;">&#128269;</button>
+                </form>
                 <button class="btn-settings">&#9881;</button>
                 @if (User.Identity?.IsAuthenticated == true)
                 {

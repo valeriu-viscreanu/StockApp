@@ -16,18 +16,24 @@ namespace StockApp.Filters
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            foreach (object? actionArgument in context.ActionArguments.Values)
+            foreach (var actionArgument in context.ActionArguments)
             {
-                switch (actionArgument)
+                string parameterName = actionArgument.Key;
+                object? argumentValue = actionArgument.Value;
+
+                if (argumentValue is BuyOrderRequest buyOrderRequest)
                 {
-                    case BuyOrderRequest buyOrderRequest:
-                        buyOrderRequest.DateAndTimeOfOrder = DateTime.Now;
-                        context.ModelState.Remove(nameof(BuyOrderRequest.DateAndTimeOfOrder));
-                        break;
-                    case SellOrderRequest sellOrderRequest:
-                        sellOrderRequest.DateAndTimeOfOrder = DateTime.Now;
-                        context.ModelState.Remove(nameof(SellOrderRequest.DateAndTimeOfOrder));
-                        break;
+                    buyOrderRequest.DateAndTimeOfOrder = DateTime.Now;
+                    // Remove both prefixed and non-prefixed keys to be safe
+                    context.ModelState.Remove(nameof(BuyOrderRequest.DateAndTimeOfOrder));
+                    context.ModelState.Remove($"{parameterName}.{nameof(BuyOrderRequest.DateAndTimeOfOrder)}");
+                }
+                else if (argumentValue is SellOrderRequest sellOrderRequest)
+                {
+                    sellOrderRequest.DateAndTimeOfOrder = DateTime.Now;
+                    // Remove both prefixed and non-prefixed keys to be safe
+                    context.ModelState.Remove(nameof(SellOrderRequest.DateAndTimeOfOrder));
+                    context.ModelState.Remove($"{parameterName}.{nameof(SellOrderRequest.DateAndTimeOfOrder)}");
                 }
             }
 
