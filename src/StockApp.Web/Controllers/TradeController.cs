@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using StockApp.Application.DTO;
@@ -9,6 +10,7 @@ using StockApp.Application.ServiceContracts;
 namespace StockApp.Controllers
 {
     [Route("[controller]")]
+    [Authorize]
     public class TradeController : Controller
     {
         private readonly IStockProfileService _stockProfileService;
