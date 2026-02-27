@@ -65,3 +65,8 @@
         }
     </div>
 </div>
+
+<div class="orders-total-footer" style="padding: 20px; text-align: right; border-top: 1px solid #ccc; margin-top: 20px;">
+    <h3>Total Buy Amounts: $@Model.BuyOrders.Sum(o => o.TradeAmount).ToString("F2")</h3>
+    <h3>Total Sell Amounts: $@Model.SellOrders.Sum(o => o.TradeAmount).ToString("F2")</h3>
+</div>
