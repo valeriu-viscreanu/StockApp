@@ -118,18 +118,11 @@ body {
 }
 
 /* ===== Trade/Index ===== */
-.trade-container {
-    display: flex;
-    margin: 0 20px;
-    background-color: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
+.trade-container {}
 
 .stock-info {
     flex: 1;
     padding: 30px;
-    border-right: 1px solid #ddd;
 }
 
 .stock-name {
