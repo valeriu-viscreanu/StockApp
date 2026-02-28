@@ -20,7 +20,7 @@ public class TradeControllerTests
         const string expectedStockSymbol = "MSFT";
         const string expectedStockName = "Microsoft Corporation";
         const double expectedPrice = 410.25;
-        const uint expectedQuantity = 100;
+        const uint expectedQuantity = 1;
 
         Mock<IStockProfileService> stockProfileServiceMock = new();
         stockProfileServiceMock
