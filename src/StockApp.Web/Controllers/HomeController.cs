@@ -8,6 +8,7 @@ namespace StockApp.Controllers
     public class HomeController : Controller
     {
         [Route("/Home")]
+        [Route("/")]
         public IActionResult Index()
         {
             // Mock dummy data for the dashboard

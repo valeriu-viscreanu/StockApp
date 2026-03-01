@@ -52,7 +52,7 @@ namespace StockApp.Controllers
 
                 await HttpContext.SignInAsync("Cookies", new ClaimsPrincipal(claimsIdentity), authProperties);
 
-                return RedirectToAction("Index", "Trade");
+                return RedirectToAction("Index", "Home");
             }
 
             ViewBag.Errors = new List<string> { "Invalid email or password" };
@@ -64,7 +64,7 @@ namespace StockApp.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync("Cookies");
-            return RedirectToAction("Index", "Trade");
+            return RedirectToAction("Login", "Account");
         }
     }
 }

@@ -37,7 +37,6 @@ namespace StockApp.Controllers
         }
 
         [Route("[action]/{stock?}")]
-        [Route("/")]
         [HttpGet]
         public async Task<IActionResult> Index(string? stock)
         {
