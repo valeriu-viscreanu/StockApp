@@ -9,11 +9,12 @@
 <body>
     <header>
         <nav class="navbar">
-            <div class="navbar-brand">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index" style="text-decoration: none; color: inherit;">
                 <span class="brand-icon">&#128200;</span>
                 <span class="brand-text">Stocks</span>
-            </div>
+            </a>
             <div class="navbar-links">
+                <a asp-controller="Home" asp-action="Index">Dashboard</a>
                 <a asp-controller="Trade" asp-action="Index">Trade</a>
                 <a asp-controller="Trade" asp-action="Orders">Orders</a>
             </div>
