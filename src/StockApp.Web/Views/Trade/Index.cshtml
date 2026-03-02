@@ -3,18 +3,20 @@
 @{
     ViewData["Title"] = "Trade Dashboard";
     string? finnhubToken = ViewBag.FinnhubToken;
-    
-    var popularStocks = new List<(string Symbol, string Name)>
-    {
-        ("MSFT", "Microsoft"),
-        ("AAPL", "Apple"),
-        ("GOOGL", "Alphabet"),
-        ("AMZN", "Amazon"),
-        ("TSLA", "Tesla"),
-        ("NFLX", "Netflix"),
-        ("META", "Meta"),
-        ("NVDA", "Nvidia")
-    };
+
+
+
+    var popularStocks = new List<(string Symbol, string Name, int Price)>
+{
+    ("MSFT", "Microsoft", 0),
+    ("AAPL", "Apple", 0),
+    ("GOOGL", "Alphabet", 0),
+    ("AMZN", "Amazon", 0),
+    ("TSLA", "Tesla", 0),
+    ("NFLX", "Netflix", 0),
+    ("META", "Meta", 0),
+    ("NVDA", "Nvidia", 0)
+};
 }
 
 <div class="advanced-dashboard">
@@ -35,7 +37,7 @@
                         <span class="stock-company">@stock.Name</span>
                     </div>
                     <div class="stock-mini-chart">
-                        <span id="mini-price-@stock.Symbol" class="stock-mini-price">Loading...</span>
+                        <span id="mini-price-@stock.Symbol" class="stock-mini-price">@(stock.Price == 0 ? "Loading" :  @stock.Price)</span>
                         <span id="mini-change-@stock.Symbol" class="stock-mini-change"></span>
                     </div>
                 </a>
@@ -112,7 +114,6 @@
 <script>
     const token = document.getElementById("finnhub-token").value;
     const stockCharts = {};
-    const stockPrices = {};
     let socket = null;
 
     class StockTrader {
@@ -155,7 +156,7 @@
             });
 
             // Initial Chart
-            this.fetchAndRenderChart('month', container.querySelector('.btn-month'));
+                    this.fetchAndRenderChart('day', container.querySelector('.btn-day'));
         }
 
         updatePrice(price) {
