@@ -39,3 +39,7 @@ Run the unit tests:
 ```bash
 dotnet test
 ```
+
+
+## TODO
+- [ ] update stock price in the sidebar panel from controller instead of the websocket
