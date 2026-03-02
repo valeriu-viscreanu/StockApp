@@ -1,71 +1,108 @@
 @model StockApp.Models.StockTrade
 
 @{
-    ViewData["Title"] = "Trade";
+    ViewData["Title"] = "Trade Dashboard";
     string? finnhubToken = ViewBag.FinnhubToken;
-}
-
-@{
-    var symbols = new List<string> { Model.StockSymbol! };
-    if (Model.StockSymbol != "GOOGL") symbols.Add("GOOGL");
-}
-
-@foreach (var symbol in symbols)
-{
-    bool isGoogl = symbol == "GOOGL";
-    string name = isGoogl ? "Alphabet Inc." : Model.StockName!;
-    double price = isGoogl ? 0 : Model.Price; // Will be updated by WS
     
-    <div class="trade-container" style="margin-top: @(isGoogl ? "40px" : "0");">
-        <div class="stock-info">
-            <h1 class="stock-name">@name (@symbol)</h1>
-            <div class="stock-price">
-                <span class="currency">$</span>
-                <span id="price-@symbol" class="price price-value">@price.ToString("F2")</span>
-            </div>
-            <div class="stock-price-label">Stock Price</div>
-        </div>
-
-        <div class="order-panel">
-            <h3 class="order-title">New Order</h3>
-            <div class="order-form">
-                <label for="quantity-@symbol">Quantity:</label>
-                <input type="number" id="quantity-@symbol" class="quantity-input" data-symbol="@symbol" min="1" max="100000" value="1" />
-            </div>
-
-            <div class="order-buttons">
-                <form asp-controller="Trade" asp-action="SellOrder" method="post">
-                    <input name="StockSymbol" type="hidden" value="@symbol" />
-                    <input name="StockName" type="hidden" value="@name" />
-                    <input name="Quantity" type="hidden" id="sell-qty-@symbol" value="1" />
-                    <input name="Price" type="hidden" id="sell-price-@symbol" value="@price" />
-                    <button type="submit" class="btn-sell">&#8595; Sell</button>
-                </form>
-
-                <form asp-controller="Trade" asp-action="BuyOrder" method="post">
-                    <input name="StockSymbol" type="hidden" value="@symbol" />
-                    <input name="StockName" type="hidden" value="@name" />
-                    <input name="Quantity" type="hidden" id="buy-qty-@symbol" value="1" />
-                    <input name="Price" type="hidden" id="buy-price-@symbol" value="@price" />
-                    <button type="submit" class="btn-buy">&#8593; Buy</button>
-                </form>
-            </div>
-        </div>
-
-        <!-- START GRAPH PANEL -->
-        <div class="graph-panel" style="flex: 2; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid #ddd; background-color: transparent;">
-            <div class="timeframe-buttons" style="margin-bottom: 15px;">
-                <button class="btn-timeframe btn-day" data-symbol="@symbol" style="padding: 6px 16px; margin: 0 5px; cursor: pointer; border: 1px solid #28a745; background: transparent; color: #28a745; border-radius: 4px; font-weight: bold;">Day</button>
-                <button class="btn-timeframe btn-month" data-symbol="@symbol" style="padding: 6px 16px; margin: 0 5px; cursor: pointer; border: 1px solid #28a745; background: #28a745; color: white; border-radius: 4px; font-weight: bold;">Month</button>
-                <button class="btn-timeframe btn-year" data-symbol="@symbol" style="padding: 6px 16px; margin: 0 5px; cursor: pointer; border: 1px solid #28a745; background: transparent; color: #28a745; border-radius: 4px; font-weight: bold;">Year</button>
-            </div>
-            <div style="width: 100%; height: 250px; position: relative;">
-                <canvas id="chart-@symbol"></canvas>
-            </div>
-        </div>
-        <!-- END GRAPH PANEL -->
-    </div>
+    var popularStocks = new List<(string Symbol, string Name)>
+    {
+        ("MSFT", "Microsoft"),
+        ("AAPL", "Apple"),
+        ("GOOGL", "Alphabet"),
+        ("AMZN", "Amazon"),
+        ("TSLA", "Tesla"),
+        ("NFLX", "Netflix"),
+        ("META", "Meta"),
+        ("NVDA", "Nvidia")
+    };
 }
+
+<div class="advanced-dashboard">
+    <!-- SIDEPAR PANEL -->
+    <div class="sidebar-panel">
+        <div class="sidebar-header">
+            <h3>Market Watch</h3>
+        </div>
+        <div class="stock-list">
+            @foreach (var stock in popularStocks)
+            {
+                bool isActive = stock.Symbol == Model.StockSymbol;
+                <a asp-controller="Trade" asp-action="Index" asp-route-stock="@stock.Symbol" 
+                   class="stock-item @(isActive ? "active" : "")">
+                    <div class="stock-icon">@stock.Symbol.Substring(0, 1)</div>
+                    <div class="stock-details">
+                        <span class="stock-symbol">@stock.Symbol</span>
+                        <span class="stock-company">@stock.Name</span>
+                    </div>
+                    <div class="stock-mini-chart">
+                        <span id="mini-price-@stock.Symbol" class="stock-mini-price">---</span>
+                        <span id="mini-change-@stock.Symbol" class="stock-mini-change">0.00%</span>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- MAIN VIEW PANEL -->
+    <div class="main-view-panel">
+        @{
+            string symbol = Model.StockSymbol!;
+            string name = Model.StockName!;
+            double price = Model.Price;
+        }
+        
+        <div class="trade-container">
+            <div class="stock-info">
+                <h1 class="stock-name">@name (@symbol)</h1>
+                <div class="stock-price">
+                    <span class="currency">$</span>
+                    <span id="price-@symbol" class="price price-value">@price.ToString("F2")</span>
+                </div>
+                <div class="stock-price-label">Live Market Price</div>
+            </div>
+
+            <div class="order-panel">
+                <h3 class="order-title">New Order</h3>
+                <div class="order-form">
+                    <label for="quantity-@symbol">Quantity:</label>
+                    <input type="number" id="quantity-@symbol" class="quantity-input" data-symbol="@symbol" min="1" max="100000" value="1" />
+                </div>
+
+                <div class="order-buttons">
+                    <form asp-controller="Trade" asp-action="SellOrder" method="post">
+                        <input name="StockSymbol" type="hidden" value="@symbol" />
+                        <input name="StockName" type="hidden" value="@name" />
+                        <input name="Quantity" type="hidden" id="sell-qty-@symbol" value="1" />
+                        <input name="Price" type="hidden" id="sell-price-@symbol" value="@price" />
+                        <button type="submit" class="btn-sell">&#8595; Sell</button>
+                    </form>
+
+                    <form asp-controller="Trade" asp-action="BuyOrder" method="post">
+                        <input name="StockSymbol" type="hidden" value="@symbol" />
+                        <input name="StockName" type="hidden" value="@name" />
+                        <input name="Quantity" type="hidden" id="buy-qty-@symbol" value="1" />
+                        <input name="Price" type="hidden" id="buy-price-@symbol" value="@price" />
+                        <button type="submit" class="btn-buy">&#8593; Buy</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- START GRAPH PANEL -->
+            <div class="graph-panel" style="flex: 2; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid #ddd; background-color: transparent;">
+                <div class="timeframe-buttons" style="margin-bottom: 15px;">
+                    <button class="btn-timeframe btn-day" data-symbol="@symbol" style="padding: 6px 16px; margin: 0 5px; cursor: pointer; border: 1px solid #28a745; background: transparent; color: #28a745; border-radius: 4px; font-weight: bold;">Day</button>
+                    <button class="btn-timeframe btn-month" data-symbol="@symbol" style="padding: 6px 16px; margin: 0 5px; cursor: pointer; border: 1px solid #28a745; background: #28a745; color: white; border-radius: 4px; font-weight: bold;">Month</button>
+                    <button class="btn-timeframe btn-year" data-symbol="@symbol" style="padding: 6px 16px; margin: 0 5px; cursor: pointer; border: 1px solid #28a745; background: transparent; color: #28a745; border-radius: 4px; font-weight: bold;">Year</button>
+                </div>
+                <div style="width: 100%; height: 350px; position: relative;">
+                    <canvas id="chart-@symbol"></canvas>
+                </div>
+            </div>
+            <!-- END GRAPH PANEL -->
+        </div>
+
+    </div>
+</div>
 
 <input asp-for="StockSymbol" type="hidden" id="stock-symbol" />
 <input type="hidden" id="finnhub-token" value="@finnhubToken" />
@@ -88,6 +125,7 @@
             this.buyQtyInput = document.getElementById(`buy-qty-${symbol}`);
             this.sellQtyInput = document.getElementById(`sell-qty-${symbol}`);
             this.chartCtx = document.getElementById(`chart-${symbol}`).getContext('2d');
+            this.miniPriceElement = document.getElementById(`mini-price-${symbol}`);
             this.chart = null;
             this.currentPrice = 0;
 
@@ -95,6 +133,8 @@
         }
 
         init() {
+            if (!this.qtyInput) return; // For mini-items
+
             // Quantity Listeners
             const updateQty = (val) => {
                 this.buyQtyInput.value = val;
@@ -120,9 +160,14 @@
 
         updatePrice(price) {
             this.currentPrice = price;
-            this.priceElement.textContent = price.toFixed(2);
-            this.buyPriceInput.value = price.toFixed(2);
-            this.sellPriceInput.value = price.toFixed(2);
+            if (this.priceElement) {
+                this.priceElement.textContent = price.toFixed(2);
+                this.buyPriceInput.value = price.toFixed(2);
+                this.sellPriceInput.value = price.toFixed(2);
+            }
+            if (this.miniPriceElement) {
+                this.miniPriceElement.textContent = '$' + price.toFixed(2);
+            }
         }
 
         async fetchAndRenderChart(timeframe, btn) {
@@ -202,18 +247,30 @@
         }
     }
 
-    // Initialize all traders
+    // Initialize traders
     const traders = {};
-    document.querySelectorAll('.quantity-input').forEach(input => {
-        const symbol = input.dataset.symbol;
-        traders[symbol] = new StockTrader(symbol);
+    const symbolsToSubscribe = [@Html.Raw(string.Join(",", popularStocks.Select(s => $"\"{s.Symbol}\"")))];
+    
+    // Main trader
+    traders["@Model.StockSymbol"] = new StockTrader("@Model.StockSymbol");
+
+    // Mini traders (just for price updates)
+    symbolsToSubscribe.forEach(s => {
+        if (!traders[s]) {
+             traders[s] = {
+                 updatePrice: (price) => {
+                     const el = document.getElementById(`mini-price-${s}`);
+                     if (el) el.textContent = '$' + price.toFixed(2);
+                 }
+             };
+        }
     });
 
     // Shared WebSocket
     if (token) {
         socket = new WebSocket(`wss://ws.finnhub.io?token=${token}`);
         socket.addEventListener("open", () => {
-            Object.keys(traders).forEach(symbol => {
+            symbolsToSubscribe.forEach(symbol => {
                 socket.send(JSON.stringify({ type: "subscribe", symbol }));
             });
         });
@@ -231,7 +288,7 @@
 
     window.addEventListener("beforeunload", () => {
         if (socket && socket.readyState === WebSocket.OPEN) {
-            Object.keys(traders).forEach(s => socket.send(JSON.stringify({ type: "unsubscribe", symbol: s })));
+            symbolsToSubscribe.forEach(s => socket.send(JSON.stringify({ type: "unsubscribe", symbol: s })));
             socket.close();
         }
     });
