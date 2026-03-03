@@ -262,7 +262,29 @@
     // Main trader (full functionality: chart, order form, live price)
     const mainTrader = new StockTrader(activeSymbol);
 
-    // Fetch sidebar prices from the API on page load
+    // Apply cached quote data to the sidebar DOM
+    function applySidebarQuotes(quotes) {
+        for (const [symbol, quote] of Object.entries(quotes)) {
+            const priceEl = document.getElementById(`mini-price-${symbol}`);
+            const changeEl = document.getElementById(`mini-change-${symbol}`);
+            if (priceEl && quote.c != null) {
+                priceEl.textContent = '$' + quote.c.toFixed(2);
+            }
+            if (changeEl && quote.dp != null) {
+                const pct = quote.dp.toFixed(2);
+                changeEl.textContent = (quote.dp >= 0 ? '+' : '') + pct + '%';
+                changeEl.style.color = quote.dp >= 0 ? '#28a745' : '#dc3545';
+            }
+        }
+    }
+
+    // Restore sidebar prices from sessionStorage immediately (no flash)
+    const cachedQuotes = sessionStorage.getItem('sidebarQuotes');
+    if (cachedQuotes) {
+        try { applySidebarQuotes(JSON.parse(cachedQuotes)); } catch (e) {}
+    }
+
+    // Then fetch fresh prices from the API in the background
     async function loadSidebarPrices() {
         try {
             const params = allSymbols.map(s => `symbols=${s}`).join('&');
@@ -270,18 +292,8 @@
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             const quotes = await response.json();
 
-            for (const [symbol, quote] of Object.entries(quotes)) {
-                const priceEl = document.getElementById(`mini-price-${symbol}`);
-                const changeEl = document.getElementById(`mini-change-${symbol}`);
-                if (priceEl && quote.c != null) {
-                    priceEl.textContent = '$' + quote.c.toFixed(2);
-                }
-                if (changeEl && quote.dp != null) {
-                    const pct = quote.dp.toFixed(2);
-                    changeEl.textContent = (quote.dp >= 0 ? '+' : '') + pct + '%';
-                    changeEl.style.color = quote.dp >= 0 ? '#28a745' : '#dc3545';
-                }
-            }
+            applySidebarQuotes(quotes);
+            sessionStorage.setItem('sidebarQuotes', JSON.stringify(quotes));
         } catch (err) {
             console.error('Failed to load sidebar prices:', err);
         }
