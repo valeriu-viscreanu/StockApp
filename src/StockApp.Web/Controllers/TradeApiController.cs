@@ -83,6 +83,35 @@ namespace StockApp.Controllers
             }
         }
 
+        [HttpGet("quotes")]
+        public async Task<ActionResult<Dictionary<string, FinnhubStockQuoteResponse>>> GetBatchQuotes([FromQuery] List<string> symbols)
+        {
+            if (symbols == null || symbols.Count == 0)
+            {
+                return BadRequest("symbols query parameter is required");
+            }
+
+            var result = new Dictionary<string, FinnhubStockQuoteResponse>();
+
+            foreach (var symbol in symbols)
+            {
+                var quote = await _stockQuoteService.GetStockPriceQuote(symbol);
+                if (quote != null)
+                {
+                    result[symbol] = quote;
+                }
+                
+                // Add a small delay between requests if there are multiple symbols, 
+                // to avoid slamming the free tier API limit
+                if (symbols.Count > 3)
+                {
+                    await Task.Delay(150); // 150ms delay
+                }
+            }
+
+            return Ok(result);
+        }
+
         [HttpPost("sell-order")]
         public async Task<ActionResult<SellOrderResponse>> CreateSellOrder(SellOrderRequest sellOrderRequest)
         {

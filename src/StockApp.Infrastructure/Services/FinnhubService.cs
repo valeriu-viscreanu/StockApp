@@ -22,7 +22,8 @@ namespace StockApp.Infrastructure.Services
             string url = $"https://finnhub.io/api/v1/stock/profile2?symbol={stockSymbol}&token={token}";
 
             HttpResponseMessage response = await _httpClient.GetAsync(url);
-            response.EnsureSuccessStatusCode();
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests) return null;
+            if (!response.IsSuccessStatusCode) return null;
 
             string responseBody = await response.Content.ReadAsStringAsync();
             FinnhubCompanyProfileResponse? result = JsonSerializer.Deserialize<FinnhubCompanyProfileResponse>(responseBody);
@@ -36,7 +37,8 @@ namespace StockApp.Infrastructure.Services
             string url = $"https://finnhub.io/api/v1/quote?symbol={stockSymbol}&token={token}";
 
             HttpResponseMessage response = await _httpClient.GetAsync(url);
-            response.EnsureSuccessStatusCode();
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests) return null;
+            if (!response.IsSuccessStatusCode) return null;
 
             string responseBody = await response.Content.ReadAsStringAsync();
             FinnhubStockQuoteResponse? result = JsonSerializer.Deserialize<FinnhubStockQuoteResponse>(responseBody);
@@ -50,7 +52,8 @@ namespace StockApp.Infrastructure.Services
             string url = $"https://finnhub.io/api/v1/search?q={query}&token={token}";
 
             HttpResponseMessage response = await _httpClient.GetAsync(url);
-            response.EnsureSuccessStatusCode();
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests) return null;
+            if (!response.IsSuccessStatusCode) return null;
 
             string responseBody = await response.Content.ReadAsStringAsync();
             FinnhubSearchResponse? result = JsonSerializer.Deserialize<FinnhubSearchResponse>(responseBody);

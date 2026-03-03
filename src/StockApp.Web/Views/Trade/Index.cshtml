@@ -255,40 +255,54 @@
         }
     }
 
-    // Initialize traders
-    const traders = {};
-    const symbolsToSubscribe = [@Html.Raw(string.Join(",", popularStocks.Select(s => $"\"{s.Symbol}\"")))];
+    // Initialize
+    const activeSymbol = "@Model.StockSymbol";
+    const allSymbols = [@Html.Raw(string.Join(",", popularStocks.Select(s => $"\"{s.Symbol}\"")))];
     
-    // Main trader
-    traders["@Model.StockSymbol"] = new StockTrader("@Model.StockSymbol");
+    // Main trader (full functionality: chart, order form, live price)
+    const mainTrader = new StockTrader(activeSymbol);
 
-    // Mini traders (just for price updates)
-    symbolsToSubscribe.forEach(s => {
-        if (!traders[s]) {
-             traders[s] = {
-                 updatePrice: (price) => {
-                     const el = document.getElementById(`mini-price-${s}`);
-                     if (el) el.textContent = '$' + price.toFixed(2);
-                 }
-             };
+    // Fetch sidebar prices from the API on page load
+    async function loadSidebarPrices() {
+        try {
+            const params = allSymbols.map(s => `symbols=${s}`).join('&');
+            const response = await fetch(`/api/v1/TradeApi/quotes?${params}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const quotes = await response.json();
+
+            for (const [symbol, quote] of Object.entries(quotes)) {
+                const priceEl = document.getElementById(`mini-price-${symbol}`);
+                const changeEl = document.getElementById(`mini-change-${symbol}`);
+                if (priceEl && quote.c != null) {
+                    priceEl.textContent = '$' + quote.c.toFixed(2);
+                }
+                if (changeEl && quote.dp != null) {
+                    const pct = quote.dp.toFixed(2);
+                    changeEl.textContent = (quote.dp >= 0 ? '+' : '') + pct + '%';
+                    changeEl.style.color = quote.dp >= 0 ? '#28a745' : '#dc3545';
+                }
+            }
+        } catch (err) {
+            console.error('Failed to load sidebar prices:', err);
         }
-    });
+    }
 
-    // Shared WebSocket
+    loadSidebarPrices();
+
+    // WebSocket only for the active stock's live price
     if (token) {
         socket = new WebSocket(`wss://ws.finnhub.io?token=${token}`);
         socket.addEventListener("open", () => {
-            symbolsToSubscribe.forEach(symbol => {
-                socket.send(JSON.stringify({ type: "subscribe", symbol }));
-            });
+            socket.send(JSON.stringify({ type: "subscribe", symbol: activeSymbol }));
         });
 
         socket.addEventListener("message", (event) => {
             const message = JSON.parse(event.data);
             if (message.type === "trade") {
                 message.data.forEach(trade => {
-                    const trader = traders[trade.s];
-                    if (trader) trader.updatePrice(trade.p);
+                    if (trade.s === activeSymbol) {
+                        mainTrader.updatePrice(trade.p);
+                    }
                 });
             }
         });
@@ -296,7 +310,7 @@
 
     window.addEventListener("beforeunload", () => {
         if (socket && socket.readyState === WebSocket.OPEN) {
-            symbolsToSubscribe.forEach(s => socket.send(JSON.stringify({ type: "unsubscribe", symbol: s })));
+            socket.send(JSON.stringify({ type: "unsubscribe", symbol: activeSymbol }));
             socket.close();
         }
     });
