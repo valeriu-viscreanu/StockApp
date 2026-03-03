@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using StockApp.Application.DTO;
 using StockApp.Application.ServiceContracts;
+using System.Collections.Concurrent;
 
 namespace StockApp.Infrastructure.Services
 {
@@ -9,6 +10,7 @@ namespace StockApp.Infrastructure.Services
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _configuration;
+        private static readonly ConcurrentDictionary<string, (FinnhubStockQuoteResponse Quote, DateTime Expiry)> _quoteCache = new();
 
         public FinnhubService(HttpClient httpClient, IConfiguration configuration)
         {
@@ -33,6 +35,12 @@ namespace StockApp.Infrastructure.Services
 
         public async Task<FinnhubStockQuoteResponse?> GetStockPriceQuote(string stockSymbol)
         {
+            // Check cache first
+            if (_quoteCache.TryGetValue(stockSymbol, out var cached) && cached.Expiry > DateTime.UtcNow)
+            {
+                return cached.Quote;
+            }
+
             string? token = _configuration["FinnhubToken"];
             string url = $"https://finnhub.io/api/v1/quote?symbol={stockSymbol}&token={token}";
 
@@ -42,6 +50,12 @@ namespace StockApp.Infrastructure.Services
 
             string responseBody = await response.Content.ReadAsStringAsync();
             FinnhubStockQuoteResponse? result = JsonSerializer.Deserialize<FinnhubStockQuoteResponse>(responseBody);
+
+            if (result != null)
+            {
+                // Cache for 60 seconds
+                _quoteCache[stockSymbol] = (result, DateTime.UtcNow.AddSeconds(60));
+            }
 
             return result;
         }
