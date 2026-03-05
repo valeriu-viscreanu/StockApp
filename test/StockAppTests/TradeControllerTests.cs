@@ -6,7 +6,7 @@ using StockApp.Options;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using Moq;
+using Imposter.Abstractions;
 using FluentAssertions;
 
 namespace StockAppTests;
@@ -22,18 +22,18 @@ public class TradeControllerTests
         const double expectedPrice = 410.25;
         const uint expectedQuantity = 1;
 
-        Mock<IStockProfileService> stockProfileServiceMock = new();
+        var stockProfileServiceMock = new IStockProfileServiceImposter();
         stockProfileServiceMock
-            .Setup(service => service.GetCompanyProfile(expectedStockSymbol))
+            .GetCompanyProfile(expectedStockSymbol)
             .ReturnsAsync(new FinnhubCompanyProfileResponse { Name = expectedStockName });
 
-        Mock<IStockQuoteService> stockQuoteServiceMock = new();
+        var stockQuoteServiceMock = new IStockQuoteServiceImposter();
         stockQuoteServiceMock
-            .Setup(service => service.GetStockPriceQuote(expectedStockSymbol))
+            .GetStockPriceQuote(expectedStockSymbol)
             .ReturnsAsync(new FinnhubStockQuoteResponse { CurrentPrice = expectedPrice });
 
-        Mock<IBuyOrdersService> buyOrdersServiceMock = new();
-        Mock<ISellOrdersService> sellOrdersServiceMock = new();
+        var buyOrdersServiceMock = new IBuyOrdersServiceImposter();
+        var sellOrdersServiceMock = new ISellOrdersServiceImposter();
         IOptions<TradingOptions> tradingOptions = Options.Create(new TradingOptions
         {
             DefaultStockSymbol = expectedStockSymbol,
@@ -45,10 +45,10 @@ public class TradeControllerTests
             .Build();
 
         TradeController controller = new(
-            stockProfileServiceMock.Object,
-            stockQuoteServiceMock.Object,
-            buyOrdersServiceMock.Object,
-            sellOrdersServiceMock.Object,
+            stockProfileServiceMock.Instance(),
+            stockQuoteServiceMock.Instance(),
+            buyOrdersServiceMock.Instance(),
+            sellOrdersServiceMock.Instance(),
             tradingOptions,
             configuration);
 
