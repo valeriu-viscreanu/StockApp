@@ -14,10 +14,10 @@ namespace StockApp.Controllers
             // Mock dummy data for the dashboard
             var viewModel = new PortfolioSummary
             {
-                TotalPortfolioValue = 125430.85,
-                DayChange = 2340.12,
-                DayChangePercentage = 1.87,
-                TotalStocksHeld = 12
+                TotalPortfolioValue = 0,
+                DayChange = 0,
+                DayChangePercentage = 0,
+                TotalStocksHeld = 0
             };
 
             return View(viewModel);

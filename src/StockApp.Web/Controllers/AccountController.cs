@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockApp.Application.DTO;
 using StockApp.Application.ServiceContracts;
@@ -16,6 +17,7 @@ namespace StockApp.Controllers
             _accountService = accountService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         [Route("[action]")]
         public IActionResult Login()
@@ -23,6 +25,7 @@ namespace StockApp.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         [HttpPost]
         [Route("[action]")]
         public async Task<IActionResult> Login(LoginRequest loginRequest)

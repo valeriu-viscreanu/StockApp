@@ -8,6 +8,9 @@ using StockApp.Infrastructure.Repositories;
 using StockApp.Infrastructure.Services;
 using StockApp.Middleware;
 using Serilog;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +24,14 @@ builder.Host.UseSerilog((context, loggerConfiguration) =>
 
 builder.Services.AddControllersWithViews();
 
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException(
+        "JWT signing key is not configured. Please set 'Jwt:Key' in appsettings.json or user secrets.");
+
 builder.Services.AddAuthentication(options =>
 {
+    // Cookies are standard for browsers/views.
+    // JWT handles the API side.
     options.DefaultAuthenticateScheme = "Cookies";
     options.DefaultSignInScheme = "Cookies";
     options.DefaultChallengeScheme = "Cookies";
@@ -33,6 +42,19 @@ builder.Services.AddAuthentication(options =>
     options.LogoutPath = "/Account/Logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+})
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
 });
 
 builder.Services.AddAuthorization();
@@ -88,7 +110,7 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapControllers().RequireAuthorization();
 
 app.Run();
 
