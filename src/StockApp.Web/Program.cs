@@ -83,6 +83,7 @@ builder.Services.AddSingleton<ISellOrderMapper, SellOrderMapper>();
 builder.Services.AddSingleton<IBuyOrdersService, BuyOrdersService>();
 builder.Services.AddSingleton<ISellOrdersService, SellOrdersService>();
 builder.Services.AddSingleton<IAccountService, InMemoryAccountService>();
+builder.Services.AddSingleton<IRefreshTokenService, InMemoryRefreshTokenService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

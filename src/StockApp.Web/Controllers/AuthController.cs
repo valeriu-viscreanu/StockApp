@@ -15,11 +15,13 @@ namespace StockApp.Controllers
     {
         private readonly IAccountService _accountService;
         private readonly IConfiguration _configuration;
+        private readonly IRefreshTokenService _refreshTokenService;
 
-        public AuthController(IAccountService accountService, IConfiguration configuration)
+        public AuthController(IAccountService accountService, IConfiguration configuration, IRefreshTokenService refreshTokenService)
         {
             _accountService = accountService;
             _configuration = configuration;
+            _refreshTokenService = refreshTokenService;
         }
 
         [AllowAnonymous]
@@ -37,8 +39,42 @@ namespace StockApp.Controllers
                 return Unauthorized(new { message = "Invalid email or password" });
             }
 
-            var token = GenerateJwtToken(loginRequest.Email!);
-            return Ok(new { token });
+            var accessToken = GenerateJwtToken(loginRequest.Email!);
+            var refreshToken = _refreshTokenService.CreateRefreshToken(loginRequest.Email!);
+
+            return Ok(new 
+            { 
+                token = accessToken, 
+                refreshToken = refreshToken.Token 
+            });
+        }
+
+        [AllowAnonymous]
+        [HttpPost("refresh")]
+        public IActionResult Refresh([FromBody] RefreshRequest refreshRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var refreshToken = _refreshTokenService.GetByToken(refreshRequest.RefreshToken!);
+
+            if (refreshToken == null || refreshToken.IsRevoked || refreshToken.ExpiresUtc < DateTime.UtcNow)
+            {
+                return Unauthorized(new { message = "Invalid or expired refresh token." });
+            }
+
+            _refreshTokenService.RevokeToken(refreshToken.Token);
+            var newRefreshToken = _refreshTokenService.CreateRefreshToken(refreshToken.Email);
+            
+            var newAccessToken = GenerateJwtToken(refreshToken.Email);
+
+            return Ok(new
+            {
+                token = newAccessToken,
+                refreshToken = newRefreshToken.Token
+            });
         }
 
         private string GenerateJwtToken(string email)
@@ -61,7 +97,7 @@ namespace StockApp.Controllers
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(60),
+                expires: DateTime.UtcNow.AddMinutes(15),
                 signingCredentials: credentials
             );
 
