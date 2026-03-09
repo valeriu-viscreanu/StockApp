@@ -26,7 +26,7 @@ namespace StockApp.Controllers
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest loginRequest)
+        public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
         {
             if (!ModelState.IsValid)
             {
@@ -40,7 +40,7 @@ namespace StockApp.Controllers
             }
 
             var accessToken = GenerateJwtToken(loginRequest.Email!);
-            var refreshToken = _refreshTokenService.CreateRefreshToken(loginRequest.Email!);
+            var refreshToken = await _refreshTokenService.CreateRefreshToken(loginRequest.Email!);
 
             return Ok(new 
             { 
@@ -51,22 +51,22 @@ namespace StockApp.Controllers
 
         [AllowAnonymous]
         [HttpPost("refresh")]
-        public IActionResult Refresh([FromBody] RefreshRequest refreshRequest)
+        public async Task<IActionResult> Refresh([FromBody] RefreshRequest refreshRequest)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var refreshToken = _refreshTokenService.GetByToken(refreshRequest.RefreshToken!);
+            var refreshToken = await _refreshTokenService.GetByToken(refreshRequest.RefreshToken!);
 
             if (refreshToken == null || refreshToken.IsRevoked || refreshToken.ExpiresUtc < DateTime.UtcNow)
             {
                 return Unauthorized(new { message = "Invalid or expired refresh token." });
             }
 
-            _refreshTokenService.RevokeToken(refreshToken.Token);
-            var newRefreshToken = _refreshTokenService.CreateRefreshToken(refreshToken.Email);
+            await _refreshTokenService.RevokeToken(refreshToken.Token);
+            var newRefreshToken = await _refreshTokenService.CreateRefreshToken(refreshToken.Email);
             
             var newAccessToken = GenerateJwtToken(refreshToken.Email);
 
