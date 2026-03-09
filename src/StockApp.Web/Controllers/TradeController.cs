@@ -40,16 +40,9 @@ namespace StockApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Index(string? stock)
         {
-            string? stockSymbol = stock;
-            if (string.IsNullOrWhiteSpace(stockSymbol))
-            {
-                stockSymbol = _tradingOptions.DefaultStockSymbol;
-            }
-
-            if (string.IsNullOrEmpty(stockSymbol))
-            {
-                stockSymbol = "MSFT";
-            }
+            string stockSymbol = !string.IsNullOrWhiteSpace(stock)
+                ? stock
+                : (!string.IsNullOrWhiteSpace(_tradingOptions.DefaultStockSymbol) ? _tradingOptions.DefaultStockSymbol : "MSFT");
 
             // Attempt to get quote. If price is 0, it might be a name search
             FinnhubStockQuoteResponse? stockPriceQuote = await _stockQuoteService.GetStockPriceQuote(stockSymbol);
@@ -61,8 +54,8 @@ namespace StockApp.Controllers
                 if (searchResults?.Result != null && searchResults.Result.Count > 0)
                 {
                     // Take the first matching symbol (best guess)
-                    stockSymbol = searchResults.Result[0].Symbol;
-                    stockPriceQuote = await _stockQuoteService.GetStockPriceQuote(stockSymbol!);
+                    stockSymbol = searchResults.Result[0].Symbol!;
+                    stockPriceQuote = await _stockQuoteService.GetStockPriceQuote(stockSymbol);
                 }
             }
 
