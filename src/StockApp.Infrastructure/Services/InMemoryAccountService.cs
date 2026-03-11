@@ -16,6 +16,15 @@ namespace StockApp.Infrastructure.Services
                     Email = loginRequest.Email
                 };
             }
+            if (loginRequest.Email == "admin1@test.com" && loginRequest.Password == "123")
+            {
+                return new LoginResponse
+                {
+                    IsSuccess = true,
+                    UserID = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                    Email = loginRequest.Email
+                };
+            }
             return new LoginResponse { IsSuccess = false };
         }
     }
