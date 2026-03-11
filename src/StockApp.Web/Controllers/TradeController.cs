@@ -17,6 +17,7 @@ namespace StockApp.Controllers
         private readonly IStockQuoteService _stockQuoteService;
         private readonly IBuyOrdersService _buyOrdersService;
         private readonly ISellOrdersService _sellOrdersService;
+        private readonly IUserBalanceService _userBalanceService;
         private readonly TradingOptions _tradingOptions;
         private readonly IConfiguration _configuration;
 
@@ -25,6 +26,7 @@ namespace StockApp.Controllers
             IStockQuoteService stockQuoteService,
             IBuyOrdersService buyOrdersService,
             ISellOrdersService sellOrdersService,
+            IUserBalanceService userBalanceService,
             IOptions<TradingOptions> tradingOptions,
             IConfiguration configuration)
         {
@@ -32,6 +34,7 @@ namespace StockApp.Controllers
             _stockQuoteService = stockQuoteService;
             _buyOrdersService = buyOrdersService;
             _sellOrdersService = sellOrdersService;
+            _userBalanceService = userBalanceService;
             _tradingOptions = tradingOptions.Value;
             _configuration = configuration;
         }
@@ -79,6 +82,12 @@ namespace StockApp.Controllers
 
             ViewBag.FinnhubToken = _configuration["FinnhubToken"];
 
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdString, out Guid userId))
+            {
+                stockTrade.CashBalance = _userBalanceService.GetBalance(userId);
+            }
+
             return View(stockTrade);
         }
 
@@ -91,6 +100,12 @@ namespace StockApp.Controllers
             if (Guid.TryParse(userIdString, out Guid userId))
             {
                 buyOrderRequest.UserID = userId;
+                double totalCost = buyOrderRequest.Price * buyOrderRequest.Quantity;
+                if (!_userBalanceService.DeductBalance(userId, totalCost))
+                {
+                    TempData["Error"] = "Insufficient funds for this purchase.";
+                    return RedirectToAction("Index", new { stock = buyOrderRequest.StockSymbol });
+                }
             }
 
             BuyOrderResponse buyOrderResponse = await _buyOrdersService.CreateBuyOrder(buyOrderRequest);
@@ -107,6 +122,8 @@ namespace StockApp.Controllers
             if (Guid.TryParse(userIdString, out Guid userId))
             {
                 sellOrderRequest.UserID = userId;
+                double totalProceeds = sellOrderRequest.Price * sellOrderRequest.Quantity;
+                _userBalanceService.AddBalance(userId, totalProceeds);
             }
 
             SellOrderResponse sellOrderResponse = await _sellOrdersService.CreateSellOrder(sellOrderRequest);

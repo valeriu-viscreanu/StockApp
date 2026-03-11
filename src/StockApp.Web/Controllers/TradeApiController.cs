@@ -14,17 +14,20 @@ namespace StockApp.Controllers
         private readonly IStockQuoteService _stockQuoteService;
         private readonly IBuyOrdersService _buyOrdersService;
         private readonly ISellOrdersService _sellOrdersService;
+        private readonly IUserBalanceService _userBalanceService;
 
         public TradeApiController(
             IStockProfileService stockProfileService,
             IStockQuoteService stockQuoteService,
             IBuyOrdersService buyOrdersService,
-            ISellOrdersService sellOrdersService)
+            ISellOrdersService sellOrdersService,
+            IUserBalanceService userBalanceService)
         {
             _stockProfileService = stockProfileService;
             _stockQuoteService = stockQuoteService;
             _buyOrdersService = buyOrdersService;
             _sellOrdersService = sellOrdersService;
+            _userBalanceService = userBalanceService;
         }
 
         [HttpGet("profile/{stockSymbol}")]
@@ -85,6 +88,11 @@ namespace StockApp.Controllers
                 if (Guid.TryParse(userIdString, out Guid userId))
                 {
                     buyOrderRequest.UserID = userId;
+                    double totalCost = buyOrderRequest.Price * buyOrderRequest.Quantity;
+                    if (!_userBalanceService.DeductBalance(userId, totalCost))
+                    {
+                        return BadRequest(new { message = "Insufficient funds for this purchase." });
+                    }
                 }
 
                 var response = await _buyOrdersService.CreateBuyOrder(buyOrderRequest);
@@ -139,6 +147,8 @@ namespace StockApp.Controllers
                 if (Guid.TryParse(userIdString, out Guid userId))
                 {
                     sellOrderRequest.UserID = userId;
+                    double totalProceeds = sellOrderRequest.Price * sellOrderRequest.Quantity;
+                    _userBalanceService.AddBalance(userId, totalProceeds);
                 }
 
                 var response = await _sellOrdersService.CreateSellOrder(sellOrderRequest);

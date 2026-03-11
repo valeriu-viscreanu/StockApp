@@ -8,5 +8,6 @@ namespace StockApp.Models
         public double DayChange { get; set; }
         public double DayChangePercentage { get; set; }
         public int TotalStocksHeld { get; set; }
+        public double CashBalance { get; set; }
     }
 }
