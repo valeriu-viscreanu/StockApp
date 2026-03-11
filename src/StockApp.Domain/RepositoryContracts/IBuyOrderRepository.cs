@@ -6,5 +6,6 @@ namespace StockApp.Domain.RepositoryContracts
     {
         void Add(BuyOrder order);
         List<BuyOrder> GetAll();
+        List<BuyOrder> GetByUserID(Guid userID);
     }
 }

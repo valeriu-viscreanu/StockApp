@@ -4,6 +4,6 @@ namespace StockApp.Application.ServiceContracts
 {
     public interface IAccountService
     {
-        bool Login(LoginRequest loginRequest);
+        LoginResponse Login(LoginRequest loginRequest);
     }
 }

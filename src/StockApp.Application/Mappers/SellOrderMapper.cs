@@ -15,7 +15,8 @@ namespace StockApp.Application.Mappers
                 StockName = request.StockName,
                 DateAndTimeOfOrder = request.DateAndTimeOfOrder,
                 Quantity = request.Quantity,
-                Price = request.Price
+                Price = request.Price,
+                UserID = request.UserID
             };
         }
 

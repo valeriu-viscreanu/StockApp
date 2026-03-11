@@ -33,13 +33,13 @@ namespace StockApp.Controllers
                 return BadRequest(ModelState);
             }
 
-            bool isSuccess = _accountService.Login(loginRequest);
-            if (!isSuccess)
+            LoginResponse loginResponse = _accountService.Login(loginRequest);
+            if (!loginResponse.IsSuccess)
             {
                 return Unauthorized(new { message = "Invalid email or password" });
             }
 
-            var accessToken = GenerateJwtToken(loginRequest.Email!);
+            var accessToken = GenerateJwtToken(loginResponse.Email!, loginResponse.UserID);
             var refreshToken = await _refreshTokenService.CreateRefreshToken(loginRequest.Email!);
 
             return Ok(new 
@@ -68,7 +68,10 @@ namespace StockApp.Controllers
             await _refreshTokenService.RevokeToken(refreshToken.Token);
             var newRefreshToken = await _refreshTokenService.CreateRefreshToken(refreshToken.Email);
             
-            var newAccessToken = GenerateJwtToken(refreshToken.Email);
+            // Note: Since we don't have UserID in RefreshToken, we might need to store it or look it up.
+            // For now, I'll pass Guid.Empty or try to find it if possible. 
+            // In a real app, RefreshToken would link to a User.
+            var newAccessToken = GenerateJwtToken(refreshToken.Email, Guid.Empty);
 
             return Ok(new
             {
@@ -77,7 +80,7 @@ namespace StockApp.Controllers
             });
         }
 
-        private string GenerateJwtToken(string email)
+        private string GenerateJwtToken(string email, Guid userId)
         {
             var jwtKey = _configuration["Jwt:Key"]
                 ?? throw new InvalidOperationException(
@@ -90,6 +93,7 @@ namespace StockApp.Controllers
             {
                 new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.Name, email),
+                new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

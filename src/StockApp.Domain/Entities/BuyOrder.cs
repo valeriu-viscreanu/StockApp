@@ -19,5 +19,7 @@ namespace StockApp.Domain.Entities
 
         [Range(1, 10000)]
         public double Price { get; set; }
+
+        public Guid UserID { get; set; }
     }
 }

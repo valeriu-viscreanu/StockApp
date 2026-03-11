@@ -1,5 +1,6 @@
 using StockApp.Domain.Entities;
 using StockApp.Domain.RepositoryContracts;
+using System.Linq;
 
 namespace StockApp.Infrastructure.Repositories
 {
@@ -15,6 +16,11 @@ namespace StockApp.Infrastructure.Repositories
         public List<BuyOrder> GetAll()
         {
             return _orders.ToList();
+        }
+
+        public List<BuyOrder> GetByUserID(Guid userID)
+        {
+            return _orders.Where(o => o.UserID == userID).ToList();
         }
     }
 }

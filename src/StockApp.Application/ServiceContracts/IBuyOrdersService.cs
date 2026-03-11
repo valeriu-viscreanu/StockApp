@@ -5,6 +5,6 @@ namespace StockApp.Application.ServiceContracts
     public interface IBuyOrdersService
     {
         Task<BuyOrderResponse> CreateBuyOrder(BuyOrderRequest? buyOrderRequest);
-        Task<List<BuyOrderResponse>> GetBuyOrders();
+        Task<List<BuyOrderResponse>> GetBuyOrders(Guid userID);
     }
 }

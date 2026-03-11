@@ -19,5 +19,7 @@ namespace StockApp.Application.DTO
 
         [Range(1, 10000, ErrorMessage = "Price must be between 1 and 10000.")]
         public double Price { get; set; }
+
+        public Guid UserID { get; set; }
     }
 }

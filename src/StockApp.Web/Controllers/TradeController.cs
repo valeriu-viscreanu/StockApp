@@ -87,6 +87,12 @@ namespace StockApp.Controllers
         [TypeFilter(typeof(CreateOrderActionFilter))]
         public async Task<IActionResult> BuyOrder(BuyOrderRequest buyOrderRequest)
         {
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdString, out Guid userId))
+            {
+                buyOrderRequest.UserID = userId;
+            }
+
             BuyOrderResponse buyOrderResponse = await _buyOrdersService.CreateBuyOrder(buyOrderRequest);
 
             return RedirectToAction("Orders");
@@ -97,6 +103,12 @@ namespace StockApp.Controllers
         [TypeFilter(typeof(CreateOrderActionFilter))]
         public async Task<IActionResult> SellOrder(SellOrderRequest sellOrderRequest)
         {
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdString, out Guid userId))
+            {
+                sellOrderRequest.UserID = userId;
+            }
+
             SellOrderResponse sellOrderResponse = await _sellOrdersService.CreateSellOrder(sellOrderRequest);
 
             return RedirectToAction("Orders");
@@ -106,8 +118,15 @@ namespace StockApp.Controllers
         [HttpGet]
         public async Task<IActionResult> Orders()
         {
-            List<BuyOrderResponse> buyOrders = await _buyOrdersService.GetBuyOrders();
-            List<SellOrderResponse> sellOrders = await _sellOrdersService.GetSellOrders();
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            Guid userId = Guid.Empty;
+            if (Guid.TryParse(userIdString, out Guid parsedId))
+            {
+                userId = parsedId;
+            }
+
+            List<BuyOrderResponse> buyOrders = await _buyOrdersService.GetBuyOrders(userId);
+            List<SellOrderResponse> sellOrders = await _sellOrdersService.GetSellOrders(userId);
 
             Models.Orders orders = new Models.Orders
             {

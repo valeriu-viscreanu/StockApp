@@ -35,10 +35,10 @@ namespace StockApp.Application.Services
             return Task.FromResult(_sellOrderMapper.MapToResponse(sellOrder));
         }
 
-        public Task<List<SellOrderResponse>> GetSellOrders()
+        public Task<List<SellOrderResponse>> GetSellOrders(Guid userID)
         {
             var sellOrderResponses = _sellOrderRepository
-                .GetAll()
+                .GetByUserID(userID)
                 .Select(_sellOrderMapper.MapToResponse)
                 .ToList();
 

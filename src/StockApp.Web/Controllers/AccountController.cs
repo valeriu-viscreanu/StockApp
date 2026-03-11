@@ -36,13 +36,14 @@ namespace StockApp.Controllers
                 return View(loginRequest);
             }
 
-            bool isSuccess = _accountService.Login(loginRequest);
-            if (isSuccess)
+            LoginResponse loginResponse = _accountService.Login(loginRequest);
+            if (loginResponse.IsSuccess)
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, loginRequest.Email!),
-                    new Claim(ClaimTypes.Email, loginRequest.Email!),
+                    new Claim(ClaimTypes.Name, loginResponse.Email!),
+                    new Claim(ClaimTypes.Email, loginResponse.Email!),
+                    new Claim(ClaimTypes.NameIdentifier, loginResponse.UserID.ToString()),
                     new Claim(ClaimTypes.Role, "Admin")
                 };
 

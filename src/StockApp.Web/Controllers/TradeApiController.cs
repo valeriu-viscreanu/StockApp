@@ -52,8 +52,15 @@ namespace StockApp.Controllers
         [HttpGet("orders")]
         public async Task<ActionResult<Models.Orders>> GetOrders()
         {
-            var buyOrders = await _buyOrdersService.GetBuyOrders();
-            var sellOrders = await _sellOrdersService.GetSellOrders();
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            Guid userId = Guid.Empty;
+            if (Guid.TryParse(userIdString, out Guid parsedId))
+            {
+                userId = parsedId;
+            }
+
+            var buyOrders = await _buyOrdersService.GetBuyOrders(userId);
+            var sellOrders = await _sellOrdersService.GetSellOrders(userId);
 
             var orders = new Models.Orders
             {
@@ -74,6 +81,12 @@ namespace StockApp.Controllers
 
             try
             {
+                var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (Guid.TryParse(userIdString, out Guid userId))
+                {
+                    buyOrderRequest.UserID = userId;
+                }
+
                 var response = await _buyOrdersService.CreateBuyOrder(buyOrderRequest);
                 return CreatedAtAction(nameof(GetOrders), response);
             }
@@ -122,6 +135,12 @@ namespace StockApp.Controllers
 
             try
             {
+                var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (Guid.TryParse(userIdString, out Guid userId))
+                {
+                    sellOrderRequest.UserID = userId;
+                }
+
                 var response = await _sellOrdersService.CreateSellOrder(sellOrderRequest);
                 return CreatedAtAction(nameof(GetOrders), response);
             }

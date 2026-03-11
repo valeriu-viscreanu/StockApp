@@ -59,7 +59,7 @@ public class TradeControllerTests
         ViewResult viewResult = result.Should().BeOfType<ViewResult>().Subject;
         StockTrade model = viewResult.Model.Should().BeOfType<StockTrade>().Subject;
 
-        model.StockSymbol.Should().Be(expectedStockSymbol);
+        model.StockSymbol.Should().Be(expectedStockSymbol);j
         model.StockName.Should().Be(expectedStockName);
         model.Price.Should().Be(expectedPrice);
         model.Quantity.Should().Be(expectedQuantity);
