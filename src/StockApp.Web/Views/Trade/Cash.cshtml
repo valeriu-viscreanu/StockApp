@@ -1,0 +1,27 @@
+@{
+    ViewData["Title"] = "Cash Management";
+    double balance = ViewBag.CashBalance ?? 0.0;
+}
+
+<div class="cash-page">
+    <div class="cash-card">
+        <div class="cash-icon">&#128176;</div>
+        <h1 class="cash-title">Your Cash Balance</h1>
+        <p class="cash-subtitle">Manage your trading funds</p>
+
+        <div class="cash-balance-display">
+            <span class="cash-currency">$</span>
+            <span class="cash-amount" id="cash-amount">@balance.ToString("N2")</span>
+        </div>
+
+        <div class="cash-message">
+            <p>Add funds to your account to start trading stocks. Each deposit adds <strong>$100.00</strong> to your balance.</p>
+        </div>
+
+        <form asp-controller="Trade" asp-action="AddCash" method="post" class="cash-form">
+            <button type="submit" class="btn-add-cash" id="btn-add-cash">
+                <span class="btn-icon">&#43;</span> Add $100
+            </button>
+        </form>
+    </div>
+</div>

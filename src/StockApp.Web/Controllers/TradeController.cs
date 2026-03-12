@@ -153,5 +153,35 @@ namespace StockApp.Controllers
 
             return View(orders);
         }
+
+        [Route("[action]")]
+        [HttpGet]
+        public IActionResult Cash()
+        {
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdString, out Guid userId))
+            {
+                ViewBag.CashBalance = _userBalanceService.GetBalance(userId);
+            }
+            else
+            {
+                ViewBag.CashBalance = 0.0;
+            }
+
+            return View();
+        }
+
+        [Route("[action]")]
+        [HttpPost]
+        public IActionResult AddCash()
+        {
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdString, out Guid userId))
+            {
+                _userBalanceService.AddBalance(userId, 100.0);
+            }
+
+            return RedirectToAction("Cash");
+        }
     }
 }
