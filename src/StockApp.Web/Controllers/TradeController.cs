@@ -173,12 +173,28 @@ namespace StockApp.Controllers
 
         [Route("[action]")]
         [HttpPost]
-        public IActionResult AddCash()
+        public IActionResult AddCash(double amount)
         {
             var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-            if (Guid.TryParse(userIdString, out Guid userId))
+            if (Guid.TryParse(userIdString, out Guid userId) && amount > 0)
             {
-                _userBalanceService.AddBalance(userId, 100.0);
+                _userBalanceService.AddBalance(userId, amount);
+            }
+
+            return RedirectToAction("Cash");
+        }
+
+        [Route("[action]")]
+        [HttpPost]
+        public IActionResult WithdrawCash(double amount)
+        {
+            var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (Guid.TryParse(userIdString, out Guid userId) && amount > 0)
+            {
+                if (!_userBalanceService.DeductBalance(userId, amount))
+                {
+                    TempData["Error"] = "Insufficient funds for withdrawal.";
+                }
             }
 
             return RedirectToAction("Cash");

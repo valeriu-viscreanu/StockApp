@@ -15,13 +15,49 @@
         </div>
 
         <div class="cash-message">
-            <p>Add funds to your account to start trading stocks. Each deposit adds <strong>$100.00</strong> to your balance.</p>
+            <p>Add or withdraw funds to manage your account balance. Enter the amount below.</p>
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger" style="color: #dc3545; margin-top: 10px; font-weight: 600;">
+                    @TempData["Error"]
+                </div>
+            }
         </div>
 
-        <form asp-controller="Trade" asp-action="AddCash" method="post" class="cash-form">
-            <button type="submit" class="btn-add-cash" id="btn-add-cash">
-                <span class="btn-icon">&#43;</span> Add $100
-            </button>
-        </form>
+        <div class="amount-selector">
+            <button type="button" class="btn-adjust minus" onclick="adjustAmount(-10)">-</button>
+            <input type="number" name="amount" id="cash-amount-input" value="100" min="10" step="10" class="input-amount" />
+            <button type="button" class="btn-adjust plus" onclick="adjustAmount(10)">+</button>
+        </div>
+
+        <div class="cash-actions">
+            <form asp-controller="Trade" asp-action="AddCash" method="post" class="cash-form" onsubmit="syncAmount(this)">
+                <input type="hidden" name="amount" class="hidden-amount" />
+                <button type="submit" class="btn-add-cash">
+                    <span class="btn-icon">&#43;</span> Add Funds
+                </button>
+            </form>
+
+            <form asp-controller="Trade" asp-action="WithdrawCash" method="post" class="cash-form" onsubmit="syncAmount(this)">
+                <input type="hidden" name="amount" class="hidden-amount" />
+                <button type="submit" class="btn-withdraw-cash">
+                    <span class="btn-icon">&#8722;</span> Withdraw
+                </button>
+            </form>
+        </div>
     </div>
 </div>
+
+<script>
+    function adjustAmount(delta) {
+        const input = document.getElementById('cash-amount-input');
+        let val = parseInt(input.value) || 0;
+        val = Math.max(10, val + delta);
+        input.value = val;
+    }
+
+    function syncAmount(form) {
+        const amount = document.getElementById('cash-amount-input').value;
+        form.querySelector('.hidden-amount').value = amount;
+    }
+</script>

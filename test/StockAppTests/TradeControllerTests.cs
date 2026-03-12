@@ -44,11 +44,14 @@ public class TradeControllerTests
             .AddInMemoryCollection(new Dictionary<string, string?> { ["FinnhubToken"] = "test-token" })
             .Build();
 
+        var userBalanceServiceMock = new IUserBalanceServiceImposter();
+
         TradeController controller = new(
             stockProfileServiceMock.Instance(),
             stockQuoteServiceMock.Instance(),
             buyOrdersServiceMock.Instance(),
             sellOrdersServiceMock.Instance(),
+            userBalanceServiceMock.Instance(),
             tradingOptions,
             configuration);
 
@@ -59,7 +62,7 @@ public class TradeControllerTests
         ViewResult viewResult = result.Should().BeOfType<ViewResult>().Subject;
         StockTrade model = viewResult.Model.Should().BeOfType<StockTrade>().Subject;
 
-        model.StockSymbol.Should().Be(expectedStockSymbol);j
+        model.StockSymbol.Should().Be(expectedStockSymbol);
         model.StockName.Should().Be(expectedStockName);
         model.Price.Should().Be(expectedPrice);
         model.Quantity.Should().Be(expectedQuantity);
