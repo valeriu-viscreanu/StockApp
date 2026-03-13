@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Linq;
 using StockApp.Application.DTO;
 using StockApp.Filters;
 using StockApp.Models;
@@ -122,6 +123,20 @@ namespace StockApp.Controllers
             if (Guid.TryParse(userIdString, out Guid userId))
             {
                 sellOrderRequest.UserID = userId;
+
+                // Ownership check
+                var buyOrders = await _buyOrdersService.GetBuyOrders(userId);
+                var sellOrders = await _sellOrdersService.GetSellOrders(userId);
+
+                var totalBought = buyOrders.Where(b => b.StockSymbol == sellOrderRequest.StockSymbol).Sum(b => (long)b.Quantity);
+                var totalSold = sellOrders.Where(s => s.StockSymbol == sellOrderRequest.StockSymbol).Sum(s => (long)s.Quantity);
+
+                if (totalBought - totalSold < sellOrderRequest.Quantity)
+                {
+                    TempData["Error"] = $"You do not own enough shares of {sellOrderRequest.StockSymbol} to sell.";
+                    return RedirectToAction("Index", new { stock = sellOrderRequest.StockSymbol });
+                }
+
                 double totalProceeds = sellOrderRequest.Price * sellOrderRequest.Quantity;
                 _userBalanceService.AddBalance(userId, totalProceeds);
             }
