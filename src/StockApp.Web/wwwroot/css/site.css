@@ -13,6 +13,26 @@ body {
     color: #333;
 }
 
+/* ===== Alerts ===== */
+.alert {
+    padding: 12px 20px;
+    margin: 20px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.alert-danger {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fee2e2;
+}
+
+.alert-success {
+    background-color: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #dcfce7;
+}
+
 /* ===== Navbar ===== */
 .navbar {
     display: flex;

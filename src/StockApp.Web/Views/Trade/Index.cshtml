@@ -53,7 +53,19 @@
     </div>
 
     <!-- MAIN VIEW PANEL -->
-    <div class="main-view-panel">
+        <div class="main-view-panel">
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["Error"]
+            </div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["Success"]
+            </div>
+        }
         @{
             string symbol = Model.StockSymbol!;
             string name = Model.StockName!;
