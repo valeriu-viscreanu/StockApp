@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Stocks</title>
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index" style="text-decoration: none; color: inherit;">
+                <span class="brand-icon">&#128200;</span>
+                <span class="brand-text">Stocks</span>
+            </a>
+            <div class="navbar-links">
+                <a asp-controller="Home" asp-action="Index">Dashboard</a>
+                <a asp-controller="Trade" asp-action="Index">Trade</a>
+                <a asp-controller="Trade" asp-action="Orders">Orders</a>
+                <a asp-controller="Trade" asp-action="Cash">Cash</a>
+            </div>
+            <div class="navbar-right">
+                <form asp-controller="Trade" asp-action="Index" method="get" style="display: flex; align-items: center;">
+                    <input type="text" name="stock" placeholder="Search Stocks" class="search-input" />
+                    <button type="submit" class="btn-search" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; padding: 0 10px;">&#128269;</button>
+                </form>
+                <button class="btn-settings">&#9881;</button>
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <span class="user-info">Hello, @User.Identity.Name</span>
+                    <a asp-controller="Account" asp-action="Logout" class="btn-logout" style="text-decoration: none; display: inline-block; text-align: center; margin-left: 10px;">Logout</a>
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn-login" style="text-decoration: none; display: inline-block; text-align: center;">Login</a>
+                }
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

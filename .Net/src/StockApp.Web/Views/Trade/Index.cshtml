@@ -1,0 +1,342 @@
+@model StockApp.Models.StockTrade
+
+@{
+    ViewData["Title"] = "Trade Dashboard";
+    string? finnhubToken = ViewBag.FinnhubToken;
+
+
+
+    var popularStocks = new List<(string Symbol, string Name, int Price)>
+{
+    ("MSFT", "Microsoft", 0),
+    ("AAPL", "Apple", 0),
+    ("GOOGL", "Alphabet", 0),
+    ("AMZN", "Amazon", 0),
+    ("NVDA", "Nvidia", 0),
+    ("META", "Meta Platforms", 0),
+    ("TSLA", "Tesla", 0),
+    ("AMD", "Advanced Micro Devices", 0),
+    ("JPM", "JPMorgan Chase", 0),
+    ("V", "Visa", 0),
+    ("WMT", "Walmart", 0),
+    ("LLY", "Eli Lilly", 0),
+    ("XOM", "Exxon Mobil", 0),
+    ("SPY", "SPDR S&P 500 ETF", 0),
+    ("QQQ", "Invesco QQQ Trust", 0)
+};
+}
+
+<div class="advanced-dashboard">
+    <!-- SIDEPAR PANEL -->
+    <div class="sidebar-panel">
+        <div class="sidebar-header">
+            <h3>Market Watch</h3>
+        </div>
+        <div class="stock-list">
+            @foreach (var stock in popularStocks)
+            {
+                bool isActive = stock.Symbol == Model.StockSymbol;
+                <a asp-controller="Trade" asp-action="Index" asp-route-stock="@stock.Symbol" 
+                   class="stock-item @(isActive ? "active" : "")">
+                    <div class="stock-icon">@stock.Symbol.Substring(0, 1)</div>
+                    <div class="stock-details">
+                        <span class="stock-symbol">@stock.Symbol</span>
+                        <span class="stock-company">@stock.Name</span>
+                    </div>
+                    <div class="stock-mini-chart">
+                        <span id="mini-price-@stock.Symbol" class="stock-mini-price">@(stock.Price == 0 ? "Loading" :  @stock.Price)</span>
+                        <span id="mini-change-@stock.Symbol" class="stock-mini-change"></span>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+
+    <!-- MAIN VIEW PANEL -->
+        <div class="main-view-panel">
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger">
+                @TempData["Error"]
+            </div>
+        }
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success">
+                @TempData["Success"]
+            </div>
+        }
+        @{
+            string symbol = Model.StockSymbol!;
+            string name = Model.StockName!;
+            double price = Model.Price;
+        }
+        
+        <div class="trade-container">
+            <div class="stock-info">
+                <h1 class="stock-name">@name (@symbol)</h1>
+                <div class="stock-price">
+                    <span class="currency">$</span>
+                    <span id="price-@symbol" class="price price-value">@price.ToString("F2")</span>
+                </div>
+                <div class="stock-price-label">Live Market Price</div>
+            </div>
+
+            <div class="order-panel">
+                <h3 class="order-title">New Order</h3>
+                <div class="order-form">
+                    <label for="quantity-@symbol">Quantity:</label>
+                    <input type="number" id="quantity-@symbol" class="quantity-input" data-symbol="@symbol" min="1" max="100000" value="1" />
+                </div>
+
+                <div class="order-buttons">
+                    <form asp-controller="Trade" asp-action="SellOrder" method="post">
+                        <input name="StockSymbol" type="hidden" value="@symbol" />
+                        <input name="StockName" type="hidden" value="@name" />
+                        <input name="Quantity" type="hidden" id="sell-qty-@symbol" value="1" />
+                        <input name="Price" type="hidden" id="sell-price-@symbol" value="@price" />
+                        <button type="submit" class="btn-sell">&#8595; Sell</button>
+                    </form>
+
+                    <form asp-controller="Trade" asp-action="BuyOrder" method="post">
+                        <input name="StockSymbol" type="hidden" value="@symbol" />
+                        <input name="StockName" type="hidden" value="@name" />
+                        <input name="Quantity" type="hidden" id="buy-qty-@symbol" value="1" />
+                        <input name="Price" type="hidden" id="buy-price-@symbol" value="@price" />
+                        <button type="submit" class="btn-buy">&#8593; Buy</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- START GRAPH PANEL -->
+            <div class="graph-panel" style="flex: 2; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-left: 1px solid #ddd; background-color: transparent;">
+                <div class="timeframe-buttons" style="margin-bottom: 15px;">
+                    <button class="btn-timeframe btn-day" data-symbol="@symbol" style="padding: 6px 16px; margin: 0 5px; cursor: pointer; border: 1px solid #28a745; background: transparent; color: #28a745; border-radius: 4px; font-weight: bold;">Day</button>
+                    <button class="btn-timeframe btn-month" data-symbol="@symbol" style="padding: 6px 16px; margin: 0 5px; cursor: pointer; border: 1px solid #28a745; background: #28a745; color: white; border-radius: 4px; font-weight: bold;">Month</button>
+                    <button class="btn-timeframe btn-year" data-symbol="@symbol" style="padding: 6px 16px; margin: 0 5px; cursor: pointer; border: 1px solid #28a745; background: transparent; color: #28a745; border-radius: 4px; font-weight: bold;">Year</button>
+                </div>
+                <div style="width: 100%; height: 350px; position: relative;">
+                    <canvas id="chart-@symbol"></canvas>
+                </div>
+            </div>
+            <!-- END GRAPH PANEL -->
+        </div>
+
+    </div>
+</div>
+
+<input asp-for="StockSymbol" type="hidden" id="stock-symbol" />
+<input type="hidden" id="finnhub-token" value="@finnhubToken" />
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const token = document.getElementById("finnhub-token").value;
+    const stockCharts = {};
+    let socket = null;
+
+    class StockTrader {
+        constructor(symbol) {
+            this.symbol = symbol;
+            this.priceElement = document.getElementById(`price-${symbol}`);
+            this.buyPriceInput = document.getElementById(`buy-price-${symbol}`);
+            this.sellPriceInput = document.getElementById(`sell-price-${symbol}`);
+            this.qtyInput = document.getElementById(`quantity-${symbol}`);
+            this.buyQtyInput = document.getElementById(`buy-qty-${symbol}`);
+            this.sellQtyInput = document.getElementById(`sell-qty-${symbol}`);
+            this.chartCtx = document.getElementById(`chart-${symbol}`).getContext('2d');
+            this.miniPriceElement = document.getElementById(`mini-price-${symbol}`);
+            this.chart = null;
+            this.currentPrice = 0;
+
+            this.init();
+        }
+
+        init() {
+            if (!this.qtyInput) return; // For mini-items
+
+            // Quantity Listeners
+            const updateQty = (val) => {
+                this.buyQtyInput.value = val;
+                this.sellQtyInput.value = val;
+            };
+
+            this.qtyInput.addEventListener("input", (e) => updateQty(e.target.value));
+            this.qtyInput.addEventListener("change", (e) => updateQty(e.target.value));
+
+            // Timeframe Listeners
+            const container = this.qtyInput.closest('.trade-container');
+            container.querySelectorAll('.btn-timeframe').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const timeframe = btn.classList.contains('btn-day') ? 'day' :
+                                    btn.classList.contains('btn-month') ? 'month' : 'year';
+                    this.fetchAndRenderChart(timeframe, btn);
+                });
+            });
+
+            // Initial Chart
+                    this.fetchAndRenderChart('day', container.querySelector('.btn-day'));
+        }
+
+        updatePrice(price) {
+            this.currentPrice = price;
+            if (this.priceElement) {
+                this.priceElement.textContent = price.toFixed(2);
+                this.buyPriceInput.value = price.toFixed(2);
+                this.sellPriceInput.value = price.toFixed(2);
+            }
+            if (this.miniPriceElement) {
+                this.miniPriceElement.textContent = '$' + price.toFixed(2);
+            }
+        }
+
+        async fetchAndRenderChart(timeframe, btn) {
+            if (!token || !this.symbol) return;
+
+            // Update UI buttons
+            const buttons = btn.parentElement.querySelectorAll('.btn-timeframe');
+            buttons.forEach(b => {
+                b.style.background = 'transparent';
+                b.style.color = '#28a745';
+            });
+            btn.style.background = '#28a745';
+            btn.style.color = 'white';
+
+            try {
+                const response = await fetch(`https://finnhub.io/api/v1/quote?symbol=${this.symbol}&token=${token}`);
+                const data = await response.json();
+
+                if (data.c !== undefined) {
+                    const price = data.c;
+                    this.updatePrice(price);
+                    
+                    const labels = [];
+                    const prices = [];
+                    const now = new Date();
+                    let pointsCount = timeframe === 'day' ? 24 : timeframe === 'month' ? 30 : 52;
+                    let volatility = price * (timeframe === 'day' ? 0.005 : timeframe === 'month' ? 0.015 : 0.05);
+
+                    let simulatedPrice = price;
+                    for (let i = pointsCount - 1; i >= 0; i--) {
+                        prices.unshift(simulatedPrice);
+                        const date = new Date(now);
+                        if (timeframe === 'day') {
+                            date.setHours(now.getHours() - i);
+                            labels.unshift(date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                        } else if (timeframe === 'month') {
+                            date.setDate(now.getDate() - i);
+                            labels.unshift(date.toLocaleDateString([], { month: 'short', day: 'numeric' }));
+                        } else {
+                            date.setDate(now.getDate() - (i * 7));
+                            labels.unshift(date.toLocaleDateString([], { month: 'short', year: 'numeric' }));
+                        }
+                        simulatedPrice = Math.max(0.01, simulatedPrice - (Math.random() - 0.5) * volatility);
+                    }
+
+                    this.renderChart(labels, prices, timeframe);
+                }
+            } catch (e) { console.error("Chart Error:", e); }
+        }
+
+        renderChart(labels, data, timeframe) {
+            if (this.chart) this.chart.destroy();
+            this.chart = new Chart(this.chartCtx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `${this.symbol} Price`,
+                        data: data,
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        pointRadius: timeframe === 'year' ? 1 : 2,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { display: false }, ticks: { maxTicksLimit: 7 } },
+                        y: { ticks: { callback: v => '$' + v } }
+                    }
+                }
+            });
+        }
+    }
+
+    // Initialize
+    const activeSymbol = "@Model.StockSymbol";
+    const allSymbols = [@Html.Raw(string.Join(",", popularStocks.Select(s => $"\"{s.Symbol}\"")))];
+    
+    // Main trader (full functionality: chart, order form, live price)
+    const mainTrader = new StockTrader(activeSymbol);
+
+    // Apply cached quote data to the sidebar DOM
+    function applySidebarQuotes(quotes) {
+        for (const [symbol, quote] of Object.entries(quotes)) {
+            const priceEl = document.getElementById(`mini-price-${symbol}`);
+            const changeEl = document.getElementById(`mini-change-${symbol}`);
+            if (priceEl && quote.c != null) {
+                priceEl.textContent = '$' + quote.c.toFixed(2);
+            }
+            if (changeEl && quote.dp != null) {
+                const pct = quote.dp.toFixed(2);
+                changeEl.textContent = (quote.dp >= 0 ? '+' : '') + pct + '%';
+                changeEl.style.color = quote.dp >= 0 ? '#28a745' : '#dc3545';
+            }
+        }
+    }
+
+    // Restore sidebar prices from sessionStorage immediately (no flash)
+    const cachedQuotes = sessionStorage.getItem('sidebarQuotes');
+    if (cachedQuotes) {
+        try { applySidebarQuotes(JSON.parse(cachedQuotes)); } catch (e) {}
+    }
+
+    // Then fetch fresh prices from the API in the background
+    async function loadSidebarPrices() {
+        try {
+            const params = allSymbols.map(s => `symbols=${s}`).join('&');
+            const response = await fetch(`/api/v1/TradeApi/quotes?${params}`);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const quotes = await response.json();
+
+            applySidebarQuotes(quotes);
+            sessionStorage.setItem('sidebarQuotes', JSON.stringify(quotes));
+        } catch (err) {
+            console.error('Failed to load sidebar prices:', err);
+        }
+    }
+
+    loadSidebarPrices();
+
+    // WebSocket only for the active stock's live price
+    if (token) {
+        socket = new WebSocket(`wss://ws.finnhub.io?token=${token}`);
+        socket.addEventListener("open", () => {
+            socket.send(JSON.stringify({ type: "subscribe", symbol: activeSymbol }));
+        });
+
+        socket.addEventListener("message", (event) => {
+            const message = JSON.parse(event.data);
+            if (message.type === "trade") {
+                message.data.forEach(trade => {
+                    if (trade.s === activeSymbol) {
+                        mainTrader.updatePrice(trade.p);
+                    }
+                });
+            }
+        });
+    }
+
+    window.addEventListener("beforeunload", () => {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: "unsubscribe", symbol: activeSymbol }));
+            socket.close();
+        }
+    });
+</script>
+}
