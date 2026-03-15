@@ -20,7 +20,7 @@ function App() {
           <a href="/orders">Orders</a>
         </div>
         <div className="nav-right">
-          <span className="user-badge">{user}</span>
+          {user}
           <button style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Logout</button>
         </div>
       </nav>
