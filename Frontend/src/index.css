@@ -49,3 +49,210 @@ body {
 .stat-label { font-size: 0.75rem; font-weight: 700; color: #999; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
 .stat-value { font-size: 2.4rem; font-weight: 800; margin-bottom: 10px; }
 .stat-footer { font-size: 0.9rem; font-weight: 600; color: var(--primary); }
+
+/* ===== Cash Page ===== */
+.cash-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 61px);
+    background: linear-gradient(135deg, #f8f9fa 0%, #e8f5e9 100%);
+    padding: 40px 20px;
+}
+
+.cash-card {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+    padding: 50px 60px;
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+    border: 1px solid #e8e8e8;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.cash-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 48px rgba(0, 0, 0, 0.12);
+}
+
+.cash-icon {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+}
+
+.cash-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+}
+
+.cash-subtitle {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 30px;
+}
+
+.cash-balance-display {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    margin-bottom: 25px;
+    padding: 20px 0;
+    border-top: 1px solid #f0f0f0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.cash-currency {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #28a745;
+    margin-right: 4px;
+}
+
+.cash-amount {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: #28a745;
+    letter-spacing: -1px;
+}
+
+.cash-message {
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.cash-message strong {
+    color: #28a745;
+}
+
+.cash-form {
+    display: inline-block;
+}
+
+.btn-add-cash {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: #fff;
+    border: none;
+    padding: 14px 40px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.3px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+}
+
+.btn-add-cash:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+}
+
+.btn-add-cash:active {
+    transform: translateY(0);
+}
+
+.btn-icon {
+    font-weight: 900;
+    margin-right: 6px;
+}
+
+/* ===== Amount Selector ===== */
+.amount-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.btn-adjust {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid #28a745;
+    background: #fff;
+    color: #28a745;
+    font-size: 1.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.btn-adjust:hover {
+    background: #28a745;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.2);
+}
+
+.btn-adjust:active {
+    transform: scale(0.95);
+}
+
+.input-amount {
+    width: 140px;
+    padding: 10px;
+    border: 2px solid #eee;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-amount:focus {
+    border-color: #28a745;
+}
+
+/* ===== Cash Actions ===== */
+.cash-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-withdraw-cash {
+    background: linear-gradient(135deg, #fd7e14 0%, #f03e3e 100%);
+    color: #fff;
+    border: none;
+    padding: 14px 30px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.3px;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 15px rgba(240, 62, 62, 0.3);
+}
+
+.btn-withdraw-cash:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(240, 62, 62, 0.4);
+}
+
+.btn-withdraw-cash:active {
+    transform: translateY(0);
+}
+
+/* Hide arrows/spinners in number input */
+.input-amount::-webkit-outer-spin-button,
+.input-amount::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.input-amount[type=number] {
+    -moz-appearance: textfield;
+}
