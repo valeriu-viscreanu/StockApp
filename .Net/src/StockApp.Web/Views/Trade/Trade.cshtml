@@ -36,7 +36,7 @@
             @foreach (var stock in popularStocks)
             {
                 bool isActive = stock.Symbol == Model.StockSymbol;
-                <a asp-controller="Trade" asp-action="Index" asp-route-stock="@stock.Symbol" 
+                <a asp-controller="Trade" asp-action="Trade" asp-route-stock="@stock.Symbol" 
                    class="stock-item @(isActive ? "active" : "")">
                     <div class="stock-icon">@stock.Symbol.Substring(0, 1)</div>
                     <div class="stock-details">

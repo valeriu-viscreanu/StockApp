@@ -42,7 +42,7 @@ namespace StockApp.Controllers
 
         [Route("[action]/{stock?}")]
         [HttpGet]
-        public async Task<IActionResult> Index(string? stock)
+        public async Task<IActionResult> Trade(string? stock)
         {
             string stockSymbol = !string.IsNullOrWhiteSpace(stock)
                 ? stock
@@ -105,7 +105,7 @@ namespace StockApp.Controllers
                 if (!_userBalanceService.DeductBalance(userId, totalCost))
                 {
                     TempData["Error"] = "Insufficient funds for this purchase.";
-                    return RedirectToAction("Index", new { stock = buyOrderRequest.StockSymbol });
+                    return RedirectToAction("Trade", new { stock = buyOrderRequest.StockSymbol });
                 }
             }
 
@@ -134,7 +134,7 @@ namespace StockApp.Controllers
                 if (totalBought - totalSold < sellOrderRequest.Quantity)
                 {
                     TempData["Error"] = $"You do not own enough shares of {sellOrderRequest.StockSymbol} to sell.";
-                    return RedirectToAction("Index", new { stock = sellOrderRequest.StockSymbol });
+                    return RedirectToAction("Trade", new { stock = sellOrderRequest.StockSymbol });
                 }
 
                 double totalProceeds = sellOrderRequest.Price * sellOrderRequest.Quantity;
