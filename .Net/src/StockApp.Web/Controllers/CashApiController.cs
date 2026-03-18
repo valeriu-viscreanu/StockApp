@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockApp.Application.ServiceContracts;
@@ -7,7 +8,7 @@ namespace StockApp.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    //[Authorize(AuthenticationSchemes = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CashApiController : ControllerBase
     {
         private readonly IUserBalanceService _userBalanceService;
@@ -20,13 +21,12 @@ namespace StockApp.Controllers
         [HttpGet("balance")]
         public ActionResult<double> GetBalance()
         {
-            // For testing: Fallback to fixed GUID if token parsing fails
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!Guid.TryParse(userIdString, out Guid userId))
+            if (Guid.TryParse(userIdString, out Guid userId))
             {
-                userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                return Ok(_userBalanceService.GetBalance(userId));
             }
-            return Ok(_userBalanceService.GetBalance(userId));
+            return Unauthorized(new { message = "User ID not found in token." });
         }
 
         [HttpPost("add-funds")]
@@ -38,13 +38,12 @@ namespace StockApp.Controllers
             }
 
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!Guid.TryParse(userIdString, out Guid userId))
+            if (Guid.TryParse(userIdString, out Guid userId))
             {
-                userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                _userBalanceService.AddBalance(userId, amount);
+                return Ok(new { balance = _userBalanceService.GetBalance(userId) });
             }
-            
-            _userBalanceService.AddBalance(userId, amount);
-            return Ok(new { balance = _userBalanceService.GetBalance(userId) });
+            return Unauthorized(new { message = "User ID not found in token." });
         }
 
         [HttpPost("withdraw")]
@@ -56,16 +55,15 @@ namespace StockApp.Controllers
             }
 
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (!Guid.TryParse(userIdString, out Guid userId))
+            if (Guid.TryParse(userIdString, out Guid userId))
             {
-                userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
+                if (_userBalanceService.DeductBalance(userId, amount))
+                {
+                    return Ok(new { balance = _userBalanceService.GetBalance(userId) });
+                }
+                return BadRequest(new { message = "Insufficient funds." });
             }
-
-            if (_userBalanceService.DeductBalance(userId, amount))
-            {
-                return Ok(new { balance = _userBalanceService.GetBalance(userId) });
-            }
-            return BadRequest(new { message = "Insufficient funds." });
+            return Unauthorized(new { message = "User ID not found in token." });
         }
     }
 }

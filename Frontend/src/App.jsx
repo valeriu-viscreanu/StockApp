@@ -7,7 +7,7 @@ function App() {
   const [loginEmail, setLoginEmail] = useState('admin@test.com');
   const [loginPassword, setLoginPassword] = useState('123');
   const [error, setError] = useState('');
-  
+
   const [page, setPage] = useState('dashboard');
   const [amount, setAmount] = useState(100);
   const [quantity, setQuantity] = useState(1);
@@ -36,6 +36,8 @@ function App() {
       if (response.ok) {
         const balance = await response.json();
         setData(prev => ({ ...prev, balance }));
+      } else if (response.status === 401) {
+        handleLogout();
       }
     } catch (err) {
       console.error('Failed to fetch balance', err);
@@ -103,67 +105,67 @@ function App() {
 
   if (!isLoggedIn) {
     return (
-      <div className="login-container" style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        height: '100vh', 
-        background: '#f8f9fa' 
+      <div className="login-container" style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        background: '#f8f9fa'
       }}>
-        <div className="login-card" style={{ 
-          background: 'white', 
-          padding: '40px', 
-          borderRadius: '16px', 
+        <div className="login-card" style={{
+          background: 'white',
+          padding: '40px',
+          borderRadius: '16px',
           boxShadow: '0 4px 24px rgba(0,0,0,0.1)',
           width: '100%',
           maxWidth: '400px'
         }}>
           <h1 style={{ textAlign: 'center', marginBottom: '8px' }}>Login</h1>
           <p style={{ textAlign: 'center', color: '#666', marginBottom: '24px' }}>Welcome back! Please login to your account.</p>
-          
+
           <form onSubmit={handleLogin}>
             <div style={{ marginBottom: '16px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Email</label>
-              <input 
-                type="email" 
-                value={loginEmail} 
+              <input
+                type="email"
+                value={loginEmail}
                 onChange={(e) => setLoginEmail(e.target.value)}
-                style={{ 
-                  width: '100%', 
-                  padding: '12px', 
-                  borderRadius: '8px', 
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
                   border: '1px solid #ddd',
                   boxSizing: 'border-box'
                 }}
-                required 
+                required
               />
             </div>
             <div style={{ marginBottom: '24px' }}>
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Password</label>
-              <input 
-                type="password" 
-                value={loginPassword} 
+              <input
+                type="password"
+                value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
-                style={{ 
-                  width: '100%', 
-                  padding: '12px', 
-                  borderRadius: '8px', 
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
                   border: '1px solid #ddd',
                   boxSizing: 'border-box'
                 }}
-                required 
+                required
               />
             </div>
             {error && <p style={{ color: '#dc3545', marginBottom: '16px', textAlign: 'center' }}>{error}</p>}
-            <button type="submit" style={{ 
-              width: '100%', 
-              padding: '12px', 
-              borderRadius: '8px', 
-              border: 'none', 
-              background: '#28a745', 
-              color: 'white', 
-              fontWeight: 600, 
-              cursor: 'pointer' 
+            <button type="submit" style={{
+              width: '100%',
+              padding: '12px',
+              borderRadius: '8px',
+              border: 'none',
+              background: '#28a745',
+              color: 'white',
+              fontWeight: 600,
+              cursor: 'pointer'
             }}>
               Login
             </button>
@@ -212,7 +214,7 @@ function App() {
         </div>
         <div className="nav-right">
           {user}
-          <button 
+          <button
             onClick={handleLogout}
             style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginLeft: '12px' }}
           >
@@ -256,7 +258,7 @@ function App() {
             </div>
             <div className="stock-list">
               {popularStocks.map(stock => (
-                <a 
+                <a
                   key={stock.symbol}
                   href="#"
                   className={`stock-item ${selectedStock.symbol === stock.symbol ? 'active' : ''}`}
@@ -290,11 +292,11 @@ function App() {
                 <h3 className="order-title">New Order</h3>
                 <div className="order-form">
                   <label>Quantity:</label>
-                  <input 
-                    type="number" 
-                    className="quantity-input" 
-                    min="1" 
-                    value={quantity} 
+                  <input
+                    type="number"
+                    className="quantity-input"
+                    min="1"
+                    value={quantity}
                     onChange={(e) => setQuantity(parseInt(e.target.value) || 1)}
                   />
                 </div>
@@ -379,34 +381,34 @@ function App() {
       {page === 'cash' && (
         <div className="cash-page">
           <div className="cash-card">
-              <div className="cash-icon">&#128176;</div>
-              <h1 className="cash-title">Your Cash Balance</h1>
-              <p className="cash-subtitle">Manage your trading funds</p>
+            <div className="cash-icon">&#128176;</div>
+            <h1 className="cash-title">Your Cash Balance</h1>
+            <p className="cash-subtitle">Manage your trading funds</p>
 
-              <div className="cash-balance-display">
-                  <span className="cash-currency">$</span>
-                  <span className="cash-amount" id="cash-amount">{data.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-              </div>
+            <div className="cash-balance-display">
+              <span className="cash-currency">$</span>
+              <span className="cash-amount" id="cash-amount">{data.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+            </div>
 
-              <div className="cash-message">
-                  <p>Add or withdraw funds to manage your account balance. Enter the amount below.</p>
-              </div>
+            <div className="cash-message">
+              <p>Add or withdraw funds to manage your account balance. Enter the amount below.</p>
+            </div>
 
-              <div className="amount-selector">
-                  <button type="button" className="btn-adjust minus" onClick={() => setAmount(Math.max(10, amount - 10))}>-</button>
-                  <input type="number" name="amount" id="cash-amount-input" value={amount} onChange={(e) => setAmount(parseInt(e.target.value) || 0)} min="10" step="10" className="input-amount" />
-                  <button type="button" className="btn-adjust plus" onClick={() => setAmount(amount + 10)}>+</button>
-              </div>
+            <div className="amount-selector">
+              <button type="button" className="btn-adjust minus" onClick={() => setAmount(Math.max(10, amount - 10))}>-</button>
+              <input type="number" name="amount" id="cash-amount-input" value={amount} onChange={(e) => setAmount(parseInt(e.target.value) || 0)} min="10" step="10" className="input-amount" />
+              <button type="button" className="btn-adjust plus" onClick={() => setAmount(amount + 10)}>+</button>
+            </div>
 
-              <div className="cash-actions">
-                  <button type="button" className="btn-add-cash" onClick={() => handleCashAction('add')}>
-                      <span className="btn-icon">&#43;</span> Add Funds
-                  </button>
+            <div className="cash-actions">
+              <button type="button" className="btn-add-cash" onClick={() => handleCashAction('add')}>
+                <span className="btn-icon">&#43;</span> Add Funds
+              </button>
 
-                  <button type="button" className="btn-withdraw-cash" onClick={() => handleCashAction('withdraw')}>
-                      <span className="btn-icon">&#8722;</span> Withdraw
-                  </button>
-              </div>
+              <button type="button" className="btn-withdraw-cash" onClick={() => handleCashAction('withdraw')}>
+                <span className="btn-icon">&#8722;</span> Withdraw
+              </button>
+            </div>
           </div>
         </div>
       )}
