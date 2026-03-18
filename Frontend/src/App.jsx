@@ -172,7 +172,7 @@ function App() {
         </div>
       </nav>
 
-      {page === 'dashboard' && <Dashboard user={user} data={data} />}
+      {page === 'dashboard' && <Dashboard user={user} data={data} setPage={setPage} />}
       
       {page === 'trade' && (
         <Trade 
