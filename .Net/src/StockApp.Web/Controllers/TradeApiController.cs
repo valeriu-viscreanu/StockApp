@@ -7,7 +7,7 @@ namespace StockApp.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerDefaults.AuthenticationScheme)]
     public class TradeApiController : ControllerBase
     {
         private readonly IStockProfileService _stockProfileService;

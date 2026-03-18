@@ -112,7 +112,7 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllers().RequireAuthorization();
+app.MapControllers();
 
 app.Run();
 

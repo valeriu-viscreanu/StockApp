@@ -1,16 +1,177 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function App() {
-  const [user] = useState('admin');
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [loginEmail, setLoginEmail] = useState('admin@test.com');
+  const [loginPassword, setLoginPassword] = useState('123');
+  const [error, setError] = useState('');
+  
   const [page, setPage] = useState('dashboard');
   const [amount, setAmount] = useState(100);
   const [quantity, setQuantity] = useState(1);
   const [selectedStock, setSelectedStock] = useState({ symbol: 'AAPL', name: 'Apple', price: 175.50 });
-  const [data] = useState({
-    balance: 1000.00,
+  const [data, setData] = useState({
+    balance: 0.00,
     stocks: 15,
     totalValue: 12450.75
   });
+
+  useEffect(() => {
+    if (isLoggedIn && token) {
+      fetchBalance();
+      // Mocking user email from token for now
+      setUser(loginEmail || 'User');
+    }
+  }, [isLoggedIn, token]);
+
+  const fetchBalance = async () => {
+    try {
+      const response = await fetch('http://localhost:5002/api/v1/CashApi/balance', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (response.ok) {
+        const balance = await response.json();
+        setData(prev => ({ ...prev, balance }));
+      }
+    } catch (err) {
+      console.error('Failed to fetch balance', err);
+    }
+  };
+
+  const handleCashAction = async (type) => {
+    try {
+      const endpoint = type === 'add' ? 'add-funds' : 'withdraw';
+      const response = await fetch(`http://localhost:5002/api/v1/CashApi/${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(amount)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setData(prev => ({ ...prev, balance: result.balance }));
+        setAmount(100); // Reset amount
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || `${type} failed`);
+      }
+    } catch (err) {
+      alert(`An error occurred during the ${type} action.`);
+    }
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    try {
+      const response = await fetch('http://localhost:5002/api/Auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: loginEmail, password: loginPassword })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const accessToken = result.token;
+        localStorage.setItem('token', accessToken);
+        setToken(accessToken);
+        setIsLoggedIn(true);
+        setUser(loginEmail);
+      } else {
+        setError('Invalid email or password');
+      }
+    } catch (err) {
+      setError('Login failed. Please check if the server is running.');
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+    setIsLoggedIn(false);
+    setUser(null);
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <div className="login-container" style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        background: '#f8f9fa' 
+      }}>
+        <div className="login-card" style={{ 
+          background: 'white', 
+          padding: '40px', 
+          borderRadius: '16px', 
+          boxShadow: '0 4px 24px rgba(0,0,0,0.1)',
+          width: '100%',
+          maxWidth: '400px'
+        }}>
+          <h1 style={{ textAlign: 'center', marginBottom: '8px' }}>Login</h1>
+          <p style={{ textAlign: 'center', color: '#666', marginBottom: '24px' }}>Welcome back! Please login to your account.</p>
+          
+          <form onSubmit={handleLogin}>
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Email</label>
+              <input 
+                type="email" 
+                value={loginEmail} 
+                onChange={(e) => setLoginEmail(e.target.value)}
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  borderRadius: '8px', 
+                  border: '1px solid #ddd',
+                  boxSizing: 'border-box'
+                }}
+                required 
+              />
+            </div>
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Password</label>
+              <input 
+                type="password" 
+                value={loginPassword} 
+                onChange={(e) => setLoginPassword(e.target.value)}
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  borderRadius: '8px', 
+                  border: '1px solid #ddd',
+                  boxSizing: 'border-box'
+                }}
+                required 
+              />
+            </div>
+            {error && <p style={{ color: '#dc3545', marginBottom: '16px', textAlign: 'center' }}>{error}</p>}
+            <button type="submit" style={{ 
+              width: '100%', 
+              padding: '12px', 
+              borderRadius: '8px', 
+              border: 'none', 
+              background: '#28a745', 
+              color: 'white', 
+              fontWeight: 600, 
+              cursor: 'pointer' 
+            }}>
+              Login
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   const [popularStocks] = useState([
     { symbol: "MSFT", name: "Microsoft", price: 420.50 },
@@ -51,7 +212,12 @@ function App() {
         </div>
         <div className="nav-right">
           {user}
-          <button style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}>Logout</button>
+          <button 
+            onClick={handleLogout}
+            style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginLeft: '12px' }}
+          >
+            Logout
+          </button>
         </div>
       </nav>
 
@@ -233,11 +399,11 @@ function App() {
               </div>
 
               <div className="cash-actions">
-                  <button type="button" className="btn-add-cash">
+                  <button type="button" className="btn-add-cash" onClick={() => handleCashAction('add')}>
                       <span className="btn-icon">&#43;</span> Add Funds
                   </button>
 
-                  <button type="button" className="btn-withdraw-cash">
+                  <button type="button" className="btn-withdraw-cash" onClick={() => handleCashAction('withdraw')}>
                       <span className="btn-icon">&#8722;</span> Withdraw
                   </button>
               </div>
