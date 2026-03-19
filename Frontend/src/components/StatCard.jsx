@@ -10,7 +10,7 @@ function StatCard({ label, value, footer, onClick, isClickable }) {
       <div className="stat-label">{label}</div>
       <div className="stat-value">{value}</div>
       {footer && (
-        <div className="stat-footer" style={isClickable ? { color: '#28a745' } : {}}>
+        <div className="stat-footer" style={isClickable ? { color: 'var(--primary)' } : {}}>
           {footer}
         </div>
       )}

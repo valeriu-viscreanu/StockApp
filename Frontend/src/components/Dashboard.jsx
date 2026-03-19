@@ -6,7 +6,7 @@ function Dashboard({ user, data, setPage }) {
     <main className="container">
       <div className="header">
         <h1>Welcome, {user}</h1>
-        <p style={{ color: '#666' }}>Here's your portfolio overview for today.</p>
+        <p style={{ color: 'var(--text-muted)' }}>Here's your portfolio overview for today.</p>
       </div>
 
       <StatsGrid data={data} setPage={setPage} />

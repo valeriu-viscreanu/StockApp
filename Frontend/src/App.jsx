@@ -13,7 +13,17 @@ function App() {
   const [loginPassword, setLoginPassword] = useState('123');
   const [error, setError] = useState('');
   
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [page, setPage] = useState('dashboard');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
   const [amount, setAmount] = useState(100);
   const [quantity, setQuantity] = useState(1);
   const [selectedStock, setSelectedStock] = useState({ symbol: 'AAPL', name: 'Apple', price: 175.50 });
@@ -163,6 +173,9 @@ function App() {
         </div>
         <div className="nav-right">
           {user}
+          <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
           <button
             onClick={handleLogout}
             style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginLeft: '12px' }}

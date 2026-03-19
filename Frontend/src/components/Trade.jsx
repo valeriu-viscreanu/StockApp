@@ -58,13 +58,13 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
             </div>
           </div>
 
-          <div className="graph-panel" style={{ flex: 2, padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderLeft: '1px solid #eee' }}>
-            <div className="timeframe-buttons" style={{ marginBottom: '15px' }}>
-              <button style={{ padding: '6px 16px', margin: '0 5px', cursor: 'pointer', border: '1px solid #28a745', background: 'transparent', color: '#28a745', borderRadius: '4px', fontWeight: 'bold' }}>Day</button>
-              <button style={{ padding: '6px 16px', margin: '0 5px', cursor: 'pointer', border: '1px solid #28a745', background: '#28a745', color: 'white', borderRadius: '4px', fontWeight: 'bold' }}>Month</button>
-              <button style={{ padding: '6px 16px', margin: '0 5px', cursor: 'pointer', border: '1px solid #28a745', background: 'transparent', color: '#28a745', borderRadius: '4px', fontWeight: 'bold' }}>Year</button>
+          <div className="graph-panel">
+            <div className="timeframe-buttons">
+              <button className="btn-timeframe">Day</button>
+              <button className="btn-timeframe active">Month</button>
+              <button className="btn-timeframe">Year</button>
             </div>
-            <div style={{ width: '100%', height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fcfcfc', border: '1px dashed #ddd', borderRadius: '12px', color: '#888' }}>
+            <div className="chart-placeholder">
               [ Chart Visualization Placeholder ]
             </div>
           </div>
