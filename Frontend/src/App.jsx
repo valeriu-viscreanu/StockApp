@@ -5,6 +5,21 @@ import Orders from './components/Orders';
 import Cash from './components/Cash';
 import Login from './components/Login';
 
+const API_BASE = 'http://localhost:5002/api/v1';
+
+const POPULAR_STOCKS = [
+  { symbol: "MSFT", name: "Microsoft" },
+  { symbol: "AAPL", name: "Apple" },
+  { symbol: "GOOGL", name: "Alphabet" },
+  { symbol: "AMZN", name: "Amazon" },
+  { symbol: "NVDA", name: "Nvidia" },
+  { symbol: "META", name: "Meta Platforms" },
+  { symbol: "TSLA", name: "Tesla" },
+  { symbol: "AMD", name: "Advanced Micro Devices" },
+  { symbol: "JPM", name: "JPMorgan Chase" },
+  { symbol: "V", name: "Visa" },
+];
+
 function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -24,50 +39,209 @@ function App() {
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
+
   const [amount, setAmount] = useState(100);
   const [quantity, setQuantity] = useState(1);
-  const [selectedStock, setSelectedStock] = useState({ symbol: 'AAPL', name: 'Apple', price: 175.50 });
+  const [popularStocks, setPopularStocks] = useState(
+    POPULAR_STOCKS.map(s => ({ ...s, price: 0 }))
+  );
+  const [selectedStock, setSelectedStock] = useState({ symbol: 'AAPL', name: 'Apple', price: 0 });
   const [data, setData] = useState({
     balance: 0.00,
-    stocks: 15,
-    totalValue: 12450.75
+    stocks: 0,
+    totalValue: 0
   });
+
+  const [buyOrders, setBuyOrders] = useState([]);
+  const [sellOrders, setSellOrders] = useState([]);
+  const [tradeMessage, setTradeMessage] = useState('');
+
+  // Auth helper for API calls
+  const authHeaders = () => ({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  });
+
+  const handleApiError = (response) => {
+    if (response.status === 401) {
+      handleLogout();
+      return true;
+    }
+    return false;
+  };
+
+  // ---- Data Fetching ----
 
   useEffect(() => {
     if (isLoggedIn && token) {
       fetchBalance();
-      // Mocking user email from token for now
+      fetchOrders();
+      fetchStockPrices();
       setUser(loginEmail || 'User');
     }
   }, [isLoggedIn, token]);
 
   const fetchBalance = async () => {
     try {
-      const response = await fetch('http://localhost:5002/api/v1/CashApi/balance', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await fetch(`${API_BASE}/CashApi/balance`, {
+        headers: authHeaders()
       });
+      if (handleApiError(response)) return;
       if (response.ok) {
         const balance = await response.json();
         setData(prev => ({ ...prev, balance }));
-      } else if (response.status === 401) {
-        handleLogout();
       }
     } catch (err) {
       console.error('Failed to fetch balance', err);
     }
   };
 
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch(`${API_BASE}/TradeApi/orders`, {
+        headers: authHeaders()
+      });
+      if (handleApiError(response)) return;
+      if (response.ok) {
+        const orders = await response.json();
+        const mapOrder = (o) => ({
+          id: o.buyOrderID || o.sellOrderID,
+          stockName: o.stockName,
+          stockSymbol: o.stockSymbol,
+          quantity: o.quantity,
+          price: o.price,
+          tradeAmount: o.tradeAmount,
+          date: new Date(o.dateAndTimeOfOrder).toLocaleString()
+        });
+        setBuyOrders((orders.buyOrders || []).map(mapOrder));
+        setSellOrders((orders.sellOrders || []).map(mapOrder));
+
+        // Update stocks held & total value from orders
+        const totalBought = (orders.buyOrders || []).reduce((sum, o) => sum + o.quantity, 0);
+        const totalSold = (orders.sellOrders || []).reduce((sum, o) => sum + o.quantity, 0);
+        const totalBuyValue = (orders.buyOrders || []).reduce((sum, o) => sum + o.tradeAmount, 0);
+        const totalSellValue = (orders.sellOrders || []).reduce((sum, o) => sum + o.tradeAmount, 0);
+        setData(prev => ({
+          ...prev,
+          stocks: totalBought - totalSold,
+          totalValue: prev.balance + (totalBuyValue - totalSellValue)
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to fetch orders', err);
+    }
+  };
+
+  const fetchStockPrices = async () => {
+    try {
+      const symbols = POPULAR_STOCKS.map(s => s.symbol);
+      const params = symbols.map(s => `symbols=${s}`).join('&');
+      const response = await fetch(`${API_BASE}/TradeApi/quotes?${params}`, {
+        headers: authHeaders()
+      });
+      if (handleApiError(response)) return;
+      if (response.ok) {
+        const quotes = await response.json();
+        setPopularStocks(prev => prev.map(stock => {
+          const quote = quotes[stock.symbol];
+          return quote ? { ...stock, price: quote.c || 0 } : stock;
+        }));
+        // Update selected stock price if available
+        setSelectedStock(prev => {
+          const quote = quotes[prev.symbol];
+          return quote ? { ...prev, price: quote.c || 0 } : prev;
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch stock prices', err);
+    }
+  };
+
+  // When user selects a stock, fetch its latest price
+  const handleSelectStock = async (stock) => {
+    setSelectedStock(stock);
+    try {
+      const response = await fetch(`${API_BASE}/TradeApi/quote/${stock.symbol}`, {
+        headers: authHeaders()
+      });
+      if (handleApiError(response)) return;
+      if (response.ok) {
+        const quote = await response.json();
+        if (quote.c) {
+          setSelectedStock(prev => ({ ...prev, price: quote.c }));
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch quote', err);
+    }
+  };
+
+  // ---- Trading ----
+
+  const handleBuyOrder = async () => {
+    setTradeMessage('');
+    try {
+      const response = await fetch(`${API_BASE}/TradeApi/buy-order`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          stockSymbol: selectedStock.symbol,
+          stockName: selectedStock.name,
+          dateAndTimeOfOrder: new Date().toISOString(),
+          quantity: quantity,
+          price: selectedStock.price
+        })
+      });
+      if (handleApiError(response)) return;
+      if (response.ok) {
+        setTradeMessage(`Bought ${quantity} share(s) of ${selectedStock.symbol}`);
+        fetchBalance();
+        fetchOrders();
+      } else {
+        const err = await response.json();
+        setTradeMessage(err.message || 'Buy order failed');
+      }
+    } catch (err) {
+      setTradeMessage('Buy order failed');
+    }
+  };
+
+  const handleSellOrder = async () => {
+    setTradeMessage('');
+    try {
+      const response = await fetch(`${API_BASE}/TradeApi/sell-order`, {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({
+          stockSymbol: selectedStock.symbol,
+          stockName: selectedStock.name,
+          dateAndTimeOfOrder: new Date().toISOString(),
+          quantity: quantity,
+          price: selectedStock.price
+        })
+      });
+      if (handleApiError(response)) return;
+      if (response.ok) {
+        setTradeMessage(`Sold ${quantity} share(s) of ${selectedStock.symbol}`);
+        fetchBalance();
+        fetchOrders();
+      } else {
+        const err = await response.json();
+        setTradeMessage(err.message || 'Sell order failed');
+      }
+    } catch (err) {
+      setTradeMessage('Sell order failed');
+    }
+  };
+
+  // ---- Cash ----
+
   const handleCashAction = async (type) => {
     try {
       const endpoint = type === 'add' ? 'add-funds' : 'withdraw';
-      const response = await fetch(`http://localhost:5002/api/v1/CashApi/${endpoint}`, {
+      const response = await fetch(`${API_BASE}/CashApi/${endpoint}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
+        headers: authHeaders(),
         body: JSON.stringify(amount)
       });
 
@@ -86,15 +260,15 @@ function App() {
     }
   };
 
+  // ---- Auth ----
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     try {
-      const response = await fetch('http://localhost:5002/api/Auth/login', {
+      const response = await fetch(`${API_BASE.replace('/v1', '')}/Auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: loginEmail, password: loginPassword })
       });
 
@@ -120,28 +294,7 @@ function App() {
     setUser(null);
   };
 
-  // Static Data
-  const [popularStocks] = useState([
-    { symbol: "MSFT", name: "Microsoft", price: 420.50 },
-    { symbol: "AAPL", name: "Apple", price: 175.50 },
-    { symbol: "GOOGL", name: "Alphabet", price: 145.20 },
-    { symbol: "AMZN", name: "Amazon", price: 178.10 },
-    { symbol: "NVDA", name: "Nvidia", price: 875.40 },
-    { symbol: "META", name: "Meta Platforms", price: 490.30 },
-    { symbol: "TSLA", name: "Tesla", price: 165.20 },
-    { symbol: "AMD", name: "Advanced Micro Devices", price: 180.50 },
-    { symbol: "JPM", name: "JPMorgan Chase", price: 195.40 },
-    { symbol: "V", name: "Visa", price: 280.10 },
-  ]);
-
-  const [buyOrders] = useState([
-    { id: 1, stockName: "Microsoft", stockSymbol: "MSFT", quantity: 5, price: 415.20, tradeAmount: 2076.00, date: "16 March 2026 10:20:15 AM" },
-    { id: 2, stockName: "Apple", stockSymbol: "AAPL", quantity: 10, price: 172.50, tradeAmount: 1725.00, date: "15 March 2026 02:45:10 PM" },
-  ]);
-
-  const [sellOrders] = useState([
-    { id: 3, stockName: "Tesla", stockSymbol: "TSLA", quantity: 2, price: 168.40, tradeAmount: 336.80, date: "16 March 2026 11:15:22 AM" },
-  ]);
+  // ---- Computed ----
 
   const totalBuyAmount = buyOrders.reduce((sum, order) => sum + order.tradeAmount, 0);
   const totalSellAmount = sellOrders.reduce((sum, order) => sum + order.tradeAmount, 0);
@@ -191,9 +344,12 @@ function App() {
         <Trade 
           popularStocks={popularStocks}
           selectedStock={selectedStock}
-          setSelectedStock={setSelectedStock}
+          setSelectedStock={handleSelectStock}
           quantity={quantity}
           setQuantity={setQuantity}
+          onBuy={handleBuyOrder}
+          onSell={handleSellOrder}
+          tradeMessage={tradeMessage}
         />
       )}
 

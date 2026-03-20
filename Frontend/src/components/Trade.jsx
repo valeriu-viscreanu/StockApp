@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQuantity }) {
+function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQuantity, onBuy, onSell, tradeMessage }) {
   return (
     <div className="advanced-dashboard">
       <div className="sidebar-panel">
@@ -21,7 +21,9 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
                 <span className="stock-company">{stock.name}</span>
               </div>
               <div className="stock-mini-chart">
-                <span className="stock-mini-price">${stock.price.toFixed(2)}</span>
+                <span className="stock-mini-price">
+                  {stock.price > 0 ? `$${stock.price.toFixed(2)}` : 'Loading...'}
+                </span>
               </div>
             </a>
           ))}
@@ -34,7 +36,9 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
             <h1 className="stock-name">{selectedStock.name} ({selectedStock.symbol})</h1>
             <div className="stock-price">
               <span className="currency">$</span>
-              <span className="price-value">{selectedStock.price.toFixed(2)}</span>
+              <span className="price-value">
+                {selectedStock.price > 0 ? selectedStock.price.toFixed(2) : '...'}
+              </span>
             </div>
             <div className="stock-price-label">Live Market Price</div>
           </div>
@@ -53,9 +57,27 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
             </div>
 
             <div className="order-buttons">
-              <button type="button" className="btn-sell">&#8595; Sell</button>
-              <button type="button" className="btn-buy">&#8593; Buy</button>
+              <button type="button" className="btn-sell" onClick={onSell}>&#8595; Sell</button>
+              <button type="button" className="btn-buy" onClick={onBuy}>&#8593; Buy</button>
             </div>
+
+            {tradeMessage && (
+              <div className="trade-message" style={{ 
+                marginTop: '12px', 
+                padding: '8px 12px', 
+                borderRadius: '8px', 
+                fontSize: '0.85rem', 
+                fontWeight: 600,
+                background: tradeMessage.startsWith('Bought') || tradeMessage.startsWith('Sold') 
+                  ? 'rgba(40, 167, 69, 0.15)' 
+                  : 'rgba(220, 53, 69, 0.15)',
+                color: tradeMessage.startsWith('Bought') || tradeMessage.startsWith('Sold') 
+                  ? 'var(--primary)' 
+                  : '#dc3545'
+              }}>
+                {tradeMessage}
+              </div>
+            )}
           </div>
 
           <div className="graph-panel">
