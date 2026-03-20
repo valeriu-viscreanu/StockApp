@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Dashboard from './components/Dashboard';
 import Trade from './components/Trade';
 import Orders from './components/Orders';
 import Cash from './components/Cash';
 import Login from './components/Login';
-
-const API_BASE = 'http://localhost:5002/api/v1';
+import Navbar from './components/Navbar';
+import * as api from './services/api';
 
 const POPULAR_STOCKS = [
   { symbol: "MSFT", name: "Microsoft" },
@@ -23,87 +23,46 @@ const POPULAR_STOCKS = [
 function App() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
+  const [isLoggedIn, setIsLoggedIn] = useState(!!token);
   const [loginEmail, setLoginEmail] = useState('admin@test.com');
   const [loginPassword, setLoginPassword] = useState('123');
   const [error, setError] = useState('');
-  
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [page, setPage] = useState('dashboard');
 
+  const [amount, setAmount] = useState(100);
+  const [quantity, setQuantity] = useState(1);
+  const [popularStocks, setPopularStocks] = useState(POPULAR_STOCKS.map(s => ({ ...s, price: 0 })));
+  const [selectedStock, setSelectedStock] = useState({ symbol: 'AAPL', name: 'Apple', price: 0 });
+  const [data, setData] = useState({ balance: 0.00, stocks: 0, totalValue: 0 });
+  const [buyOrders, setBuyOrders] = useState([]);
+  const [sellOrders, setSellOrders] = useState([]);
+  const [tradeMessage, setTradeMessage] = useState('');
+
+  // Logout callback
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('token');
+    setToken(null);
+    setIsLoggedIn(false);
+    setUser(null);
+  }, []);
+
+  // Theme setup
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
+  // Data Refresh Helpers
+  const refreshUserData = useCallback(async () => {
+    if (!token) return;
 
-  const [amount, setAmount] = useState(100);
-  const [quantity, setQuantity] = useState(1);
-  const [popularStocks, setPopularStocks] = useState(
-    POPULAR_STOCKS.map(s => ({ ...s, price: 0 }))
-  );
-  const [selectedStock, setSelectedStock] = useState({ symbol: 'AAPL', name: 'Apple', price: 0 });
-  const [data, setData] = useState({
-    balance: 0.00,
-    stocks: 0,
-    totalValue: 0
-  });
-
-  const [buyOrders, setBuyOrders] = useState([]);
-  const [sellOrders, setSellOrders] = useState([]);
-  const [tradeMessage, setTradeMessage] = useState('');
-
-  // Auth helper for API calls
-  const authHeaders = () => ({
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`
-  });
-
-  const handleApiError = (response) => {
-    if (response.status === 401) {
-      handleLogout();
-      return true;
-    }
-    return false;
-  };
-
-  // ---- Data Fetching ----
-
-  useEffect(() => {
-    if (isLoggedIn && token) {
-      fetchBalance();
-      fetchOrders();
-      fetchStockPrices();
-      setUser(loginEmail || 'User');
-    }
-  }, [isLoggedIn, token]);
-
-  const fetchBalance = async () => {
     try {
-      const response = await fetch(`${API_BASE}/CashApi/balance`, {
-        headers: authHeaders()
-      });
-      if (handleApiError(response)) return;
-      if (response.ok) {
-        const balance = await response.json();
-        setData(prev => ({ ...prev, balance }));
-      }
-    } catch (err) {
-      console.error('Failed to fetch balance', err);
-    }
-  };
+      const balance = await api.fetchBalance(token, handleLogout);
+      if (balance !== null) setData(prev => ({ ...prev, balance }));
 
-  const fetchOrders = async () => {
-    try {
-      const response = await fetch(`${API_BASE}/TradeApi/orders`, {
-        headers: authHeaders()
-      });
-      if (handleApiError(response)) return;
-      if (response.ok) {
-        const orders = await response.json();
+      const ordersData = await api.fetchOrders(token, handleLogout);
+      if (ordersData) {
         const mapOrder = (o) => ({
           id: o.buyOrderID || o.sellOrderID,
           stockName: o.stockName,
@@ -113,263 +72,112 @@ function App() {
           tradeAmount: o.tradeAmount,
           date: new Date(o.dateAndTimeOfOrder).toLocaleString()
         });
-        setBuyOrders((orders.buyOrders || []).map(mapOrder));
-        setSellOrders((orders.sellOrders || []).map(mapOrder));
+        const bOrders = (ordersData.buyOrders || []).map(mapOrder);
+        const sOrders = (ordersData.sellOrders || []).map(mapOrder);
+        setBuyOrders(bOrders);
+        setSellOrders(sOrders);
 
-        // Update stocks held & total value from orders
-        const totalBought = (orders.buyOrders || []).reduce((sum, o) => sum + o.quantity, 0);
-        const totalSold = (orders.sellOrders || []).reduce((sum, o) => sum + o.quantity, 0);
-        const totalBuyValue = (orders.buyOrders || []).reduce((sum, o) => sum + o.tradeAmount, 0);
-        const totalSellValue = (orders.sellOrders || []).reduce((sum, o) => sum + o.tradeAmount, 0);
+        const totalBought = bOrders.reduce((sum, o) => sum + o.quantity, 0);
+        const totalSold = sOrders.reduce((sum, o) => sum + o.quantity, 0);
+        const totalBuyValue = bOrders.reduce((sum, o) => sum + o.tradeAmount, 0);
+        const totalSellValue = sOrders.reduce((sum, o) => sum + o.tradeAmount, 0);
+        
         setData(prev => ({
           ...prev,
           stocks: totalBought - totalSold,
-          totalValue: prev.balance + (totalBuyValue - totalSellValue)
+          totalValue: (balance ?? prev.balance) + (totalBuyValue - totalSellValue)
+        }));
+      }
+
+      const quotes = await api.fetchStockPrices(POPULAR_STOCKS.map(s => s.symbol), token, handleLogout);
+      if (quotes) {
+        setPopularStocks(prev => prev.map(stock => ({
+          ...stock,
+          price: quotes[stock.symbol]?.c || stock.price
+        })));
+        setSelectedStock(prev => ({
+          ...prev,
+          price: quotes[prev.symbol]?.c || prev.price
         }));
       }
     } catch (err) {
-      console.error('Failed to fetch orders', err);
+      console.error('Refresh data error:', err);
     }
-  };
+  }, [token, handleLogout]);
 
-  const fetchStockPrices = async () => {
-    try {
-      const symbols = POPULAR_STOCKS.map(s => s.symbol);
-      const params = symbols.map(s => `symbols=${s}`).join('&');
-      const response = await fetch(`${API_BASE}/TradeApi/quotes?${params}`, {
-        headers: authHeaders()
-      });
-      if (handleApiError(response)) return;
-      if (response.ok) {
-        const quotes = await response.json();
-        setPopularStocks(prev => prev.map(stock => {
-          const quote = quotes[stock.symbol];
-          return quote ? { ...stock, price: quote.c || 0 } : stock;
-        }));
-        // Update selected stock price if available
-        setSelectedStock(prev => {
-          const quote = quotes[prev.symbol];
-          return quote ? { ...prev, price: quote.c || 0 } : prev;
-        });
-      }
-    } catch (err) {
-      console.error('Failed to fetch stock prices', err);
+  useEffect(() => {
+    if (isLoggedIn && token) {
+      refreshUserData();
+      setUser(loginEmail || 'User');
     }
-  };
+  }, [isLoggedIn, token, refreshUserData, loginEmail]);
 
-  // When user selects a stock, fetch its latest price
+  // Handlers
   const handleSelectStock = async (stock) => {
     setSelectedStock(stock);
-    try {
-      const response = await fetch(`${API_BASE}/TradeApi/quote/${stock.symbol}`, {
-        headers: authHeaders()
-      });
-      if (handleApiError(response)) return;
-      if (response.ok) {
-        const quote = await response.json();
-        if (quote.c) {
-          setSelectedStock(prev => ({ ...prev, price: quote.c }));
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch quote', err);
-    }
+    const quote = await api.fetchStockQuote(stock.symbol, token, handleLogout);
+    if (quote?.c) setSelectedStock(prev => ({ ...prev, price: quote.c }));
   };
 
-  // ---- Trading ----
-
-  const handleBuyOrder = async () => {
+  const executeOrder = async (type) => {
     setTradeMessage('');
-    try {
-      const response = await fetch(`${API_BASE}/TradeApi/buy-order`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          stockSymbol: selectedStock.symbol,
-          stockName: selectedStock.name,
-          dateAndTimeOfOrder: new Date().toISOString(),
-          quantity: quantity,
-          price: selectedStock.price
-        })
-      });
-      if (handleApiError(response)) return;
-      if (response.ok) {
-        setTradeMessage(`Bought ${quantity} share(s) of ${selectedStock.symbol}`);
-        fetchBalance();
-        fetchOrders();
-      } else {
-        const err = await response.json();
-        setTradeMessage(err.message || 'Buy order failed');
-      }
-    } catch (err) {
-      setTradeMessage('Buy order failed');
+    const orderData = {
+      stockSymbol: selectedStock.symbol,
+      stockName: selectedStock.name,
+      dateAndTimeOfOrder: new Date().toISOString(),
+      quantity,
+      price: selectedStock.price
+    };
+    
+    const result = await api.createOrder(type, orderData, token, handleLogout);
+    if (result.data) {
+      setTradeMessage(`${type === 'buy' ? 'Bought' : 'Sold'} ${quantity} share(s) of ${selectedStock.symbol}`);
+      refreshUserData();
+    } else {
+      setTradeMessage(result.error);
     }
   };
-
-  const handleSellOrder = async () => {
-    setTradeMessage('');
-    try {
-      const response = await fetch(`${API_BASE}/TradeApi/sell-order`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify({
-          stockSymbol: selectedStock.symbol,
-          stockName: selectedStock.name,
-          dateAndTimeOfOrder: new Date().toISOString(),
-          quantity: quantity,
-          price: selectedStock.price
-        })
-      });
-      if (handleApiError(response)) return;
-      if (response.ok) {
-        setTradeMessage(`Sold ${quantity} share(s) of ${selectedStock.symbol}`);
-        fetchBalance();
-        fetchOrders();
-      } else {
-        const err = await response.json();
-        setTradeMessage(err.message || 'Sell order failed');
-      }
-    } catch (err) {
-      setTradeMessage('Sell order failed');
-    }
-  };
-
-  // ---- Cash ----
 
   const handleCashAction = async (type) => {
     try {
-      const endpoint = type === 'add' ? 'add-funds' : 'withdraw';
-      const response = await fetch(`${API_BASE}/CashApi/${endpoint}`, {
-        method: 'POST',
-        headers: authHeaders(),
-        body: JSON.stringify(amount)
-      });
-
-      if (response.ok) {
-        const result = await response.json();
+      const result = await api.handleCashActionApi(type, amount, token, handleLogout);
+      if (result) {
         setData(prev => ({ ...prev, balance: result.balance }));
         setAmount(100);
-      } else if (response.status === 401) {
-        handleLogout();
-      } else {
-        const errorData = await response.json();
-        alert(errorData.message || `${type} failed`);
       }
     } catch (err) {
-      alert(`An error occurred during the ${type} action.`);
+      alert(err.message);
     }
   };
-
-  // ---- Auth ----
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-    try {
-      const response = await fetch(`${API_BASE.replace('/v1', '')}/Auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: loginEmail, password: loginPassword })
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        const accessToken = result.token;
-        localStorage.setItem('token', accessToken);
-        setToken(accessToken);
-        setIsLoggedIn(true);
-        setUser(loginEmail);
-      } else {
-        setError('Invalid email or password');
-      }
-    } catch (err) {
-      setError('Login failed. Please check if the server is running.');
+    const result = await api.loginApi(loginEmail, loginPassword);
+    if (result?.token) {
+      localStorage.setItem('token', result.token);
+      setToken(result.token);
+      setIsLoggedIn(true);
+      setUser(loginEmail);
+    } else {
+      setError('Invalid email or password');
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setIsLoggedIn(false);
-    setUser(null);
-  };
-
-  // ---- Computed ----
-
-  const totalBuyAmount = buyOrders.reduce((sum, order) => sum + order.tradeAmount, 0);
-  const totalSellAmount = sellOrders.reduce((sum, order) => sum + order.tradeAmount, 0);
-
   if (!isLoggedIn) {
-    return (
-      <Login 
-        handleLogin={handleLogin}
-        loginEmail={loginEmail}
-        setLoginEmail={setLoginEmail}
-        loginPassword={loginPassword}
-        setLoginPassword={setLoginPassword}
-        error={error}
-      />
-    );
+    return <Login handleLogin={handleLogin} loginEmail={loginEmail} setLoginEmail={setLoginEmail} 
+      loginPassword={loginPassword} setLoginPassword={setLoginPassword} error={error} />;
   }
+
+  const totals = { buy: buyOrders.reduce((sum, o) => sum + o.tradeAmount, 0), sell: sellOrders.reduce((sum, o) => sum + o.tradeAmount, 0) };
 
   return (
     <div className="layout">
-      <nav className="navbar">
-        <a href="/" className="brand" onClick={(e) => { e.preventDefault(); setPage('dashboard'); }}>
-          <span>&#128200;</span> Stocks
-        </a>
-        <div className="nav-links">
-          <a href="/" className={page === 'dashboard' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setPage('dashboard'); }}>Dashboard</a>
-          <a href="/trade" className={page === 'trade' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setPage('trade'); }}>Trade</a>
-          <a href="/orders" className={page === 'orders' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setPage('orders'); }}>Orders</a>
-          <a href="/cash" className={page === 'cash' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setPage('cash'); }}>Cash</a>
-        </div>
-        <div className="nav-right">
-          {user}
-          <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
-          <button
-            onClick={handleLogout}
-            style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginLeft: '12px' }}
-          >
-            Logout
-          </button>
-        </div>
-      </nav>
-
+      <Navbar user={user} page={page} setPage={setPage} theme={theme} toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')} handleLogout={handleLogout} />
       {page === 'dashboard' && <Dashboard user={user} data={data} setPage={setPage} />}
-      
-      {page === 'trade' && (
-        <Trade 
-          popularStocks={popularStocks}
-          selectedStock={selectedStock}
-          setSelectedStock={handleSelectStock}
-          quantity={quantity}
-          setQuantity={setQuantity}
-          onBuy={handleBuyOrder}
-          onSell={handleSellOrder}
-          tradeMessage={tradeMessage}
-        />
-      )}
-
-      {page === 'orders' && (
-        <Orders 
-          buyOrders={buyOrders}
-          sellOrders={sellOrders}
-          totalBuyAmount={totalBuyAmount}
-          totalSellAmount={totalSellAmount}
-        />
-      )}
-
-      {page === 'cash' && (
-        <Cash 
-          data={data}
-          amount={amount}
-          setAmount={setAmount}
-          handleCashAction={handleCashAction}
-        />
-      )}
+      {page === 'trade' && <Trade popularStocks={popularStocks} selectedStock={selectedStock} setSelectedStock={handleSelectStock} quantity={quantity} setQuantity={setQuantity} onBuy={() => executeOrder('buy')} onSell={() => executeOrder('sell')} tradeMessage={tradeMessage} />}
+      {page === 'orders' && <Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />}
+      {page === 'cash' && <Cash data={data} amount={amount} setAmount={setAmount} handleCashAction={handleCashAction} />}
     </div>
   );
 }
