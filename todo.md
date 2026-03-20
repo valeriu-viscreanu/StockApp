@@ -1,9 +1,5 @@
 # StockApp - TODO List
 
-- [x] Check `TradeApiController` (Backend)
-- [x] Add Trade functionality to the Frontend
-- [x] Cleanup `App.jsx` and modularize (Navbar, API service)
-
 ## Upcoming: Graph Implementation Plan
 - [ ] **Backend: Historical Data Endpoint**
     - Add endpoint in `TradeApiController` to fetch candle/historical data from Finnhub.
