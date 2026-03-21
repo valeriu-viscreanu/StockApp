@@ -23,15 +23,46 @@ ChartJS.register(
   Legend
 );
 
-function PriceChart({ symbol, price, timeframe }) {
+function PriceChart({ symbol, price, timeframe, stockChartData }) {
   const chartData = useMemo(() => {
+    // Use real stock data if available
+    if (stockChartData && stockChartData.c && stockChartData.t && stockChartData.c.length > 0) {
+      const labels = stockChartData.t.map((ts) => {
+        const date = new Date(ts * 1000);
+        if (timeframe === 'day') {
+          return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        } else if (timeframe === 'month') {
+          return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
+        } else {
+          return date.toLocaleDateString([], { month: 'short', year: 'numeric' });
+        }
+      });
+
+      return {
+        labels,
+        datasets: [
+          {
+            label: `${symbol} Price`,
+            data: stockChartData.c,
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            borderWidth: 2,
+            fill: true,
+            pointRadius: timeframe === 'year' ? 1 : 2,
+            tension: 0.1,
+          },
+        ],
+      };
+    }
+
+    // Fallback: simulated data
     if (!price || price <= 0) return null;
 
     const labels = [];
     const prices = [];
     const now = new Date();
     
-    let pointsCount = timeframe === 'day' ? 24 : timeframe === 'month' ? 30 : 52;
+    let pointsCount = 20;
     let volatility = price * (timeframe === 'day' ? 0.005 : timeframe === 'month' ? 0.015 : 0.05);
 
     let simulatedPrice = price;
@@ -67,7 +98,7 @@ function PriceChart({ symbol, price, timeframe }) {
         },
       ],
     };
-  }, [symbol, price, timeframe]);
+  }, [symbol, price, timeframe, candleData]);
 
   const options = {
     responsive: true,

@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import PriceChart from './PriceChart';
 
-function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQuantity, onBuy, onSell, tradeMessage }) {
+function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQuantity, onBuy, onSell, tradeMessage, stockChartData, fetchStockChartData }) {
   const [timeframe, setTimeframe] = useState('month');
+
+  const handleTimeframeChange = (tf) => {
+    setTimeframe(tf);
+    fetchStockChartData(selectedStock.symbol, tf);
+  };
 
   return (
     <div className="advanced-dashboard">
@@ -87,19 +92,19 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
             <div className="timeframe-buttons">
               <button 
                 className={`btn-timeframe ${timeframe === 'day' ? 'active' : ''}`}
-                onClick={() => setTimeframe('day')}
+                onClick={() => handleTimeframeChange('day')}
               >
                 Day
               </button>
               <button 
                 className={`btn-timeframe ${timeframe === 'month' ? 'active' : ''}`}
-                onClick={() => setTimeframe('month')}
+                onClick={() => handleTimeframeChange('month')}
               >
                 Month
               </button>
               <button 
                 className={`btn-timeframe ${timeframe === 'year' ? 'active' : ''}`}
-                onClick={() => setTimeframe('year')}
+                onClick={() => handleTimeframeChange('year')}
               >
                 Year
               </button>
@@ -108,7 +113,8 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
                 <PriceChart 
                     symbol={selectedStock.symbol} 
                     price={selectedStock.price} 
-                    timeframe={timeframe} 
+                    timeframe={timeframe}
+                    stockChartData={stockChartData}
                 />
             </div>
           </div>

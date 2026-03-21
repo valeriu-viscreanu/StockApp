@@ -32,6 +32,15 @@ export const fetchStockQuote = async (symbol, token, logout) => {
   return null;
 };
 
+export const fetchStockData = async (symbol, timeframe, token, logout) => {
+  const response = await fetch(`${API_BASE}/TradeApi/data/${symbol}?timeframe=${timeframe}`, {
+    headers: authHeaders(token)
+  });
+  if (handleApiError(response, logout)) return null;
+  if (response.ok) return await response.json();
+  return null;
+};
+
 export const fetchBalance = async (token, logout) => {
   const response = await fetch(`${API_BASE}/CashApi/balance`, {
     headers: authHeaders(token)

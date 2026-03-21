@@ -38,6 +38,7 @@ function App() {
   const [buyOrders, setBuyOrders] = useState([]);
   const [sellOrders, setSellOrders] = useState([]);
   const [tradeMessage, setTradeMessage] = useState('');
+  const [stockChartData, setStockChartData] = useState(null);
 
   // Logout callback
   const handleLogout = useCallback(() => {
@@ -113,10 +114,16 @@ function App() {
   }, [isLoggedIn, token, refreshUserData, loginEmail]);
 
   // Handlers
+  const fetchStockChartData = async (symbol, timeframe) => {
+    const data = await api.fetchStockData(symbol, timeframe, token, handleLogout);
+    setStockChartData(data);
+  };
+
   const handleSelectStock = async (stock) => {
     setSelectedStock(stock);
     const quote = await api.fetchStockQuote(stock.symbol, token, handleLogout);
     if (quote?.c) setSelectedStock(prev => ({ ...prev, price: quote.c }));
+    fetchStockChartData(stock.symbol, 'month');
   };
 
   const executeOrder = async (type) => {
@@ -175,7 +182,7 @@ function App() {
     <div className="layout">
       <Navbar user={user} page={page} setPage={setPage} theme={theme} toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')} handleLogout={handleLogout} />
       {page === 'dashboard' && <Dashboard user={user} data={data} setPage={setPage} />}
-      {page === 'trade' && <Trade popularStocks={popularStocks} selectedStock={selectedStock} setSelectedStock={handleSelectStock} quantity={quantity} setQuantity={setQuantity} onBuy={() => executeOrder('buy')} onSell={() => executeOrder('sell')} tradeMessage={tradeMessage} />}
+      {page === 'trade' && <Trade popularStocks={popularStocks} selectedStock={selectedStock} setSelectedStock={handleSelectStock} quantity={quantity} setQuantity={setQuantity} onBuy={() => executeOrder('buy')} onSell={() => executeOrder('sell')} tradeMessage={tradeMessage} stockChartData={stockChartData} fetchStockChartData={fetchStockChartData} />}
       {page === 'orders' && <Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />}
       {page === 'cash' && <Cash data={data} amount={amount} setAmount={setAmount} handleCashAction={handleCashAction} />}
     </div>

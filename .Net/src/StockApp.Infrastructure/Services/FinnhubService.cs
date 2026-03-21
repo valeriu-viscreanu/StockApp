@@ -64,5 +64,18 @@ namespace StockApp.Infrastructure.Services
 
             return await response.Content.ReadFromJsonAsync<FinnhubSearchResponse>();
         }
+        public async Task<FinnhubStockDataResponse?> GetStockData(string stockSymbol, string resolution, long from, long to)
+        {
+            string url = $"https://finnhub.io/api/v1/stock/candle?symbol={stockSymbol}&resolution={resolution}&from={from}&to={to}&token={_finnhubToken}";
+
+            var response = await _httpClient.GetAsync(url);
+            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests) return null;
+            if (!response.IsSuccessStatusCode) return null;
+
+            var result = await response.Content.ReadFromJsonAsync<FinnhubStockDataResponse>();
+            if (result?.Status == "no_data") return null;
+
+            return result;
+        }
     }
 }

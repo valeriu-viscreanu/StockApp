@@ -15,19 +15,22 @@ namespace StockApp.Controllers
         private readonly IBuyOrdersService _buyOrdersService;
         private readonly ISellOrdersService _sellOrdersService;
         private readonly IUserBalanceService _userBalanceService;
+        private readonly IFinnhubService _finnhubService;
 
         public TradeApiController(
             IStockProfileService stockProfileService,
             IStockQuoteService stockQuoteService,
             IBuyOrdersService buyOrdersService,
             ISellOrdersService sellOrdersService,
-            IUserBalanceService userBalanceService)
+            IUserBalanceService userBalanceService,
+            IFinnhubService finnhubService)
         {
             _stockProfileService = stockProfileService;
             _stockQuoteService = stockQuoteService;
             _buyOrdersService = buyOrdersService;
             _sellOrdersService = sellOrdersService;
             _userBalanceService = userBalanceService;
+            _finnhubService = finnhubService;
         }
 
         [HttpGet("profile/{stockSymbol}")]
@@ -39,6 +42,37 @@ namespace StockApp.Controllers
                 return NotFound();
             }
             return Ok(profile);
+        }
+
+        [HttpGet("data/{stockSymbol}")]
+        public async Task<ActionResult<FinnhubStockDataResponse>> GetStockData(string stockSymbol, [FromQuery] string timeframe = "month")
+        {
+            var now = DateTimeOffset.UtcNow;
+            string resolution;
+            DateTimeOffset from;
+
+            switch (timeframe)
+            {
+                case "day":
+                    resolution = "60";
+                    from = now.AddHours(-20);
+                    break;
+                case "year":
+                    resolution = "W";
+                    from = now.AddDays(-20 * 7);
+                    break;
+                default: // month
+                    resolution = "D";
+                    from = now.AddDays(-20);
+                    break;
+            }
+
+            var stockData = await _finnhubService.GetStockData(stockSymbol, resolution, from.ToUnixTimeSeconds(), now.ToUnixTimeSeconds());
+            if (stockData == null)
+            {
+                return NotFound();
+            }
+            return Ok(stockData);
         }
 
         [HttpGet("quote/{stockSymbol}")]
