@@ -98,7 +98,7 @@ function PriceChart({ symbol, price, timeframe, stockChartData }) {
         },
       ],
     };
-  }, [symbol, price, timeframe, candleData]);
+  }, [symbol, price, timeframe, stockChartData]);
 
   const options = {
     responsive: true,
