@@ -12,3 +12,6 @@
 - [ ] **Frontend: Integration**
     - Replace the placeholder in `Trade.jsx` with the real `PriceChart`.
     - Wire up the "Day", "Month", "Year" buttons to update the chart.
+
+
+[] TIMEFRAME -- TRADE.JSX -- >  

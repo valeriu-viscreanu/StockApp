@@ -1,6 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
+import PriceChart from './PriceChart';
 
 function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQuantity, onBuy, onSell, tradeMessage }) {
+  const [timeframe, setTimeframe] = useState('month');
+
   return (
     <div className="advanced-dashboard">
       <div className="sidebar-panel">
@@ -82,12 +85,31 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
 
           <div className="graph-panel">
             <div className="timeframe-buttons">
-              <button className="btn-timeframe">Day</button>
-              <button className="btn-timeframe active">Month</button>
-              <button className="btn-timeframe">Year</button>
+              <button 
+                className={`btn-timeframe ${timeframe === 'day' ? 'active' : ''}`}
+                onClick={() => setTimeframe('day')}
+              >
+                Day
+              </button>
+              <button 
+                className={`btn-timeframe ${timeframe === 'month' ? 'active' : ''}`}
+                onClick={() => setTimeframe('month')}
+              >
+                Month
+              </button>
+              <button 
+                className={`btn-timeframe ${timeframe === 'year' ? 'active' : ''}`}
+                onClick={() => setTimeframe('year')}
+              >
+                Year
+              </button>
             </div>
-            <div className="chart-placeholder">
-              [ Chart Visualization Placeholder ]
+            <div style={{ padding: '0 20px', width: '100%', boxSizing: 'border-box' }}>
+                <PriceChart 
+                    symbol={selectedStock.symbol} 
+                    price={selectedStock.price} 
+                    timeframe={timeframe} 
+                />
             </div>
           </div>
         </div>
