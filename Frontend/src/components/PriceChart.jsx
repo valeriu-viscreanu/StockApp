@@ -35,7 +35,7 @@ function PriceChart({ symbol, price, timeframe }) {
     let volatility = price * (timeframe === 'day' ? 0.005 : timeframe === 'month' ? 0.015 : 0.05);
 
     let simulatedPrice = price;
-    for (let i = pointsCount - 1; i >= 0; i--) {
+    for (let i = 0; i < pointsCount; i++) {
         const date = new Date(now);
         if (timeframe === 'day') {
             date.setHours(now.getHours() - i);
