@@ -108,5 +108,14 @@ public class TradeRouteIntegrationTests
                 Result = results
             });
         }
+
+        public Task<FinnhubStockDataResponse?> GetStockData(string stockSymbol, string resolution, long from, long to)
+        {
+            return Task.FromResult<FinnhubStockDataResponse?>(new FinnhubStockDataResponse
+            {
+                ClosePrices = new List<double> { 100, 101, 102 },
+                Status = "ok"
+            });
+        }
     }
 }

@@ -196,7 +196,7 @@ namespace StockAppTests
         public async Task GetAllBuyOrders_DefaultList_ShouldBeEmpty()
         {
             // Act
-            List<BuyOrderResponse> buyOrders = await _buyOrdersService.GetBuyOrders();
+            List<BuyOrderResponse> buyOrders = await _buyOrdersService.GetBuyOrders(Guid.Empty);
 
             // Assert
             Assert.Empty(buyOrders);
@@ -213,7 +213,8 @@ namespace StockAppTests
                 StockName = "Microsoft",
                 DateAndTimeOfOrder = DateTime.Parse("2024-01-01"),
                 Quantity = 10,
-                Price = 100
+                Price = 100,
+                UserID = Guid.NewGuid()
             };
 
             BuyOrderRequest request2 = new BuyOrderRequest
@@ -222,14 +223,15 @@ namespace StockAppTests
                 StockName = "Apple",
                 DateAndTimeOfOrder = DateTime.Parse("2024-02-01"),
                 Quantity = 20,
-                Price = 150
+                Price = 150,
+                UserID = request1.UserID
             };
 
             BuyOrderResponse response1 = await _buyOrdersService.CreateBuyOrder(request1);
             BuyOrderResponse response2 = await _buyOrdersService.CreateBuyOrder(request2);
 
             // Act
-            List<BuyOrderResponse> buyOrders = await _buyOrdersService.GetBuyOrders();
+            List<BuyOrderResponse> buyOrders = await _buyOrdersService.GetBuyOrders(request1.UserID);
 
             // Assert
             Assert.Equal(2, buyOrders.Count);

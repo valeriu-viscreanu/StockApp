@@ -56,7 +56,7 @@ public class TradeControllerTests
             configuration);
 
         // Act
-        IActionResult result = await controller.Index(null);
+        IActionResult result = await controller.Trade(null);
 
         // Assert
         ViewResult viewResult = result.Should().BeOfType<ViewResult>().Subject;
