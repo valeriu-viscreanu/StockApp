@@ -10,19 +10,12 @@
 - **EFFICIENT EDITING**: When modifying files, prioritize `replace_file_content` or `multi_replace_file_content` tools over full file overwrites to save context tokens.
 
 ## 🗺️ 2. PROJECT TOPOLOGY (Don't search blindly)
-This is a hybrid web application. Do not waste tokens scanning directories; use these exact paths:
+This is a hybrid web application. Do not waste tokens scanning directories; instead, read the architectural maps based on your current task:
 
-*   **Backend (C# / .NET 8 / ASP.NET Core)**: `c:\Code\StockApp\.Net\src\`
-    *   `StockApp.Application`: Interfaces, DTOs (`FinnhubStockDataResponse`), Business Logic.
-    *   `StockApp.Domain`: Entities (e.g., `ApplicationUser`).
-    *   `StockApp.Infrastructure`: Finnhub API service implementations, DB Context.
-    *   `StockApp.Web`: API Controllers (`TradeApiController.cs`), Views, `Program.cs`.
+*   **Backend Details**: Read `c:\Code\StockApp\.Net\AGENT_CONTEXT.md` for C# Clean Architecture mapping and services.
+*   **Frontend Details**: Read `c:\Code\StockApp\Frontend\AGENT_CONTEXT.md` for React components, styling, and `api.js` mappings.
 
-*   **Frontend (React / Vite)**: `c:\Code\StockApp\Frontend\src\`
-    *   `components/`: React UI components (`Dashboard.jsx`, `Trade.jsx`, `PriceChart.jsx`).
-    *   `services/`: Centralized API calls (`api.js`).
-    *   `App.jsx`: Main UI routing and state holder.
-    *   `index.css`: Global styling.
+**⚠️ STRICT RULE 5 (MAINTENANCE)**: Agents must proactively edit the relevant `AGENT_CONTEXT.md` files if they make structural changes or introduce major new architectural patterns.
 
 ## 🎯 3. CURRENT TASK STATE
 - **Check `todo.md`**: Found at `<project_root>\todo.md`. ALWAYS read this file first to understand the current checklist and objective before taking action.
