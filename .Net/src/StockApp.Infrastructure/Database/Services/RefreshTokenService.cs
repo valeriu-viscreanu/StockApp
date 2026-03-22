@@ -1,15 +1,14 @@
-using Microsoft.EntityFrameworkCore;
 using StockApp.Application.ServiceContracts;
 using StockApp.Domain.Entities;
 using System.Security.Cryptography;
 
-namespace StockApp.Infrastructure.Db;
+namespace StockApp.Infrastructure.Database.Services;
 
-public class PersistentRefreshTokenService : IRefreshTokenService
+public class RefreshTokenService : IRefreshTokenService
 {
     private readonly ApplicationDbContext _dbContext;
 
-    public PersistentRefreshTokenService(ApplicationDbContext dbContext)
+    public RefreshTokenService(ApplicationDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -33,12 +32,12 @@ public class PersistentRefreshTokenService : IRefreshTokenService
 
     public async Task<RefreshToken?> GetByToken(string token)
     {
-        return await _dbContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token);
+        return await _dbContext.RefreshTokens.FindAsync(token);
     }
 
     public async Task RevokeToken(string token)
     {
-        var refreshToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == token);
+        var refreshToken = await _dbContext.RefreshTokens.FindAsync(token);
         if (refreshToken != null)
         {
             refreshToken.IsRevoked = true;

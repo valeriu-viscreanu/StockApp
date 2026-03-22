@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using StockApp.Domain.Entities;
 
-namespace StockApp.Infrastructure.Db;
+namespace StockApp.Infrastructure.Database;
 
 public class ApplicationDbContext : DbContext
 {
@@ -40,9 +40,8 @@ public class ApplicationDbContext : DbContext
         // Configuration for ApplicationUser
         modelBuilder.Entity<ApplicationUser>(entity =>
         {
-            entity.HasKey(e => e.Id);
+            entity.HasKey(e => e.UserID);
             entity.Property(e => e.Email).IsRequired().HasMaxLength(256);
-            entity.Property(e => e.PasswordHash).IsRequired();
             entity.Property(e => e.CashBalance).HasColumnType("decimal(18,4)");
         });
 
