@@ -11,6 +11,10 @@ using Serilog;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
+using StockApp.Infrastructure.Database;
+using StockApp.Infrastructure.Database.Repositories;
+using StockApp.Infrastructure.Database.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -73,24 +77,45 @@ builder.Services.AddSingleton<IFinnhubService, FinnhubService>();
 builder.Services.AddSingleton<IStockProfileService>(sp => sp.GetRequiredService<IFinnhubService>());
 builder.Services.AddSingleton<IStockQuoteService>(sp => sp.GetRequiredService<IFinnhubService>());
 
-builder.Services.AddSingleton<IBuyOrderRepository, InMemoryBuyOrderRepository>();
-builder.Services.AddSingleton<ISellOrderRepository, InMemorySellOrderRepository>();
+var provider = builder.Configuration["DatabaseProvider"] ?? "InMemory";
+var sqlServerConnectionString = builder.Configuration.GetConnectionString("SqlServerConnection");
 
-builder.Services.AddSingleton<IRequestValidator<BuyOrderRequest>, DataAnnotationsRequestValidator<BuyOrderRequest>>();
-builder.Services.AddSingleton<IRequestValidator<SellOrderRequest>, DataAnnotationsRequestValidator<SellOrderRequest>>();
-builder.Services.AddSingleton<IBuyOrderMapper, BuyOrderMapper>();
-builder.Services.AddSingleton<ISellOrderMapper, SellOrderMapper>();
-builder.Services.AddSingleton<IBuyOrdersService, BuyOrdersService>();
-builder.Services.AddSingleton<ISellOrdersService, SellOrdersService>();
-builder.Services.AddSingleton<IAccountService, InMemoryAccountService>();
-builder.Services.AddSingleton<IRefreshTokenService, InMemoryRefreshTokenService>();
-builder.Services.AddSingleton<IUserBalanceService, InMemoryUserBalanceService>();
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+{
+    if (provider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+    {
+        options.UseSqlServer(sqlServerConnectionString!);
+    }
+    else
+    {
+        options.UseInMemoryDatabase("StockAppInMemoryDb");
+    }
+});
+
+builder.Services.AddScoped<IBuyOrderRepository, BuyOrderRepository>();
+builder.Services.AddScoped<ISellOrderRepository, SellOrderRepository>();
+
+builder.Services.AddScoped<IRequestValidator<BuyOrderRequest>, DataAnnotationsRequestValidator<BuyOrderRequest>>();
+builder.Services.AddScoped<IRequestValidator<SellOrderRequest>, DataAnnotationsRequestValidator<SellOrderRequest>>();
+builder.Services.AddScoped<IBuyOrderMapper, BuyOrderMapper>();
+builder.Services.AddScoped<ISellOrderMapper, SellOrderMapper>();
+builder.Services.AddScoped<IBuyOrdersService, BuyOrdersService>();
+builder.Services.AddScoped<ISellOrdersService, SellOrdersService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddScoped<IUserBalanceService, UserBalanceService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    dbContext.Database.EnsureCreated();
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
