@@ -101,9 +101,18 @@ builder.Services.AddScoped<IBuyOrderMapper, BuyOrderMapper>();
 builder.Services.AddScoped<ISellOrderMapper, SellOrderMapper>();
 builder.Services.AddScoped<IBuyOrdersService, BuyOrdersService>();
 builder.Services.AddScoped<ISellOrdersService, SellOrdersService>();
-builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
-builder.Services.AddScoped<IUserBalanceService, UserBalanceService>();
+if (provider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.AddScoped<IAccountService, AccountService>();
+    builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+    builder.Services.AddScoped<IUserBalanceService, UserBalanceService>();
+}
+else
+{
+    builder.Services.AddScoped<IAccountService, StockApp.Infrastructure.Services.InMemoryAccountService>();
+    builder.Services.AddScoped<IRefreshTokenService, StockApp.Infrastructure.Services.InMemoryRefreshTokenService>();
+    builder.Services.AddSingleton<IUserBalanceService, StockApp.Infrastructure.Services.InMemoryUserBalanceService>();
+}
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
