@@ -123,7 +123,14 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.EnsureCreated();
+    if (provider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
+    {
+        dbContext.Database.Migrate();
+    }
+    else
+    {
+        dbContext.Database.EnsureCreated();
+    }
 }
 
 // Configure the HTTP request pipeline.

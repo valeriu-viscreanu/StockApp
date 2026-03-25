@@ -43,6 +43,21 @@ public class ApplicationDbContext : DbContext
             entity.HasKey(e => e.UserID);
             entity.Property(e => e.Email).IsRequired().HasMaxLength(256);
             entity.Property(e => e.CashBalance).HasColumnType("decimal(18,4)");
+
+            entity.HasData(
+                new ApplicationUser
+                {
+                    UserID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                    Email = "admin@test.com",
+                    CashBalance = 1000.00
+                },
+                new ApplicationUser
+                {
+                    UserID = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                    Email = "admin1@test.com",
+                    CashBalance = 1000.00
+                }
+            );
         });
 
         // Configuration for RefreshToken
