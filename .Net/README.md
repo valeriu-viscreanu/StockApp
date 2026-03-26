@@ -40,6 +40,9 @@ Run the unit tests:
 dotnet test
 ```
 
+## Database Configuration
+Uses `SqlServer` by default (LocalDB). To use In-Memory database, update `DatabaseProvider` in `appsettings.json`.
+
 
 ## TODO
 - [ ] update stock price in the sidebar panel from controller instead of the websocket

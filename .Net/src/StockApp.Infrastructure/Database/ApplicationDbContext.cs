@@ -44,6 +44,14 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Email).IsRequired().HasMaxLength(256);
             entity.Property(e => e.CashBalance).HasColumnType("decimal(18,4)");
 
+            entity.HasMany(u => u.BuyOrders)
+                .WithOne()
+                .HasForeignKey(bo => bo.UserID);
+
+            entity.HasMany(u => u.SellOrders)
+                .WithOne()
+                .HasForeignKey(so => so.UserID);
+
             entity.HasData(
                 new ApplicationUser
                 {

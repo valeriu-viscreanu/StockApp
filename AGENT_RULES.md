@@ -8,6 +8,8 @@
 - **MINIMAL VIABLE CHANGES**: Write minimal implementations. Do not add unrequested "extra" features, complex services, or UI elements. 
 - **PARITY**: Replicate the original `.NET` MVC project functionality when building the React frontend.
 - **EFFICIENT EDITING**: When modifying files, prioritize `replace_file_content` or `multi_replace_file_content` tools over full file overwrites to save context tokens.
+- **PLAIN COMMIT MESSAGES**: Never use `fix:`, `feat:`, or other conventional prefixes in git commit messages unless explicitly authorized. Keep them descriptive but plain.
+- **CONCISE README**: Do not overload `README.md` with excessive technical details or migration logs. Keep it focused on the high-level description and basic setup. Move detailed notes to specific context files if needed.
 
 ## 🗺️ 2. PROJECT TOPOLOGY (Don't search blindly)
 This is a hybrid web application. Do not waste tokens scanning directories; instead, read the architectural maps based on your current task:
