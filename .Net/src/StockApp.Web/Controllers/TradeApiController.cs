@@ -58,8 +58,8 @@ namespace StockApp.Controllers
                     from = now.AddHours(-20);
                     break;
                 case "year":
-                    resolution = "W";
-                    from = now.AddDays(-20 * 7);
+                    resolution = "D";
+                    from = now.AddDays(-365);
                     break;
                 default: // month
                     resolution = "D";
