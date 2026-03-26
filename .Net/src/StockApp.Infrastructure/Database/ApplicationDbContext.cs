@@ -14,6 +14,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<SellOrder> SellOrders { get; set; } = null!;
     public DbSet<ApplicationUser> Users { get; set; } = null!;
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
+    public DbSet<UserBalance> UserBalances { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -42,7 +43,6 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.UserID);
             entity.Property(e => e.Email).IsRequired().HasMaxLength(256);
-            entity.Property(e => e.CashBalance).HasColumnType("decimal(18,4)");
 
             entity.HasMany(u => u.BuyOrders)
                 .WithOne()
@@ -56,14 +56,36 @@ public class ApplicationDbContext : DbContext
                 new ApplicationUser
                 {
                     UserID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                    Email = "admin@test.com",
-                    CashBalance = 1000.00
+                    Email = "admin@test.com"
                 },
                 new ApplicationUser
                 {
                     UserID = Guid.Parse("00000000-0000-0000-0000-000000000002"),
-                    Email = "admin1@test.com",
-                    CashBalance = 1000.00
+                    Email = "admin1@test.com"
+                }
+            );
+        });
+
+        // Configuration for UserBalance
+        modelBuilder.Entity<UserBalance>(entity =>
+        {
+            entity.HasKey(e => e.UserID);
+            entity.Property(e => e.Balance).HasColumnType("decimal(18,4)");
+
+            entity.HasOne<ApplicationUser>()
+                .WithOne()
+                .HasForeignKey<UserBalance>(e => e.UserID);
+
+            entity.HasData(
+                new UserBalance
+                {
+                    UserID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                    Balance = 1000.00
+                },
+                new UserBalance
+                {
+                    UserID = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                    Balance = 1000.00
                 }
             );
         });

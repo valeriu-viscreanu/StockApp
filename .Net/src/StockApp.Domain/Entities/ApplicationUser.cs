@@ -12,8 +12,6 @@ namespace StockApp.Domain.Entities
 
         public string Email { get; set; } = string.Empty;
 
-        public double CashBalance { get; set; } = 1000.00;
-
         public virtual ICollection<BuyOrder> BuyOrders { get; set; } = new List<BuyOrder>();
         public virtual ICollection<SellOrder> SellOrders { get; set; } = new List<SellOrder>();
     }

@@ -1,4 +1,5 @@
 using StockApp.Application.ServiceContracts;
+using StockApp.Domain.Entities;
 
 namespace StockApp.Infrastructure.Database.Services;
 
@@ -13,31 +14,31 @@ public class UserBalanceService : IUserBalanceService
 
     public double GetBalance(Guid userID)
     {
-        var user = _dbContext.Users.FirstOrDefault(u => u.UserID == userID);
-        return user?.CashBalance ?? 1000.00;
+        var balance = _dbContext.UserBalances.FirstOrDefault(b => b.UserID == userID);
+        return balance?.Balance ?? 1000.00;
     }
 
     public bool DeductBalance(Guid userID, double amount)
     {
-        var user = _dbContext.Users.FirstOrDefault(u => u.UserID == userID);
-        if (user == null) return false;
+        var balance = _dbContext.UserBalances.FirstOrDefault(b => b.UserID == userID);
+        if (balance == null) return false;
 
-        if (user.CashBalance < amount)
+        if (balance.Balance < amount)
         {
             return false;
         }
 
-        user.CashBalance -= amount;
+        balance.Balance -= amount;
         _dbContext.SaveChanges();
         return true;
     }
 
     public void AddBalance(Guid userID, double amount)
     {
-        var user = _dbContext.Users.FirstOrDefault(u => u.UserID == userID);
-        if (user != null)
+        var balance = _dbContext.UserBalances.FirstOrDefault(b => b.UserID == userID);
+        if (balance != null)
         {
-            user.CashBalance += amount;
+            balance.Balance += amount;
             _dbContext.SaveChanges();
         }
     }
