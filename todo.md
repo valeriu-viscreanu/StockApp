@@ -14,7 +14,5 @@
     - Wire up the "Day", "Month", "Year" buttons to update the chart.
 
 
-[] TIMEFRAME -- TRADE.JSX -- >  
 
-## Backend: Database Persistence Configuration
-- [ ] Update `Program.cs` to conditionally register `ApplicationDbContext` and database repositories based on `appsettings.json` configuration for `DatabaseProvider` (e.g. `"InMemory"`, `"Sqlite"`, `"SqlServer"`).
+[] //TODO FIX THIS IN NEXT commit

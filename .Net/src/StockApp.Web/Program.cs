@@ -94,6 +94,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddScoped<IBuyOrderRepository, BuyOrderRepository>();
 builder.Services.AddScoped<ISellOrderRepository, SellOrderRepository>();
+builder.Services.AddScoped<IUserOperationRepository, UserOperationRepository>();
 
 builder.Services.AddScoped<IRequestValidator<BuyOrderRequest>, DataAnnotationsRequestValidator<BuyOrderRequest>>();
 builder.Services.AddScoped<IRequestValidator<SellOrderRequest>, DataAnnotationsRequestValidator<SellOrderRequest>>();

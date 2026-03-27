@@ -9,15 +9,18 @@ namespace StockApp.Application.Services
         private readonly ISellOrderRepository _sellOrderRepository;
         private readonly IRequestValidator<SellOrderRequest> _sellOrderValidator;
         private readonly ISellOrderMapper _sellOrderMapper;
+        private readonly IUserOperationRepository _userOperationRepository;
 
         public SellOrdersService(
             ISellOrderRepository sellOrderRepository,
             IRequestValidator<SellOrderRequest> sellOrderValidator,
-            ISellOrderMapper sellOrderMapper)
+            ISellOrderMapper sellOrderMapper,
+            IUserOperationRepository userOperationRepository)
         {
             _sellOrderRepository = sellOrderRepository;
             _sellOrderValidator = sellOrderValidator;
             _sellOrderMapper = sellOrderMapper;
+            _userOperationRepository = userOperationRepository;
         }
 
         public Task<SellOrderResponse> CreateSellOrder(SellOrderRequest? sellOrderRequest)
@@ -31,6 +34,17 @@ namespace StockApp.Application.Services
 
             var sellOrder = _sellOrderMapper.MapToEntity(sellOrderRequest);
             _sellOrderRepository.Add(sellOrder);
+
+            _userOperationRepository.Add(new Domain.Entities.UserOperation
+            {
+                UserOperationID = Guid.NewGuid(),
+                UserID = sellOrder.UserID,
+                OperationType = Domain.Enums.OperationType.SellOrder,
+                TimeStamp = DateTime.UtcNow,
+                Amount = sellOrder.Price * sellOrder.Quantity,
+                StockSymbol = sellOrder.StockSymbol,
+                Description = $"Sold {sellOrder.Quantity} shares of {sellOrder.StockSymbol} at {sellOrder.Price:C}"
+            });
 
             return Task.FromResult(_sellOrderMapper.MapToResponse(sellOrder));
         }

@@ -1,15 +1,18 @@
 using StockApp.Application.ServiceContracts;
 using StockApp.Domain.Entities;
+using StockApp.Domain.RepositoryContracts;
 
 namespace StockApp.Infrastructure.Database.Services;
 
 public class UserBalanceService : IUserBalanceService
 {
     private readonly ApplicationDbContext _dbContext;
+    private readonly IUserOperationRepository _userOperationRepository;
 
-    public UserBalanceService(ApplicationDbContext dbContext)
+    public UserBalanceService(ApplicationDbContext dbContext, IUserOperationRepository userOperationRepository)
     {
         _dbContext = dbContext;
+        _userOperationRepository = userOperationRepository;
     }
 
     public double GetBalance(Guid userID)
@@ -30,6 +33,17 @@ public class UserBalanceService : IUserBalanceService
 
         balance.Balance -= amount;
         _dbContext.SaveChanges();
+
+        _userOperationRepository.Add(new UserOperation
+        {
+            UserOperationID = Guid.NewGuid(),
+            UserID = userID,
+            OperationType = StockApp.Domain.Enums.OperationType.Withdrawal,
+            TimeStamp = DateTime.UtcNow,
+            Amount = amount,
+            Description = $"Withdrawal of {amount:C}"
+        });
+
         return true;
     }
 
@@ -40,6 +54,16 @@ public class UserBalanceService : IUserBalanceService
         {
             balance.Balance += amount;
             _dbContext.SaveChanges();
+
+            _userOperationRepository.Add(new UserOperation
+            {
+                UserOperationID = Guid.NewGuid(),
+                UserID = userID,
+                OperationType = StockApp.Domain.Enums.OperationType.Deposit,
+                TimeStamp = DateTime.UtcNow,
+                Amount = amount,
+                Description = $"Deposit of {amount:C}"
+            });
         }
     }
 }
