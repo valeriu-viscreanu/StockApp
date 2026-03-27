@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using StockApp.Domain.Entities;
+using StockApp.Domain.Enums;
 
 namespace StockApp.Infrastructure.Database;
 
@@ -15,6 +16,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ApplicationUser> Users { get; set; } = null!;
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
     public DbSet<UserBalance> UserBalances { get; set; } = null!;
+    public DbSet<UserOperation> UserOperations { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -95,6 +97,23 @@ public class ApplicationDbContext : DbContext
         {
             entity.HasKey(e => e.Token);
             entity.Property(e => e.Email).IsRequired().HasMaxLength(256);
+        });
+
+        // Configuration for UserOperation
+        modelBuilder.Entity<UserOperation>(entity =>
+        {
+            entity.HasKey(e => e.UserOperationID);
+            entity.Property(e => e.OperationType)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasConversion<string>();
+            entity.Property(e => e.StockSymbol).HasMaxLength(10);
+            entity.Property(e => e.Amount).HasColumnType("decimal(18,4)");
+            entity.Property(e => e.TimeStamp).IsRequired();
+
+            entity.HasOne<ApplicationUser>()
+                .WithMany(u => u.UserOperations)
+                .HasForeignKey(uo => uo.UserID);
         });
     }
 }
