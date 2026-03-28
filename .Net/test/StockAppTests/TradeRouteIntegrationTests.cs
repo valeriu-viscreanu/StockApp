@@ -18,9 +18,9 @@ public class TradeRouteIntegrationTests
         {
             using HttpClient client = factory.CreateClient();
             {
-                HttpResponseMessage response = await client.GetAsync("/Trade/Index/MSFT");
+                HttpResponseMessage response = await client.GetAsync("/Trade/Trade/MSFT");
 
-                response.StatusCode.Should().Be(HttpStatusCode.OK);
+                response.EnsureSuccessStatusCode();
                 response.Content.Headers.ContentType?.MediaType.Should().Be("text/html");
             }
         }

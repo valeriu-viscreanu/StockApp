@@ -1,0 +1,31 @@
+﻿  Determining projects to restore...
+  All projects are up-to-date for restore.
+  StockApp.Domain -> C:\Code\StockApp\.Net\src\StockApp.Domain\bin\Debug\net8.0\StockApp.Domain.dll
+  StockApp.Application -> C:\Code\StockApp\.Net\src\StockApp.Application\bin\Debug\net8.0\StockApp.Application.dll
+  StockApp.Infrastructure -> C:\Code\StockApp\.Net\src\StockApp.Infrastructure\bin\Debug\net8.0\StockApp.Infrastructure.dll
+  StockApp.Web -> C:\Code\StockApp\.Net\src\StockApp.Web\bin\Debug\net8.0\StockApp.Web.dll
+  StockAppTests -> C:\Code\StockApp\.Net\test\StockAppTests\bin\Debug\net8.0\StockAppTests.dll
+Test run for C:\Code\StockApp\.Net\test\StockAppTests\bin\Debug\net8.0\StockAppTests.dll (.NETCoreApp,Version=v8.0)
+A total of 1 test files matched the specified pattern.
+  Failed StockAppTests.TradeControllerTests.Index_WhenStockParameterIsNull_ReturnsViewWithStockTradeModel [127 ms]
+  Error Message:
+   System.NullReferenceException : Object reference not set to an instance of an object.
+  Stack Trace:
+     at StockApp.Controllers.TradeController.Trade(String stock) in C:\Code\StockApp\.Net\src\StockApp.Web\Controllers\TradeController.cs:line 86
+   at StockAppTests.TradeControllerTests.Index_WhenStockParameterIsNull_ReturnsViewWithStockTradeModel() in C:\Code\StockApp\.Net\test\StockAppTests\TradeControllerTests.cs:line 59
+--- End of stack trace from previous location ---
+  Failed StockAppTests.TradeRouteIntegrationTests.Get_TradeIndexWithStockSymbol_ReturnsHtmlWithPriceElement [3 s]
+  Error Message:
+   Expected response.StatusCode to be HttpStatusCode.OK {value: 200}, but found HttpStatusCode.NotFound {value: 404}.
+  Stack Trace:
+     at FluentAssertions.Execution.XUnit2TestFramework.Throw(String message)
+   at FluentAssertions.Execution.TestFrameworkProvider.Throw(String message)
+   at FluentAssertions.Execution.DefaultAssertionStrategy.HandleFailure(String message)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(Func`1 failReasonFunc)
+   at FluentAssertions.Execution.AssertionScope.FailWith(String message, Object[] args)
+   at FluentAssertions.Primitives.EnumAssertions`2.Be(TEnum expected, String because, Object[] becauseArgs)
+   at StockAppTests.TradeRouteIntegrationTests.Get_TradeIndexWithStockSymbol_ReturnsHtmlWithPriceElement() in C:\Code\StockApp\.Net\test\StockAppTests\TradeRouteIntegrationTests.cs:line 23
+--- End of stack trace from previous location ---
+
+Failed!  - Failed:     2, Passed:    20, Skipped:     0, Total:    22, Duration: 3 s - StockAppTests.dll (net8.0)
