@@ -4,6 +4,7 @@ import Trade from './components/Trade';
 import Orders from './components/Orders';
 import Cash from './components/Cash';
 import Login from './components/Login';
+import Register from './components/Register';
 import Navbar from './components/Navbar';
 import * as api from './services/api';
 
@@ -29,6 +30,11 @@ function App() {
   const [error, setError] = useState('');
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [page, setPage] = useState('dashboard');
+  const [showRegister, setShowRegister] = useState(false);
+
+  const [registerName, setRegisterName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
 
   const [amount, setAmount] = useState(100);
   const [quantity, setQuantity] = useState(1);
@@ -171,9 +177,47 @@ function App() {
     }
   };
 
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError('');
+    const result = await api.registerApi(registerName, registerEmail, registerPassword);
+    if (result.data) {
+      // Auto-login after registration
+      const loginResult = await api.loginApi(registerEmail, registerPassword);
+      if (loginResult?.token) {
+        localStorage.setItem('token', loginResult.token);
+        setToken(loginResult.token);
+        setIsLoggedIn(true);
+        setUser(registerName);
+      } else {
+        setShowRegister(false);
+        setLoginEmail(registerEmail);
+        setLoginPassword(registerPassword);
+      }
+    } else {
+      setError(result.error);
+    }
+  };
+
   if (!isLoggedIn) {
-    return <Login handleLogin={handleLogin} loginEmail={loginEmail} setLoginEmail={setLoginEmail} 
-      loginPassword={loginPassword} setLoginPassword={setLoginPassword} error={error} />;
+    return showRegister ? (
+      <Register 
+        handleRegister={handleRegister}
+        registerName={registerName} setRegisterName={setRegisterName}
+        registerEmail={registerEmail} setRegisterEmail={setRegisterEmail}
+        registerPassword={registerPassword} setRegisterPassword={setRegisterPassword}
+        error={error}
+        onSwitchToLogin={() => { setShowRegister(false); setError(''); }}
+      />
+    ) : (
+      <Login 
+        handleLogin={handleLogin} 
+        loginEmail={loginEmail} setLoginEmail={setLoginEmail} 
+        loginPassword={loginPassword} setLoginPassword={setLoginPassword} 
+        error={error} 
+        onSwitchToRegister={() => { setShowRegister(true); setError(''); }}
+      />
+    );
   }
 
   const totals = { buy: buyOrders.reduce((sum, o) => sum + o.tradeAmount, 0), sell: sellOrders.reduce((sum, o) => sum + o.tradeAmount, 0) };

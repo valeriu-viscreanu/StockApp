@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Login({ handleLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, error }) {
+function Login({ handleLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, error, onSwitchToRegister }) {
   return (
     <div className="login-container">
       <div className="login-card">
@@ -33,6 +33,10 @@ function Login({ handleLogin, loginEmail, setLoginEmail, loginPassword, setLogin
             Login
           </button>
         </form>
+
+        <p className="auth-switch">
+          Don't have an account? <button onClick={onSwitchToRegister} className="link-button">Register</button>
+        </p>
       </div>
     </div>
   );

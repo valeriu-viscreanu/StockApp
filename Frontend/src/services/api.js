@@ -94,3 +94,14 @@ export const loginApi = async (email, password) => {
   if (response.ok) return await response.json();
   return null;
 };
+
+export const registerApi = async (name, email, password) => {
+  const response = await fetch(`${API_BASE.replace('/v1', '')}/Auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, email, password })
+  });
+  const data = await response.json();
+  if (response.ok) return { data };
+  return { error: data.message || 'Registration failed' };
+};
