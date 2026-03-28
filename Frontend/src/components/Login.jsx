@@ -1,19 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
-function Login({ handleLogin, loginEmail, setLoginEmail, loginPassword, setLoginPassword, error, onSwitchToRegister }) {
+function Login({ onSwitchToRegister }) {
+  const [email, setEmail] = useState('admin@test.com');
+  const [password, setPassword] = useState('123');
+  const { handleLogin, error } = useAuth();
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    handleLogin(email, password);
+  };
+
   return (
     <div className="login-container">
       <div className="login-card">
         <h1>Login</h1>
         <p className="login-subtitle">Welcome back! Please login to your account.</p>
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={onSubmit}>
           <div className="form-group">
             <label>Email</label>
             <input
               type="email"
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="login-input"
               required
             />
@@ -22,8 +32,8 @@ function Login({ handleLogin, loginEmail, setLoginEmail, loginPassword, setLogin
             <label>Password</label>
             <input
               type="password"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="login-input"
               required
             />

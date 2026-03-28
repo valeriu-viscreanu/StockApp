@@ -1,6 +1,9 @@
 import React from 'react';
+import { useAuth } from '../context/AuthContext';
 
-function Navbar({ user, page, setPage, theme, toggleTheme, handleLogout }) {
+function Navbar({ page, setPage, theme, toggleTheme }) {
+  const { user, handleLogout } = useAuth();
+  
   return (
     <nav className="navbar">
       <a href="/" className="brand" onClick={(e) => { e.preventDefault(); setPage('dashboard'); }}>

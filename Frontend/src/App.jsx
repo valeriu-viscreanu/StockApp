@@ -7,6 +7,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Navbar from './components/Navbar';
 import * as api from './services/api';
+import { useAuth } from './context/AuthContext';
 
 const POPULAR_STOCKS = [
   { symbol: "MSFT", name: "Microsoft" },
@@ -22,19 +23,10 @@ const POPULAR_STOCKS = [
 ];
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [isLoggedIn, setIsLoggedIn] = useState(!!token);
-  const [loginEmail, setLoginEmail] = useState('admin@test.com');
-  const [loginPassword, setLoginPassword] = useState('123');
-  const [error, setError] = useState('');
+  const { isLoggedIn, token, user, setUser, handleLogout } = useAuth();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [page, setPage] = useState('dashboard');
   const [showRegister, setShowRegister] = useState(false);
-
-  const [registerName, setRegisterName] = useState('');
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
 
   const [amount, setAmount] = useState(100);
   const [quantity, setQuantity] = useState(1);
@@ -45,14 +37,6 @@ function App() {
   const [sellOrders, setSellOrders] = useState([]);
   const [tradeMessage, setTradeMessage] = useState('');
   const [stockChartData, setStockChartData] = useState(null);
-
-  // Logout callback
-  const handleLogout = useCallback(() => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setIsLoggedIn(false);
-    setUser(null);
-  }, []);
 
   // Theme setup
   useEffect(() => {
@@ -115,9 +99,11 @@ function App() {
   useEffect(() => {
     if (isLoggedIn && token) {
       refreshUserData();
-      setUser(loginEmail || 'User');
+      if (!user) {
+        setUser('User'); // Fallback if user name not set
+      }
     }
-  }, [isLoggedIn, token, refreshUserData, loginEmail]);
+  }, [isLoggedIn, token, refreshUserData, user, setUser]);
 
   // Handlers
   const fetchStockChartData = async (symbol, timeframe) => {
@@ -163,59 +149,14 @@ function App() {
     }
   };
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    const result = await api.loginApi(loginEmail, loginPassword);
-    if (result?.token) {
-      localStorage.setItem('token', result.token);
-      setToken(result.token);
-      setIsLoggedIn(true);
-      setUser(loginEmail);
-    } else {
-      setError('Invalid email or password');
-    }
-  };
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    setError('');
-    const result = await api.registerApi(registerName, registerEmail, registerPassword);
-    if (result.data) {
-      // Auto-login after registration
-      const loginResult = await api.loginApi(registerEmail, registerPassword);
-      if (loginResult?.token) {
-        localStorage.setItem('token', loginResult.token);
-        setToken(loginResult.token);
-        setIsLoggedIn(true);
-        setUser(registerName);
-      } else {
-        setShowRegister(false);
-        setLoginEmail(registerEmail);
-        setLoginPassword(registerPassword);
-      }
-    } else {
-      setError(result.error);
-    }
-  };
-
   if (!isLoggedIn) {
     return showRegister ? (
       <Register 
-        handleRegister={handleRegister}
-        registerName={registerName} setRegisterName={setRegisterName}
-        registerEmail={registerEmail} setRegisterEmail={setRegisterEmail}
-        registerPassword={registerPassword} setRegisterPassword={setRegisterPassword}
-        error={error}
-        onSwitchToLogin={() => { setShowRegister(false); setError(''); }}
+        onSwitchToLogin={() => { setShowRegister(false); }}
       />
     ) : (
       <Login 
-        handleLogin={handleLogin} 
-        loginEmail={loginEmail} setLoginEmail={setLoginEmail} 
-        loginPassword={loginPassword} setLoginPassword={setLoginPassword} 
-        error={error} 
-        onSwitchToRegister={() => { setShowRegister(true); setError(''); }}
+        onSwitchToRegister={() => { setShowRegister(true); }}
       />
     );
   }
@@ -224,7 +165,7 @@ function App() {
 
   return (
     <div className="layout">
-      <Navbar user={user} page={page} setPage={setPage} theme={theme} toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')} handleLogout={handleLogout} />
+      <Navbar page={page} setPage={setPage} theme={theme} toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')} />
       {page === 'dashboard' && <Dashboard user={user} data={data} setPage={setPage} />}
       {page === 'trade' && <Trade popularStocks={popularStocks} selectedStock={selectedStock} setSelectedStock={handleSelectStock} quantity={quantity} setQuantity={setQuantity} onBuy={() => executeOrder('buy')} onSell={() => executeOrder('sell')} tradeMessage={tradeMessage} stockChartData={stockChartData} fetchStockChartData={fetchStockChartData} />}
       {page === 'orders' && <Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />}

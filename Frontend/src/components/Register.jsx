@@ -1,29 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 
-function Register({ 
-  handleRegister, 
-  registerName, 
-  setRegisterName, 
-  registerEmail, 
-  setRegisterEmail, 
-  registerPassword, 
-  setRegisterPassword, 
-  error, 
-  onSwitchToLogin 
-}) {
+function Register({ onSwitchToLogin }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { handleRegister, error } = useAuth();
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    handleRegister(name, email, password);
+  };
+
   return (
     <div className="login-container">
       <div className="login-card">
         <h1>Register</h1>
         <p className="login-subtitle">Create a new account to start trading.</p>
 
-        <form onSubmit={handleRegister}>
+        <form onSubmit={onSubmit}>
           <div className="form-group">
             <label>Full Name</label>
             <input
               type="text"
-              value={registerName}
-              onChange={(e) => setRegisterName(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="login-input"
               required
             />
@@ -32,8 +33,8 @@ function Register({
             <label>Email</label>
             <input
               type="email"
-              value={registerEmail}
-              onChange={(e) => setRegisterEmail(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="login-input"
               required
             />
@@ -42,8 +43,8 @@ function Register({
             <label>Password</label>
             <input
               type="password"
-              value={registerPassword}
-              onChange={(e) => setRegisterPassword(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="login-input"
               required
             />

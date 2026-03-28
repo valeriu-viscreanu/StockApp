@@ -15,5 +15,6 @@
 
 
 
-[] //TODO FIX THIS IN NEXT commit
+[] register BAckedn implementation
 [] router react
+[] modals
