@@ -1,19 +1,20 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
+import { NavLink } from 'react-router-dom';
 
-function Navbar({ page, setPage, theme, toggleTheme }) {
+function Navbar({ theme, toggleTheme }) {
   const { user, handleLogout } = useAuth();
   
   return (
     <nav className="navbar">
-      <a href="/" className="brand" onClick={(e) => { e.preventDefault(); setPage('dashboard'); }}>
+      <NavLink to="/dashboard" className="brand">
         <span>&#128200;</span> Stocks
-      </a>
+      </NavLink>
       <div className="nav-links">
-        <a href="/" className={page === 'dashboard' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setPage('dashboard'); }}>Dashboard</a>
-        <a href="/trade" className={page === 'trade' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setPage('trade'); }}>Trade</a>
-        <a href="/orders" className={page === 'orders' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setPage('orders'); }}>Orders</a>
-        <a href="/cash" className={page === 'cash' ? 'active' : ''} onClick={(e) => { e.preventDefault(); setPage('cash'); }}>Cash</a>
+        <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>Dashboard</NavLink>
+        <NavLink to="/trade" className={({ isActive }) => isActive ? 'active' : ''}>Trade</NavLink>
+        <NavLink to="/orders" className={({ isActive }) => isActive ? 'active' : ''}>Orders</NavLink>
+        <NavLink to="/cash" className={({ isActive }) => isActive ? 'active' : ''}>Cash</NavLink>
       </div>
       <div className="nav-right">
         {user}

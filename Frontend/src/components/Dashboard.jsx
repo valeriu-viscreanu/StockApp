@@ -1,7 +1,7 @@
 import React from 'react';
 import StatsGrid from './StatsGrid';
 
-function Dashboard({ user, data, setPage }) {
+function Dashboard({ user, data }) {
   return (
     <main className="container">
       <div className="header">
@@ -9,7 +9,7 @@ function Dashboard({ user, data, setPage }) {
         <p style={{ color: 'var(--text-muted)' }}>Here's your portfolio overview for today.</p>
       </div>
 
-      <StatsGrid data={data} setPage={setPage} />
+      <StatsGrid data={data} />
     </main>
   );
 }

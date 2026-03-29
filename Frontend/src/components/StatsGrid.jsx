@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import StatCard from './StatCard';
 
-function StatsGrid({ data, setPage }) {
+function StatsGrid({ data }) {
+  const navigate = useNavigate();
   return (
     <div className="stats-grid">
       <StatCard
@@ -19,7 +21,7 @@ function StatsGrid({ data, setPage }) {
         label="Available Cash"
         value={`$${data.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
         isClickable={true}
-        onClick={() => setPage('cash')}
+        onClick={() => navigate('/cash')}
       />
     </div>
   );

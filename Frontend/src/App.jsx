@@ -8,6 +8,7 @@ import Register from './components/Register';
 import Navbar from './components/Navbar';
 import * as api from './services/api';
 import { useAuth } from './context/AuthContext';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
 const POPULAR_STOCKS = [
   { symbol: "MSFT", name: "Microsoft" },
@@ -25,7 +26,6 @@ const POPULAR_STOCKS = [
 function App() {
   const { isLoggedIn, token, user, setUser, handleLogout } = useAuth();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-  const [page, setPage] = useState('dashboard');
   const [showRegister, setShowRegister] = useState(false);
 
   const [amount, setAmount] = useState(100);
@@ -164,13 +164,35 @@ function App() {
   const totals = { buy: buyOrders.reduce((sum, o) => sum + o.tradeAmount, 0), sell: sellOrders.reduce((sum, o) => sum + o.tradeAmount, 0) };
 
   return (
-    <div className="layout">
-      <Navbar page={page} setPage={setPage} theme={theme} toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')} />
-      {page === 'dashboard' && <Dashboard user={user} data={data} setPage={setPage} />}
-      {page === 'trade' && <Trade popularStocks={popularStocks} selectedStock={selectedStock} setSelectedStock={handleSelectStock} quantity={quantity} setQuantity={setQuantity} onBuy={() => executeOrder('buy')} onSell={() => executeOrder('sell')} tradeMessage={tradeMessage} stockChartData={stockChartData} fetchStockChartData={fetchStockChartData} />}
-      {page === 'orders' && <Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />}
-      {page === 'cash' && <Cash data={data} amount={amount} setAmount={setAmount} handleCashAction={handleCashAction} />}
-    </div>
+    <Router>
+      <div className="layout">
+        <Navbar theme={theme} toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')} />
+        <Routes>
+          <Route path="/" element={<Dashboard user={user} data={data} />} />
+          <Route path="/dashboard" element={<Dashboard user={user} data={data} />} />
+          <Route 
+            path="/trade" 
+            element={
+              <Trade 
+                popularStocks={popularStocks} 
+                selectedStock={selectedStock} 
+                setSelectedStock={handleSelectStock} 
+                quantity={quantity} 
+                setQuantity={setQuantity} 
+                onBuy={() => executeOrder('buy')} 
+                onSell={() => executeOrder('sell')} 
+                tradeMessage={tradeMessage} 
+                stockChartData={stockChartData} 
+                fetchStockChartData={fetchStockChartData} 
+              />
+            } 
+          />
+          <Route path="/orders" element={<Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />} />
+          <Route path="/cash" element={<Cash data={data} amount={amount} setAmount={setAmount} handleCashAction={handleCashAction} />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

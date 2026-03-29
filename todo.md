@@ -15,5 +15,6 @@
 
 
 
-[] router react
+[x] router react
 [] modals
+[] const POPULAR_STOCKS --> backend not hardocded FE
