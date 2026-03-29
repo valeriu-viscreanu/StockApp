@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 function Login({ onSwitchToRegister }) {
-  const [email, setEmail] = useState('admin@test.com');
-  const [password, setPassword] = useState('123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const { handleLogin, error } = useAuth();
 
   const onSubmit = (e) => {

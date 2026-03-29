@@ -46,17 +46,17 @@ export function AuthProvider({ children }) {
   const clearError = () => setError('');
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
+    <AuthContext.Provider value={{
+      user,
       setUser,
-      token, 
-      isLoggedIn, 
-      error, 
+      token,
+      isLoggedIn,
+      error,
       setError,
       clearError,
-      handleLogin, 
-      handleRegister, 
-      handleLogout 
+      handleLogin,
+      handleRegister,
+      handleLogout
     }}>
       {children}
     </AuthContext.Provider>
@@ -65,8 +65,6 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+
   return context;
 }
