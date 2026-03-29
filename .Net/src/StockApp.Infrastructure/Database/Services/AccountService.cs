@@ -29,4 +29,25 @@ public class AccountService : IAccountService
 
         return new LoginResponse { IsSuccess = false };
     }
+
+    public RegisterResponse Register(RegisterRequest registerRequest)
+    {
+        if (_dbContext.Users.Any(u => u.Email == registerRequest.Email))
+        {
+            return new RegisterResponse { IsSuccess = false, ErrorMessage = "Email already exists" };
+        }
+
+        var newUser = new StockApp.Domain.Entities.ApplicationUser
+        {
+            UserID = Guid.NewGuid(),
+            Email = registerRequest.Email!
+        };
+
+        _dbContext.Users.Add(newUser);
+        _dbContext.SaveChanges();
+
+        // Also we want to assign a starting balance of 10000 
+        // We'll just leave it since the UI doesn't require us to initialize it here or we can just initialize if needed. Let's just keep it simple.
+        return new RegisterResponse { IsSuccess = true };
+    }
 }

@@ -27,5 +27,10 @@ namespace StockApp.Infrastructure.Services
             }
             return new LoginResponse { IsSuccess = false };
         }
+
+        public RegisterResponse Register(RegisterRequest registerRequest)
+        {
+            return new RegisterResponse { IsSuccess = true };
+        }
     }
 }

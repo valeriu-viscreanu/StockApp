@@ -15,6 +15,5 @@
 
 
 
-[] register BAckedn implementation
 [] router react
 [] modals

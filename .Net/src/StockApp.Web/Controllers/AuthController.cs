@@ -50,6 +50,24 @@ namespace StockApp.Controllers
         }
 
         [AllowAnonymous]
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] RegisterRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var response = _accountService.Register(request);
+            if (!response.IsSuccess)
+            {
+                return BadRequest(new { message = response.ErrorMessage });
+            }
+
+            return Ok(new { message = "Registration successful" });
+        }
+
+        [AllowAnonymous]
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequest refreshRequest)
         {
