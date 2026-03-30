@@ -10,18 +10,6 @@ import * as api from './services/api';
 import { useAuth } from './context/AuthContext';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
-const POPULAR_STOCKS = [
-  { symbol: "MSFT", name: "Microsoft" },
-  { symbol: "AAPL", name: "Apple" },
-  { symbol: "GOOGL", name: "Alphabet" },
-  { symbol: "AMZN", name: "Amazon" },
-  { symbol: "NVDA", name: "Nvidia" },
-  { symbol: "META", name: "Meta Platforms" },
-  { symbol: "TSLA", name: "Tesla" },
-  { symbol: "AMD", name: "Advanced Micro Devices" },
-  { symbol: "JPM", name: "JPMorgan Chase" },
-  { symbol: "V", name: "Visa" },
-];
 
 function App() {
   const { isLoggedIn, token, user, setUser, handleLogout } = useAuth();
@@ -30,7 +18,7 @@ function App() {
 
   const [amount, setAmount] = useState(100);
   const [quantity, setQuantity] = useState(1);
-  const [popularStocks, setPopularStocks] = useState(POPULAR_STOCKS.map(s => ({ ...s, price: 0 })));
+  const [popularStocks, setPopularStocks] = useState([]);
   const [selectedStock, setSelectedStock] = useState({ symbol: 'AAPL', name: 'Apple', price: 0 });
   const [data, setData] = useState({ balance: 0.00, stocks: 0, totalValue: 0 });
   const [buyOrders, setBuyOrders] = useState([]);
@@ -80,16 +68,27 @@ function App() {
         }));
       }
 
-      const quotes = await api.fetchStockPrices(POPULAR_STOCKS.map(s => s.symbol), token, handleLogout);
-      if (quotes) {
-        setPopularStocks(prev => prev.map(stock => ({
-          ...stock,
-          price: quotes[stock.symbol]?.c || stock.price
-        })));
-        setSelectedStock(prev => ({
-          ...prev,
-          price: quotes[prev.symbol]?.c || prev.price
-        }));
+      let currentStocks = popularStocks;
+      if (popularStocks.length === 0) {
+        const stocks = await api.fetchPopularStocks(token, handleLogout);
+        if (stocks) {
+          currentStocks = stocks;
+          setPopularStocks(stocks.map(s => ({ ...s, price: 0 })));
+        }
+      }
+
+      if (currentStocks.length > 0) {
+        const quotes = await api.fetchStockPrices(currentStocks.map(s => s.symbol), token, handleLogout);
+        if (quotes) {
+          setPopularStocks(prev => prev.map(stock => ({
+            ...stock,
+            price: quotes[stock.symbol]?.c || stock.price
+          })));
+          setSelectedStock(prev => ({
+            ...prev,
+            price: quotes[prev.symbol]?.c || prev.price
+          }));
+        }
       }
     } catch (err) {
       console.error('Refresh data error:', err);
@@ -99,11 +98,14 @@ function App() {
   useEffect(() => {
     if (isLoggedIn && token) {
       refreshUserData();
+      if (selectedStock.symbol && !stockChartData) {
+        fetchStockChartData(selectedStock.symbol, 'month');
+      }
       if (!user) {
         setUser('User'); // Fallback if user name not set
       }
     }
-  }, [isLoggedIn, token, refreshUserData, user, setUser]);
+  }, [isLoggedIn, token, refreshUserData, user, setUser, selectedStock.symbol, stockChartData]);
 
   // Handlers
   const fetchStockChartData = async (symbol, timeframe) => {

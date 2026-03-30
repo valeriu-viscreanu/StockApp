@@ -13,6 +13,15 @@ export const handleApiError = (response, logout) => {
   return false;
 };
 
+export const fetchPopularStocks = async (token, logout) => {
+  const response = await fetch(`${API_BASE}/TradeApi/popular-stocks`, {
+    headers: authHeaders(token)
+  });
+  if (handleApiError(response, logout)) return null;
+  if (response.ok) return await response.json();
+  return null;
+};
+
 export const fetchStockPrices = async (symbols, token, logout) => {
   const params = symbols.map(s => `symbols=${s}`).join('&');
   const response = await fetch(`${API_BASE}/TradeApi/quotes?${params}`, {

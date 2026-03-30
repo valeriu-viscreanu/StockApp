@@ -17,6 +17,25 @@ namespace StockApp.Controllers
         private readonly IUserBalanceService _userBalanceService;
         private readonly IFinnhubService _finnhubService;
 
+        [HttpGet("popular-stocks")]
+        public ActionResult<List<PopularStockResponse>> GetPopularStocks()
+        {
+            var popularStocks = new List<PopularStockResponse>
+            {
+                new() { Symbol = "MSFT", Name = "Microsoft" },
+                new() { Symbol = "AAPL", Name = "Apple" },
+                new() { Symbol = "GOOGL", Name = "Alphabet" },
+                new() { Symbol = "AMZN", Name = "Amazon" },
+                new() { Symbol = "NVDA", Name = "Nvidia" },
+                new() { Symbol = "META", Name = "Meta Platforms" },
+                new() { Symbol = "TSLA", Name = "Tesla" },
+                new() { Symbol = "AMD", Name = "Advanced Micro Devices" },
+                new() { Symbol = "JPM", Name = "JPMorgan Chase" },
+                new() { Symbol = "V", Name = "Visa" }
+            };
+            return Ok(popularStocks);
+        }
+
         public TradeApiController(
             IStockProfileService stockProfileService,
             IStockQuoteService stockQuoteService,
