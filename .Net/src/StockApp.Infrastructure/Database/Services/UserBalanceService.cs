@@ -50,20 +50,27 @@ public class UserBalanceService : IUserBalanceService
     public void AddBalance(Guid userID, double amount)
     {
         var balance = _dbContext.UserBalances.FirstOrDefault(b => b.UserID == userID);
-        if (balance != null)
+        if (balance == null)
         {
-            balance.Balance += amount;
-            _dbContext.SaveChanges();
-
-            _userOperationRepository.Add(new UserOperation
+            balance = new UserBalance
             {
-                UserOperationID = Guid.NewGuid(),
                 UserID = userID,
-                OperationType = StockApp.Domain.Enums.OperationType.Deposit,
-                TimeStamp = DateTime.UtcNow,
-                Amount = amount,
-                Description = $"Deposit of {amount:C}"
-            });
+                Balance = 0
+            };
+            _dbContext.UserBalances.Add(balance);
         }
+
+        balance.Balance += amount;
+        _dbContext.SaveChanges();
+
+        _userOperationRepository.Add(new UserOperation
+        {
+            UserOperationID = Guid.NewGuid(),
+            UserID = userID,
+            OperationType = StockApp.Domain.Enums.OperationType.Deposit,
+            TimeStamp = DateTime.UtcNow,
+            Amount = amount,
+            Description = $"Deposit of {amount:C}"
+        });
     }
 }
