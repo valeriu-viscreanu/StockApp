@@ -6,6 +6,7 @@ import Cash from './components/Cash';
 import Login from './components/Login';
 import Register from './components/Register';
 import Navbar from './components/Navbar';
+import Activities from './components/Activities';
 import * as api from './services/api';
 import { useAuth } from './context/AuthContext';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
@@ -190,6 +191,7 @@ function App() {
             } 
           />
           <Route path="/orders" element={<Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />} />
+          <Route path="/activities" element={<Activities />} />
           <Route path="/cash" element={<Cash data={data} amount={amount} setAmount={setAmount} handleCashAction={handleCashAction} />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

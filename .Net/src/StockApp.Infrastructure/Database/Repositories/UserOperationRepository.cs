@@ -17,5 +17,13 @@ namespace StockApp.Infrastructure.Database.Repositories
             _dbContext.UserOperations.Add(userOperation);
             _dbContext.SaveChanges();
         }
+
+        public IEnumerable<UserOperation> GetByUserId(Guid userId)
+        {
+            return _dbContext.UserOperations
+                .Where(uo => uo.UserID == userId)
+                .OrderByDescending(uo => uo.TimeStamp)
+                .ToList();
+        }
     }
 }

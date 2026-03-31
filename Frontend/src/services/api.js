@@ -68,6 +68,15 @@ export const fetchOrders = async (token, logout) => {
   return null;
 };
 
+export const fetchUserOperations = async (token, logout) => {
+  const response = await fetch(`${API_BASE}/UserOperationsApi`, {
+    headers: authHeaders(token)
+  });
+  if (handleApiError(response, logout)) return null;
+  if (response.ok) return await response.json();
+  return null;
+};
+
 export const createOrder = async (type, orderData, token, logout) => {
   const endpoint = type === 'buy' ? 'buy-order' : 'sell-order';
   const response = await fetch(`${API_BASE}/TradeApi/${endpoint}`, {
