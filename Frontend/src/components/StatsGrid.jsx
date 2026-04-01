@@ -1,9 +1,10 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
 import StatCard from './StatCard';
+import AddCashModal from './AddCashModal';
 
-function StatsGrid({ data }) {
-  const navigate = useNavigate();
+function StatsGrid({ data, handleCashAction }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <div className="stats-grid">
       <StatCard
@@ -21,7 +22,14 @@ function StatsGrid({ data }) {
         label="Available Cash"
         value={`$${data.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
         isClickable={true}
-        onClick={() => navigate('/cash')}
+        onClick={() => setIsModalOpen(true)}
+      />
+
+      <AddCashModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onConfirm={(amount) => handleCashAction('add', amount)}
+        currentBalance={data.balance}
       />
     </div>
   );

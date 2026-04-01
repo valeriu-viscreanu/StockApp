@@ -140,12 +140,13 @@ function App() {
     }
   };
 
-  const handleCashAction = async (type) => {
+  const handleCashAction = async (type, overrideAmount) => {
+    const finalAmount = overrideAmount !== undefined ? overrideAmount : amount;
     try {
-      const result = await api.handleCashActionApi(type, amount, token, handleLogout);
+      const result = await api.handleCashActionApi(type, finalAmount, token, handleLogout);
       if (result) {
         setData(prev => ({ ...prev, balance: result.balance }));
-        setAmount(100);
+        if (overrideAmount === undefined) setAmount(100);
       }
     } catch (err) {
       alert(err.message);
@@ -171,8 +172,8 @@ function App() {
       <div className="layout">
         <Navbar theme={theme} toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')} />
         <Routes>
-          <Route path="/" element={<Dashboard user={user} data={data} />} />
-          <Route path="/dashboard" element={<Dashboard user={user} data={data} />} />
+          <Route path="/" element={<Dashboard user={user} data={data} handleCashAction={handleCashAction} />} />
+          <Route path="/dashboard" element={<Dashboard user={user} data={data} handleCashAction={handleCashAction} />} />
           <Route 
             path="/trade" 
             element={
