@@ -17,4 +17,5 @@
 
 [x] router react
 [] modals
+[] fix avaialbe cash ligth mode 
 [] const POPULAR_STOCKS --> backend not hardocded FE

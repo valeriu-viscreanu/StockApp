@@ -29,13 +29,14 @@ function Activities() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1rem' }}>
         {activities.map(activity => (
           <div key={activity.userOperationID} style={{
-            background: 'var(--surface, #1e1e1e)',
+            background: 'var(--bg-card)',
             padding: '1.5rem',
             borderRadius: '12px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            boxShadow: 'var(--card-shadow)',
+            border: '1px solid var(--border)'
           }}>
             <div style={{ fontSize: '1.1rem', fontWeight: '500' }}>
               {activity.description || activity.operationType}
