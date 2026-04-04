@@ -10,7 +10,7 @@ function StatsGrid({ data, handleCashAction }) {
       <StatCard
         label="Total Value"
         value={`$${data.totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-        footer="↑ 2.4% today"
+        footer=""
       />
 
       <StatCard
@@ -25,9 +25,9 @@ function StatsGrid({ data, handleCashAction }) {
         onClick={() => setIsModalOpen(true)}
       />
 
-      <AddCashModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <AddCashModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onConfirm={(amount) => handleCashAction('add', amount)}
         currentBalance={data.balance}
       />
