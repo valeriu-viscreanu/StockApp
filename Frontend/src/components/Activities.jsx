@@ -38,8 +38,13 @@ function Activities() {
             boxShadow: 'var(--card-shadow)',
             border: '1px solid var(--border)'
           }}>
-            <div style={{ fontSize: '1.1rem', fontWeight: '500' }}>
-              {activity.description || activity.operationType}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{ fontSize: '1.1rem', fontWeight: '500' }}>
+                {activity.description || activity.operationType}
+              </div>
+              <div style={{ fontSize: '0.85rem', opacity: 0.7, marginTop: '0.25rem' }}>
+                {new Date(activity.timeStamp).toLocaleString()}
+              </div>
             </div>
             <div style={{ 
               fontSize: '1.2rem', 
