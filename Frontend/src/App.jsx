@@ -198,7 +198,7 @@ function App() {
         />
         <Route path="/orders" element={<Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />} />
         <Route path="/activities" element={<Activities />} />
-        <Route path="/cash" element={<Cash data={data} amount={amount} setAmount={setAmount} handleCashAction={handleCashAction} />} />
+        <Route path="/cash" element={<Cash data={data} handleCashAction={handleCashAction} />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </div>

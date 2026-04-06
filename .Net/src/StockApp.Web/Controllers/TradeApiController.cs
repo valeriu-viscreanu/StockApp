@@ -82,7 +82,7 @@ namespace StockApp.Controllers
                     break;
                 default: // month
                     resolution = "D";
-                    from = now.AddDays(-20);
+                    from = now.AddDays(-30);
                     break;
             }
 
