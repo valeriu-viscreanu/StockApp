@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import AddCashModal from './AddCashModal';
+import WithdrawCashModal from './WithdrawCashModal';
 
 function Cash({ data, handleCashAction }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
   return (
     <div className="cash-page">
@@ -21,16 +23,27 @@ function Cash({ data, handleCashAction }) {
         </div>
 
         <div className="cash-actions">
-          <button type="button" className="btn-add-cash" onClick={() => setIsModalOpen(true)}>
+          <button type="button" className="btn-add-cash" onClick={() => setIsAddModalOpen(true)}>
             <span className="btn-icon">&#43;</span> Add Funds
+          </button>
+
+          <button type="button" className="btn-withdraw-cash" onClick={() => setIsWithdrawModalOpen(true)}>
+            <span className="btn-icon">&#8722;</span> Withdraw
           </button>
         </div>
       </div>
 
       <AddCashModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
         onConfirm={(amount) => handleCashAction('add', amount)}
+        currentBalance={data.balance}
+      />
+
+      <WithdrawCashModal
+        isOpen={isWithdrawModalOpen}
+        onClose={() => setIsWithdrawModalOpen(false)}
+        onConfirm={(amount) => handleCashAction('withdraw', amount)}
         currentBalance={data.balance}
       />
     </div>
