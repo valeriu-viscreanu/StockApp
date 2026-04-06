@@ -9,11 +9,12 @@ import Navbar from './components/Navbar';
 import Activities from './components/Activities';
 import * as api from './services/api';
 import { useAuth } from './context/AuthContext';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
 
 function App() {
   const { isLoggedIn, token, user, setUser, handleLogout } = useAuth();
+  const navigate = useNavigate();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [showRegister, setShowRegister] = useState(false);
 
@@ -147,6 +148,11 @@ function App() {
       if (result) {
         setData(prev => ({ ...prev, balance: result.balance }));
         if (overrideAmount === undefined) setAmount(100);
+        
+        // Redirect to cash window after successful add
+        if (type === 'add') {
+          navigate('/cash');
+        }
       }
     } catch (err) {
       alert(err.message);
@@ -168,36 +174,34 @@ function App() {
   const totals = { buy: buyOrders.reduce((sum, o) => sum + o.tradeAmount, 0), sell: sellOrders.reduce((sum, o) => sum + o.tradeAmount, 0) };
 
   return (
-    <Router>
-      <div className="layout">
-        <Navbar theme={theme} toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')} />
-        <Routes>
-          <Route path="/" element={<Dashboard user={user} data={data} handleCashAction={handleCashAction} />} />
-          <Route path="/dashboard" element={<Dashboard user={user} data={data} handleCashAction={handleCashAction} />} />
-          <Route 
-            path="/trade" 
-            element={
-              <Trade 
-                popularStocks={popularStocks} 
-                selectedStock={selectedStock} 
-                setSelectedStock={handleSelectStock} 
-                quantity={quantity} 
-                setQuantity={setQuantity} 
-                onBuy={() => executeOrder('buy')} 
-                onSell={() => executeOrder('sell')} 
-                tradeMessage={tradeMessage} 
-                stockChartData={stockChartData} 
-                fetchStockChartData={fetchStockChartData} 
-              />
-            } 
-          />
-          <Route path="/orders" element={<Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />} />
-          <Route path="/activities" element={<Activities />} />
-          <Route path="/cash" element={<Cash data={data} amount={amount} setAmount={setAmount} handleCashAction={handleCashAction} />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
-      </div>
-    </Router>
+    <div className="layout">
+      <Navbar theme={theme} toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')} />
+      <Routes>
+        <Route path="/" element={<Dashboard user={user} data={data} handleCashAction={handleCashAction} />} />
+        <Route path="/dashboard" element={<Dashboard user={user} data={data} handleCashAction={handleCashAction} />} />
+        <Route 
+          path="/trade" 
+          element={
+            <Trade 
+              popularStocks={popularStocks} 
+              selectedStock={selectedStock} 
+              setSelectedStock={handleSelectStock} 
+              quantity={quantity} 
+              setQuantity={setQuantity} 
+              onBuy={() => executeOrder('buy')} 
+              onSell={() => executeOrder('sell')} 
+              tradeMessage={tradeMessage} 
+              stockChartData={stockChartData} 
+              fetchStockChartData={fetchStockChartData} 
+            />
+          } 
+        />
+        <Route path="/orders" element={<Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />} />
+        <Route path="/activities" element={<Activities />} />
+        <Route path="/cash" element={<Cash data={data} amount={amount} setAmount={setAmount} handleCashAction={handleCashAction} />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </div>
   );
 }
 
