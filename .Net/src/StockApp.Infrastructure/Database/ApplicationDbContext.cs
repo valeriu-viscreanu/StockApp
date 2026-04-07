@@ -17,6 +17,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
     public DbSet<UserBalance> UserBalances { get; set; } = null!;
     public DbSet<UserOperation> UserOperations { get; set; } = null!;
+    public DbSet<UserHolding> UserHoldings { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -114,6 +115,18 @@ public class ApplicationDbContext : DbContext
             entity.HasOne<ApplicationUser>()
                 .WithMany(u => u.UserOperations)
                 .HasForeignKey(uo => uo.UserID);
+        });
+
+        // Configuration for UserHolding
+        modelBuilder.Entity<UserHolding>(entity =>
+        {
+            entity.HasKey(e => e.HoldingID);
+            entity.Property(e => e.StockSymbol).IsRequired().HasMaxLength(10);
+            entity.Property(e => e.StockName).IsRequired().HasMaxLength(100);
+            
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(h => h.UserID);
         });
     }
 }

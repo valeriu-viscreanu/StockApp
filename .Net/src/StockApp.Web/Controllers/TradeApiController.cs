@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockApp.Application.DTO;
 using StockApp.Application.ServiceContracts;
+using StockApp.Domain.RepositoryContracts;
 
 namespace StockApp.Controllers
 {
@@ -16,6 +17,7 @@ namespace StockApp.Controllers
         private readonly ISellOrdersService _sellOrdersService;
         private readonly IUserBalanceService _userBalanceService;
         private readonly IFinnhubService _finnhubService;
+        private readonly IUserHoldingRepository _userHoldingRepository;
 
         [HttpGet("popular-stocks")]
         public ActionResult<List<PopularStockResponse>> GetPopularStocks()
@@ -42,7 +44,8 @@ namespace StockApp.Controllers
             IBuyOrdersService buyOrdersService,
             ISellOrdersService sellOrdersService,
             IUserBalanceService userBalanceService,
-            IFinnhubService finnhubService)
+            IFinnhubService finnhubService,
+            IUserHoldingRepository userHoldingRepository)
         {
             _stockProfileService = stockProfileService;
             _stockQuoteService = stockQuoteService;
@@ -50,6 +53,7 @@ namespace StockApp.Controllers
             _sellOrdersService = sellOrdersService;
             _userBalanceService = userBalanceService;
             _finnhubService = finnhubService;
+            _userHoldingRepository = userHoldingRepository;
         }
 
         [HttpGet("profile/{stockSymbol}")]
@@ -117,11 +121,19 @@ namespace StockApp.Controllers
 
             var buyOrders = await _buyOrdersService.GetBuyOrders(userId);
             var sellOrders = await _sellOrdersService.GetSellOrders(userId);
+            var holdings = _userHoldingRepository.GetByUserID(userId)
+                .Select(h => new HoldingResponse
+                {
+                    StockSymbol = h.StockSymbol,
+                    StockName = h.StockName,
+                    Quantity = h.Quantity
+                }).ToList();
 
             var orders = new Models.Orders
             {
                 BuyOrders = buyOrders,
-                SellOrders = sellOrders
+                SellOrders = sellOrders,
+                CurrentHoldings = holdings
             };
 
             return Ok(orders);

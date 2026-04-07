@@ -7,17 +7,20 @@ namespace StockApp.Application.Services
     public class SellOrdersService : ISellOrdersService
     {
         private readonly ISellOrderRepository _sellOrderRepository;
+        private readonly IUserHoldingRepository _userHoldingRepository;
         private readonly IRequestValidator<SellOrderRequest> _sellOrderValidator;
         private readonly ISellOrderMapper _sellOrderMapper;
         private readonly IUserOperationRepository _userOperationRepository;
 
         public SellOrdersService(
             ISellOrderRepository sellOrderRepository,
+            IUserHoldingRepository userHoldingRepository,
             IRequestValidator<SellOrderRequest> sellOrderValidator,
             ISellOrderMapper sellOrderMapper,
             IUserOperationRepository userOperationRepository)
         {
             _sellOrderRepository = sellOrderRepository;
+            _userHoldingRepository = userHoldingRepository;
             _sellOrderValidator = sellOrderValidator;
             _sellOrderMapper = sellOrderMapper;
             _userOperationRepository = userOperationRepository;
@@ -32,8 +35,26 @@ namespace StockApp.Application.Services
 
             _sellOrderValidator.Validate(sellOrderRequest);
 
+            // Validation: Check stock ownership via holdings table
+            var holding = _userHoldingRepository.GetBySymbol(sellOrderRequest.UserID, sellOrderRequest.StockSymbol);
+            if (holding == null || holding.Quantity < sellOrderRequest.Quantity)
+            {
+                throw new ArgumentException($"You do not own enough shares of {sellOrderRequest.StockSymbol} to sell.");
+            }
+
             var sellOrder = _sellOrderMapper.MapToEntity(sellOrderRequest);
             _sellOrderRepository.Add(sellOrder);
+
+            // Update holdings
+            holding.Quantity -= sellOrder.Quantity;
+            if (holding.Quantity == 0)
+            {
+                _userHoldingRepository.Delete(holding.HoldingID);
+            }
+            else
+            {
+                _userHoldingRepository.Update(holding);
+            }
 
             _userOperationRepository.Add(new Domain.Entities.UserOperation
             {

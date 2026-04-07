@@ -7,17 +7,20 @@ namespace StockApp.Application.Services
     public class BuyOrdersService : IBuyOrdersService
     {
         private readonly IBuyOrderRepository _buyOrderRepository;
+        private readonly IUserHoldingRepository _userHoldingRepository;
         private readonly IRequestValidator<BuyOrderRequest> _buyOrderValidator;
         private readonly IBuyOrderMapper _buyOrderMapper;
         private readonly IUserOperationRepository _userOperationRepository;
 
         public BuyOrdersService(
             IBuyOrderRepository buyOrderRepository,
+            IUserHoldingRepository userHoldingRepository,
             IRequestValidator<BuyOrderRequest> buyOrderValidator,
             IBuyOrderMapper buyOrderMapper,
             IUserOperationRepository userOperationRepository)
         {
             _buyOrderRepository = buyOrderRepository;
+            _userHoldingRepository = userHoldingRepository;
             _buyOrderValidator = buyOrderValidator;
             _buyOrderMapper = buyOrderMapper;
             _userOperationRepository = userOperationRepository;
@@ -45,6 +48,25 @@ namespace StockApp.Application.Services
                 StockSymbol = buyOrder.StockSymbol,
                 Description = $"Bought {buyOrder.Quantity} shares of {buyOrder.StockSymbol} at {buyOrder.Price:C}"
             });
+
+            // Update holdings
+            var holding = _userHoldingRepository.GetBySymbol(buyOrder.UserID, buyOrder.StockSymbol);
+            if (holding == null)
+            {
+                _userHoldingRepository.Add(new Domain.Entities.UserHolding
+                {
+                    HoldingID = Guid.NewGuid(),
+                    UserID = buyOrder.UserID,
+                    StockSymbol = buyOrder.StockSymbol,
+                    StockName = buyOrder.StockName,
+                    Quantity = buyOrder.Quantity
+                });
+            }
+            else
+            {
+                holding.Quantity += buyOrder.Quantity;
+                _userHoldingRepository.Update(holding);
+            }
 
             return Task.FromResult(_buyOrderMapper.MapToResponse(buyOrder));
         }
