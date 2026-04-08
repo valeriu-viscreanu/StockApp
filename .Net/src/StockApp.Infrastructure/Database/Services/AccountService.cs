@@ -44,10 +44,26 @@ public class AccountService : IAccountService
         };
 
         _dbContext.Users.Add(newUser);
+
+        // Save User Details if any are provided
+        var userDetails = new StockApp.Domain.Entities.UserDetails
+        {
+            DetailsID = Guid.NewGuid(),
+            UserID = newUser.UserID,
+            Street = registerRequest.Street,
+            StreetNumber = registerRequest.StreetNumber,
+            Building = registerRequest.Building,
+            Unit = registerRequest.Unit,
+            City = registerRequest.City,
+            ZipCode = registerRequest.ZipCode,
+            Country = registerRequest.Country,
+            AdditionalInfo = registerRequest.AdditionalInfo,
+            PhoneNumber = registerRequest.PhoneNumber
+        };
+        _dbContext.UserDetails.Add(userDetails);
+
         _dbContext.SaveChanges();
 
-        // Also we want to assign a starting balance of 10000 
-        // We'll just leave it since the UI doesn't require us to initialize it here or we can just initialize if needed. Let's just keep it simple.
         return new RegisterResponse { IsSuccess = true };
     }
 }

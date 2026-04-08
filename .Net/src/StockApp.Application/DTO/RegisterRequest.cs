@@ -15,5 +15,33 @@ namespace StockApp.Application.DTO
         [Required(ErrorMessage = "Password can't be blank")]
         [DataType(DataType.Password)]
         public string? Password { get; set; }
+
+        // User Details
+        [MaxLength(100)]
+        public string? Street { get; set; }
+
+        [MaxLength(20)]
+        public string? StreetNumber { get; set; }
+
+        [MaxLength(50)]
+        public string? Building { get; set; }
+
+        [MaxLength(20)]
+        public string? Unit { get; set; }
+
+        [MaxLength(100)]
+        public string? City { get; set; }
+
+        [MaxLength(20)]
+        public string? ZipCode { get; set; }
+
+        [MaxLength(100)]
+        public string? Country { get; set; }
+
+        [MaxLength(500)]
+        public string? AdditionalInfo { get; set; }
+
+        [MaxLength(20)]
+        public string? PhoneNumber { get; set; }
     }
 }
