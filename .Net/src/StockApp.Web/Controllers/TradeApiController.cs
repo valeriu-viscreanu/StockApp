@@ -212,16 +212,31 @@ namespace StockApp.Controllers
                 if (Guid.TryParse(userIdString, out Guid userId))
                 {
                     sellOrderRequest.UserID = userId;
-                    double totalProceeds = sellOrderRequest.Price * sellOrderRequest.Quantity;
-                    _userBalanceService.AddBalance(userId, totalProceeds);
+                    
+                    // Explicitly check UserHoldings table
+                    var holding = _userHoldingRepository.GetBySymbol(userId, sellOrderRequest.StockSymbol);
+                    long currentQuantity = holding?.Quantity ?? 0;
+
+                    if (currentQuantity < sellOrderRequest.Quantity)
+                    {
+                        return BadRequest(new { message = $"Sell order denied: You only have {currentQuantity} shares of {sellOrderRequest.StockSymbol} in your UserHoldings table, but attempted to sell {sellOrderRequest.Quantity}." });
+                    }
                 }
 
                 var response = await _sellOrdersService.CreateSellOrder(sellOrderRequest);
+                
+                // Only add balance after order is successfully validated and created
+                if (Guid.TryParse(userIdString, out Guid validUserId))
+                {
+                    double totalProceeds = sellOrderRequest.Price * sellOrderRequest.Quantity;
+                    _userBalanceService.AddBalance(validUserId, totalProceeds);
+                }
+
                 return CreatedAtAction(nameof(GetOrders), response);
             }
-            catch (ArgumentException)
+            catch (Exception ex)
             {
-                return BadRequest();
+                return BadRequest(new { message = ex.Message });
             }
         }
     }

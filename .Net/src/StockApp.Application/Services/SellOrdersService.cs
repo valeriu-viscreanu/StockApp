@@ -35,25 +35,22 @@ namespace StockApp.Application.Services
 
             _sellOrderValidator.Validate(sellOrderRequest);
 
-            // Validation: Check stock ownership via holdings table
-            var holding = _userHoldingRepository.GetBySymbol(sellOrderRequest.UserID, sellOrderRequest.StockSymbol);
-            if (holding == null || holding.Quantity < sellOrderRequest.Quantity)
-            {
-                throw new ArgumentException($"You do not own enough shares of {sellOrderRequest.StockSymbol} to sell.");
-            }
-
             var sellOrder = _sellOrderMapper.MapToEntity(sellOrderRequest);
             _sellOrderRepository.Add(sellOrder);
 
             // Update holdings
-            holding.Quantity -= sellOrder.Quantity;
-            if (holding.Quantity == 0)
+            var holding = _userHoldingRepository.GetBySymbol(sellOrderRequest.UserID, sellOrderRequest.StockSymbol);
+            if (holding != null)
             {
-                _userHoldingRepository.Delete(holding.HoldingID);
-            }
-            else
-            {
-                _userHoldingRepository.Update(holding);
+                holding.Quantity -= sellOrder.Quantity;
+                if (holding.Quantity == 0)
+                {
+                    _userHoldingRepository.Delete(holding.HoldingID);
+                }
+                else
+                {
+                    _userHoldingRepository.Update(holding);
+                }
             }
 
             _userOperationRepository.Add(new Domain.Entities.UserOperation
