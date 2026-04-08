@@ -18,6 +18,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<UserBalance> UserBalances { get; set; } = null!;
     public DbSet<UserOperation> UserOperations { get; set; } = null!;
     public DbSet<UserHolding> UserHoldings { get; set; } = null!;
+    public DbSet<UserDetails> UserDetails { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -127,6 +128,25 @@ public class ApplicationDbContext : DbContext
             entity.HasOne<ApplicationUser>()
                 .WithMany()
                 .HasForeignKey(h => h.UserID);
+        });
+
+        // Configuration for UserDetails
+        modelBuilder.Entity<UserDetails>(entity =>
+        {
+            entity.HasKey(e => e.DetailsID);
+            entity.Property(e => e.Street).HasMaxLength(100);
+            entity.Property(e => e.StreetNumber).HasMaxLength(20);
+            entity.Property(e => e.Building).HasMaxLength(50);
+            entity.Property(e => e.Unit).HasMaxLength(20);
+            entity.Property(e => e.City).HasMaxLength(100);
+            entity.Property(e => e.ZipCode).HasMaxLength(20);
+            entity.Property(e => e.Country).HasMaxLength(100);
+            entity.Property(e => e.AdditionalInfo).HasMaxLength(500);
+            entity.Property(e => e.PhoneNumber).HasMaxLength(20);
+
+            entity.HasOne<ApplicationUser>()
+                .WithOne()
+                .HasForeignKey<UserDetails>(e => e.UserID);
         });
     }
 }

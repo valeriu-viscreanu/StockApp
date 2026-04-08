@@ -96,6 +96,7 @@ builder.Services.AddScoped<IBuyOrderRepository, BuyOrderRepository>();
 builder.Services.AddScoped<ISellOrderRepository, SellOrderRepository>();
 builder.Services.AddScoped<IUserOperationRepository, UserOperationRepository>();
 builder.Services.AddScoped<IUserHoldingRepository, UserHoldingRepository>();
+builder.Services.AddScoped<IUserDetailsRepository, UserDetailsRepository>();
 
 builder.Services.AddScoped<IRequestValidator<BuyOrderRequest>, DataAnnotationsRequestValidator<BuyOrderRequest>>();
 builder.Services.AddScoped<IRequestValidator<SellOrderRequest>, DataAnnotationsRequestValidator<SellOrderRequest>>();
