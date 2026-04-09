@@ -56,8 +56,8 @@ function Register({ onSwitchToLogin }) {
             <div className="form-section fade-in">
               <h3>Address & Contact</h3>
               <div className="form-row">
-                <div className="form-group flex-2">
-                  <label>Street</label>
+              <div className="form-group">
+                <label>Street</label>
                   <input
                     type="text"
                     name="street"

@@ -13,10 +13,4 @@
     - Replace the placeholder in `Trade.jsx` with the real `PriceChart`.
     - Wire up the "Day", "Month", "Year" buttons to update the chart.
 
-
-
-[x] router react
-[] modals
-[x] fix available cash ligth mode 
-[] const POPULAR_STOCKS --> backend not hardocded FE
-[] 
+[]  push

@@ -123,3 +123,23 @@ export const registerApi = async (name, email, password, details = {}) => {
   if (response.ok) return { data };
   return { error: data.message || 'Registration failed' };
 };
+
+export const fetchUserDetails = async (token, logout) => {
+  const response = await fetch(`${API_BASE}/UserDetailsApiController`, {
+    headers: authHeaders(token)
+  });
+  if (handleApiError(response, logout)) return null;
+  if (response.ok) return await response.json();
+  return null;
+};
+
+export const updateUserDetails = async (details, token, logout) => {
+  const response = await fetch(`${API_BASE}/UserDetailsApiController`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify(details)
+  });
+  if (handleApiError(response, logout)) return null;
+  if (response.ok) return true;
+  return null;
+};

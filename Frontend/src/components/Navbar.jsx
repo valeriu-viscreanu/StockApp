@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { NavLink } from 'react-router-dom';
+import EditDetailsModal from './EditDetailsModal';
 
 function Navbar({ theme, toggleTheme }) {
-  const { user, handleLogout } = useAuth();
+  const { user, token, handleLogout } = useAuth();
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   
   return (
     <nav className="navbar">
@@ -18,7 +20,13 @@ function Navbar({ theme, toggleTheme }) {
         <NavLink to="/cash" className={({ isActive }) => isActive ? 'active' : ''}>Cash</NavLink>
       </div>
       <div className="nav-right">
-        {user}
+        <button
+          className="user-badge"
+          onClick={() => setIsDetailsOpen(true)}
+          title="Edit profile"
+        >
+          {user}
+        </button>
         <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
           {theme === 'light' ? '🌙' : '☀️'}
         </button>
@@ -29,6 +37,12 @@ function Navbar({ theme, toggleTheme }) {
           Logout
         </button>
       </div>
+      <EditDetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        token={token}
+        logout={handleLogout}
+      />
     </nav>
   );
 }
