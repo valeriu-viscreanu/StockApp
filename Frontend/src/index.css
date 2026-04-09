@@ -701,8 +701,42 @@ body {
     min-width: 120px;
 }
 
-.flex-2 {
-    flex: 2 !important;
+.registration-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.registration-header h1 {
+    margin-bottom: 0;
+}
+
+.step-indicator {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: rgba(40, 167, 69, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.secondary-button {
+    background: var(--border) !important;
+    color: var(--text) !important;
+}
+
+.secondary-button:hover {
+    background: #ddd !important;
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .login-subtitle {

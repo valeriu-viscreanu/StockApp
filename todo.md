@@ -19,3 +19,4 @@
 [] modals
 [x] fix available cash ligth mode 
 [] const POPULAR_STOCKS --> backend not hardocded FE
+[] 
