@@ -31,9 +31,9 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const handleRegister = async (name, email, password) => {
+  const handleRegister = async (name, email, password, details) => {
     setError('');
-    const result = await api.registerApi(name, email, password);
+    const result = await api.registerApi(name, email, password, details);
     if (result.data) {
       // Auto-login after registration
       return await handleLogin(email, password);
