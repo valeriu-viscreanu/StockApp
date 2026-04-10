@@ -43,5 +43,8 @@ namespace StockApp.Application.DTO
 
         [MaxLength(20)]
         public string? PhoneNumber { get; set; }
+
+        // Optional: if not provided, user is created with no role
+        public Guid? RoleID { get; set; }
     }
 }

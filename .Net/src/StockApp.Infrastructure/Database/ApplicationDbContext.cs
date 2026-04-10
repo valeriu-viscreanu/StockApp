@@ -19,6 +19,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<UserOperation> UserOperations { get; set; } = null!;
     public DbSet<UserHolding> UserHoldings { get; set; } = null!;
     public DbSet<UserDetails> UserDetails { get; set; } = null!;
+    public DbSet<UserRole> UserRoles { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -56,6 +57,12 @@ public class ApplicationDbContext : DbContext
                 .WithOne()
                 .HasForeignKey(so => so.UserID);
 
+            entity.HasOne(u => u.Role)
+                .WithMany()
+                .HasForeignKey(u => u.RoleID)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
+
             entity.HasData(
                 new ApplicationUser
                 {
@@ -67,6 +74,21 @@ public class ApplicationDbContext : DbContext
                     UserID = Guid.Parse("00000000-0000-0000-0000-000000000002"),
                     Email = "admin1@test.com"
                 }
+            );
+        });
+
+        // Configuration for UserRole
+        modelBuilder.Entity<UserRole>(entity =>
+        {
+            entity.HasKey(e => e.RoleID);
+            entity.Property(e => e.RoleName).IsRequired().HasMaxLength(50);
+
+            entity.HasData(
+                new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000001"), RoleName = "User" },
+                new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000002"), RoleName = "Admin" },
+                new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000003"), RoleName = "Analyst" },
+                new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000004"), RoleName = "Moderator" },
+                new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000005"), RoleName = "Viewer" }
             );
         });
 

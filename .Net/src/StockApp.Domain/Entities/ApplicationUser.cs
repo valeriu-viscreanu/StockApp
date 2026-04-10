@@ -12,6 +12,10 @@ namespace StockApp.Domain.Entities
 
         public string Email { get; set; } = string.Empty;
 
+        // Nullable: existing users have no role assigned
+        public Guid? RoleID { get; set; }
+        public virtual UserRole? Role { get; set; }
+
         public virtual ICollection<BuyOrder> BuyOrders { get; set; } = new List<BuyOrder>();
         public virtual ICollection<SellOrder> SellOrders { get; set; } = new List<SellOrder>();
         public virtual ICollection<UserOperation> UserOperations { get; set; } = new List<UserOperation>();

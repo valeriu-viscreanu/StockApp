@@ -40,7 +40,8 @@ public class AccountService : IAccountService
         var newUser = new StockApp.Domain.Entities.ApplicationUser
         {
             UserID = Guid.NewGuid(),
-            Email = registerRequest.Email!
+            Email = registerRequest.Email!,
+            RoleID = registerRequest.RoleID
         };
 
         _dbContext.Users.Add(newUser);
