@@ -143,3 +143,9 @@ export const updateUserDetails = async (details, token, logout) => {
   if (response.ok) return true;
   return null;
 };
+
+export const fetchRoles = async () => {
+  const response = await fetch(`${API_BASE}/UserRoleApi`);
+  if (response.ok) return await response.json();
+  return [];
+};

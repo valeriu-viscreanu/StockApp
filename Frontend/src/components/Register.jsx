@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import * as api from '../services/api';
 
 function Register({ onSwitchToLogin }) {
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [roleId, setRoleId] = useState('');
+  const [roles, setRoles] = useState([]);
   
   // New User Details State
   const [details, setDetails] = useState({
@@ -22,6 +25,10 @@ function Register({ onSwitchToLogin }) {
 
   const { handleRegister, error } = useAuth();
 
+  useEffect(() => {
+    api.fetchRoles().then(setRoles);
+  }, []);
+
   const handleDetailsChange = (e) => {
     const { name, value } = e.target;
     setDetails(prev => ({ ...prev, [name]: value }));
@@ -29,7 +36,7 @@ function Register({ onSwitchToLogin }) {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    handleRegister(name, email, password, details);
+    handleRegister(name, email, password, { ...details, roleId });
   };
 
   const nextStep = (e) => {
@@ -193,6 +200,20 @@ function Register({ onSwitchToLogin }) {
                   className="login-input"
                   required
                 />
+              </div>
+
+              <div className="form-group">
+                <label>Role</label>
+                <select
+                  value={roleId}
+                  onChange={(e) => setRoleId(e.target.value)}
+                  className="login-input"
+                >
+                  <option value="">-- Select a role --</option>
+                  {roles.map(r => (
+                    <option key={r.roleID} value={r.roleID}>{r.roleName}</option>
+                  ))}
+                </select>
               </div>
 
               {error && <p className="login-error">{error}</p>}
