@@ -125,7 +125,7 @@ export const registerApi = async (name, email, password, details = {}) => {
 };
 
 export const fetchUserDetails = async (token, logout) => {
-  const response = await fetch(`${API_BASE}/UserDetailsApiController`, {
+  const response = await fetch(`${API_BASE}/UserDetailsApi`, {
     headers: authHeaders(token)
   });
   if (handleApiError(response, logout)) return null;
@@ -134,7 +134,7 @@ export const fetchUserDetails = async (token, logout) => {
 };
 
 export const updateUserDetails = async (details, token, logout) => {
-  const response = await fetch(`${API_BASE}/UserDetailsApiController`, {
+  const response = await fetch(`${API_BASE}/UserDetailsApi`, {
     method: 'POST',
     headers: authHeaders(token),
     body: JSON.stringify(details)
