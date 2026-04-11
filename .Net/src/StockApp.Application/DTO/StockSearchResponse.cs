@@ -2,16 +2,16 @@ using System.Text.Json.Serialization;
 
 namespace StockApp.Application.DTO
 {
-    public class FinnhubSearchResponse
+    public class StockSearchResponse
     {
         [JsonPropertyName("count")]
         public int Count { get; set; }
 
         [JsonPropertyName("result")]
-        public List<FinnhubSearchResult>? Result { get; set; }
+        public List<StockSearchResult>? Result { get; set; }
     }
 
-    public class FinnhubSearchResult
+    public class StockSearchResult
     {
         [JsonPropertyName("description")]
         public string? Description { get; set; }

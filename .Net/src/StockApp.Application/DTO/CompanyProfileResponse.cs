@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace StockApp.Application.DTO
 {
-    public class FinnhubCompanyProfileResponse
+    public class CompanyProfileResponse
     {
         [JsonPropertyName("country")]
         public string? Country { get; set; }
@@ -37,7 +37,7 @@ namespace StockApp.Application.DTO
         [JsonPropertyName("logo")]
         public string? Logo { get; set; }
 
-        [JsonPropertyName("finnhubIndustry")]
-        public string? FinnhubIndustry { get; set; }
+        [JsonPropertyName("industry")]
+        public string? Industry { get; set; }
     }
 }

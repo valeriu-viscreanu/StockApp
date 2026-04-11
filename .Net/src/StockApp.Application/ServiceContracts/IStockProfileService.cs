@@ -4,7 +4,7 @@ namespace StockApp.Application.ServiceContracts
 {
     public interface IStockProfileService
     {
-        Task<FinnhubCompanyProfileResponse?> GetCompanyProfile(string stockSymbol);
-        Task<FinnhubSearchResponse?> SearchStocks(string query);
+        Task<CompanyProfileResponse?> GetCompanyProfile(string stockSymbol);
+        Task<StockSearchResponse?> SearchStocks(string query);
     }
 }

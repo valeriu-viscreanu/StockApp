@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace StockApp.Application.DTO
 {
-    public class FinnhubStockQuoteResponse
+    public class StockQuoteResponse
     {
         [JsonPropertyName("c")]
         public double? CurrentPrice { get; set; }

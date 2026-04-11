@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace StockApp.Application.DTO
 {
-    public class FinnhubStockDataResponse
+    public class StockDataResponse
     {
         [JsonPropertyName("c")]
         public List<double>? ClosePrices { get; set; }

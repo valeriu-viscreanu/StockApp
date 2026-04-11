@@ -4,6 +4,6 @@ namespace StockApp.Application.ServiceContracts
 {
     public interface IStockQuoteService
     {
-        Task<FinnhubStockQuoteResponse?> GetStockPriceQuote(string stockSymbol);
+        Task<StockQuoteResponse?> GetStockPriceQuote(string stockSymbol);
     }
 }

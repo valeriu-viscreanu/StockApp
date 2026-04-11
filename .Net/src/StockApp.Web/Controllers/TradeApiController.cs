@@ -16,7 +16,7 @@ namespace StockApp.Controllers
         private readonly IBuyOrdersService _buyOrdersService;
         private readonly ISellOrdersService _sellOrdersService;
         private readonly IUserBalanceService _userBalanceService;
-        private readonly IFinnhubService _finnhubService;
+        private readonly IMarketDataService _marketDataService;
         private readonly IUserHoldingRepository _userHoldingRepository;
 
         [HttpGet("popular-stocks")]
@@ -44,7 +44,7 @@ namespace StockApp.Controllers
             IBuyOrdersService buyOrdersService,
             ISellOrdersService sellOrdersService,
             IUserBalanceService userBalanceService,
-            IFinnhubService finnhubService,
+            IMarketDataService marketDataService,
             IUserHoldingRepository userHoldingRepository)
         {
             _stockProfileService = stockProfileService;
@@ -52,12 +52,12 @@ namespace StockApp.Controllers
             _buyOrdersService = buyOrdersService;
             _sellOrdersService = sellOrdersService;
             _userBalanceService = userBalanceService;
-            _finnhubService = finnhubService;
+            _marketDataService = marketDataService;
             _userHoldingRepository = userHoldingRepository;
         }
 
         [HttpGet("profile/{stockSymbol}")]
-        public async Task<ActionResult<FinnhubCompanyProfileResponse>> GetCompanyProfile(string stockSymbol)
+        public async Task<ActionResult<CompanyProfileResponse>> GetCompanyProfile(string stockSymbol)
         {
             var profile = await _stockProfileService.GetCompanyProfile(stockSymbol);
             if (profile == null)
@@ -68,7 +68,7 @@ namespace StockApp.Controllers
         }
 
         [HttpGet("data/{stockSymbol}")]
-        public async Task<ActionResult<FinnhubStockDataResponse>> GetStockData(string stockSymbol, [FromQuery] string timeframe = "month")
+        public async Task<ActionResult<StockDataResponse>> GetStockData(string stockSymbol, [FromQuery] string timeframe = "month")
         {
             var now = DateTimeOffset.UtcNow;
             string resolution;
@@ -90,7 +90,7 @@ namespace StockApp.Controllers
                     break;
             }
 
-            var stockData = await _finnhubService.GetStockData(stockSymbol, resolution, from.ToUnixTimeSeconds(), now.ToUnixTimeSeconds());
+            var stockData = await _marketDataService.GetStockData(stockSymbol, resolution, from.ToUnixTimeSeconds(), now.ToUnixTimeSeconds());
             if (stockData == null)
             {
                 return NotFound();
@@ -99,7 +99,7 @@ namespace StockApp.Controllers
         }
 
         [HttpGet("quote/{stockSymbol}")]
-        public async Task<ActionResult<FinnhubStockQuoteResponse>> GetStockQuote(string stockSymbol)
+        public async Task<ActionResult<StockQuoteResponse>> GetStockQuote(string stockSymbol)
         {
             var quote = await _stockQuoteService.GetStockPriceQuote(stockSymbol);
             if (quote == null)
@@ -170,14 +170,14 @@ namespace StockApp.Controllers
         }
 
         [HttpGet("quotes")]
-        public async Task<ActionResult<Dictionary<string, FinnhubStockQuoteResponse>>> GetBatchQuotes([FromQuery] List<string> symbols)
+        public async Task<ActionResult<Dictionary<string, StockQuoteResponse>>> GetBatchQuotes([FromQuery] List<string> symbols)
         {
             if (symbols == null || symbols.Count == 0)
             {
                 return BadRequest("symbols query parameter is required");
             }
 
-            var result = new Dictionary<string, FinnhubStockQuoteResponse>();
+            var result = new Dictionary<string, StockQuoteResponse>();
 
             foreach (var symbol in symbols)
             {

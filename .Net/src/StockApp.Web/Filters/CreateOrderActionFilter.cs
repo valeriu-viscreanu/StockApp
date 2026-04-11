@@ -41,7 +41,6 @@ namespace StockApp.Filters
             {
                 if (context.Controller is Controller controller)
                 {
-                    controller.ViewBag.FinnhubToken = _configuration["FinnhubToken"];
                     controller.ViewBag.Errors = context.ModelState.Values
                         .SelectMany(v => v.Errors)
                         .Select(e => e.ErrorMessage)

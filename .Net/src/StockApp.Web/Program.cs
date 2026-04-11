@@ -73,9 +73,9 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<TradingOptions>(builder.Configuration.GetSection("TradingOptions"));
 builder.Services.AddHttpClient();
 
-builder.Services.AddSingleton<IFinnhubService, FinnhubService>();
-builder.Services.AddSingleton<IStockProfileService>(sp => sp.GetRequiredService<IFinnhubService>());
-builder.Services.AddSingleton<IStockQuoteService>(sp => sp.GetRequiredService<IFinnhubService>());
+builder.Services.AddSingleton<IMarketDataService, MarketDataService>();
+builder.Services.AddSingleton<IStockProfileService>(sp => sp.GetRequiredService<IMarketDataService>());
+builder.Services.AddSingleton<IStockQuoteService>(sp => sp.GetRequiredService<IMarketDataService>());
 
 var provider = builder.Configuration["DatabaseProvider"] ?? "InMemory";
 var sqlServerConnectionString = builder.Configuration.GetConnectionString("SqlServerConnection");

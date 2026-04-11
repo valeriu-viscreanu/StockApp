@@ -49,7 +49,7 @@ namespace StockApp.Controllers
                 : (!string.IsNullOrWhiteSpace(_tradingOptions.DefaultStockSymbol) ? _tradingOptions.DefaultStockSymbol : "MSFT");
 
             // Attempt to get quote. If price is 0, it might be a name search
-            FinnhubStockQuoteResponse? stockPriceQuote = await _stockQuoteService.GetStockPriceQuote(stockSymbol);
+            StockQuoteResponse? stockPriceQuote = await _stockQuoteService.GetStockPriceQuote(stockSymbol);
             
             if (stockPriceQuote == null || stockPriceQuote.CurrentPrice == 0)
             {
@@ -63,7 +63,7 @@ namespace StockApp.Controllers
                 }
             }
 
-            FinnhubCompanyProfileResponse? companyProfile = await _stockProfileService.GetCompanyProfile(stockSymbol!);
+            CompanyProfileResponse? companyProfile = await _stockProfileService.GetCompanyProfile(stockSymbol!);
 
             StockTrade stockTrade = new StockTrade
             {
@@ -80,8 +80,6 @@ namespace StockApp.Controllers
             {
                 stockTrade.Price = stockPriceQuote.CurrentPrice ?? 0;
             }
-
-            ViewBag.FinnhubToken = _configuration["FinnhubToken"];
 
             var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (Guid.TryParse(userIdString, out Guid userId))
