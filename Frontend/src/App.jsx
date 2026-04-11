@@ -148,11 +148,6 @@ function App() {
       if (result) {
         setData(prev => ({ ...prev, balance: result.balance }));
         if (overrideAmount === undefined) setAmount(100);
-        
-        // Redirect to cash window after successful add
-        if (type === 'add') {
-          navigate('/cash');
-        }
       }
     } catch (err) {
       alert(err.message);
