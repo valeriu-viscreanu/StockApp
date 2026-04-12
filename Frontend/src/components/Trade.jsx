@@ -15,8 +15,7 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
         try {
           const results = await api.searchStocks(searchQuery);
           setSearchResults(results?.result || []);
-        } catch (error) {
-          console.error('Search error:', error);
+        } catch (e) {
           setSearchResults([]);
         } finally {
           setIsSearching(false);
@@ -43,21 +42,21 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
 
         <div className="search-container">
           <div className="search-input-wrapper">
-             <span className="search-icon">🔍</span>
-             <input 
-               type="text" 
-               className="search-field"
-               placeholder="Search stocks..."
-               value={searchQuery}
-               onChange={(e) => setSearchQuery(e.target.value)}
-             />
+            <span className="search-icon">🔍</span>
+            <input
+              type="text"
+              className="search-field"
+              placeholder="Search stocks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-          
+
           {(searchResults.length > 0 || (searchQuery.length >= 2 && !isSearching)) && (
             <div className="search-results-dropdown">
               {searchResults.map(result => (
-                <div 
-                  key={result.symbol} 
+                <div
+                  key={result.symbol}
                   className="search-result-item"
                   onClick={() => {
                     setSelectedStock({ symbol: result.symbol, name: result.description, price: 0 });
@@ -134,17 +133,17 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
             </div>
 
             {tradeMessage && (
-              <div className="trade-message" style={{ 
-                marginTop: '12px', 
-                padding: '8px 12px', 
-                borderRadius: '8px', 
-                fontSize: '0.85rem', 
+              <div className="trade-message" style={{
+                marginTop: '12px',
+                padding: '8px 12px',
+                borderRadius: '8px',
+                fontSize: '0.85rem',
                 fontWeight: 600,
-                background: tradeMessage.startsWith('Bought') || tradeMessage.startsWith('Sold') 
-                  ? 'rgba(40, 167, 69, 0.15)' 
+                background: tradeMessage.startsWith('Bought') || tradeMessage.startsWith('Sold')
+                  ? 'rgba(40, 167, 69, 0.15)'
                   : 'rgba(220, 53, 69, 0.15)',
-                color: tradeMessage.startsWith('Bought') || tradeMessage.startsWith('Sold') 
-                  ? 'var(--primary)' 
+                color: tradeMessage.startsWith('Bought') || tradeMessage.startsWith('Sold')
+                  ? 'var(--primary)'
                   : '#dc3545'
               }}>
                 {tradeMessage}
@@ -154,19 +153,19 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
 
           <div className="graph-panel">
             <div className="timeframe-buttons">
-              <button 
+              <button
                 className={`btn-timeframe ${timeframe === 'day' ? 'active' : ''}`}
                 onClick={() => handleTimeframeChange('day')}
               >
                 Day
               </button>
-              <button 
+              <button
                 className={`btn-timeframe ${timeframe === 'month' ? 'active' : ''}`}
                 onClick={() => handleTimeframeChange('month')}
               >
                 Month
               </button>
-              <button 
+              <button
                 className={`btn-timeframe ${timeframe === 'year' ? 'active' : ''}`}
                 onClick={() => handleTimeframeChange('year')}
               >
@@ -174,12 +173,12 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
               </button>
             </div>
             <div style={{ padding: '0 20px', width: '100%', boxSizing: 'border-box' }}>
-                <PriceChart 
-                    symbol={selectedStock.symbol} 
-                    price={selectedStock.price} 
-                    timeframe={timeframe}
-                    stockChartData={stockChartData}
-                />
+              <PriceChart
+                symbol={selectedStock.symbol}
+                price={selectedStock.price}
+                timeframe={timeframe}
+                stockChartData={stockChartData}
+              />
             </div>
           </div>
         </div>
