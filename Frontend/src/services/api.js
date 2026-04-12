@@ -22,6 +22,12 @@ export const fetchPopularStocks = async (token, logout) => {
   return null;
 };
 
+export const searchStocks = async (query) => {
+  const response = await fetch(`${API_BASE}/TradeApi/search?q=${query}`);
+  if (response.ok) return await response.json();
+  return null;
+};
+
 export const fetchStockPrices = async (symbols, token, logout) => {
   const params = symbols.map(s => `symbols=${s}`).join('&');
   const response = await fetch(`${API_BASE}/TradeApi/quotes?${params}`, {

@@ -1,8 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PriceChart from './PriceChart';
+import * as api from '../services/api';
 
 function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQuantity, onBuy, onSell, tradeMessage, stockChartData, fetchStockChartData }) {
   const [timeframe, setTimeframe] = useState('month');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.trim().length >= 2) {
+        setIsSearching(true);
+        try {
+          const results = await api.searchStocks(searchQuery);
+          setSearchResults(results?.result || []);
+        } catch (error) {
+          console.error('Search error:', error);
+          setSearchResults([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
 
   const handleTimeframeChange = (tf) => {
     setTimeframe(tf);
@@ -15,6 +40,45 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
         <div className="sidebar-header">
           <h3>Market Watch</h3>
         </div>
+
+        <div className="search-container">
+          <div className="search-input-wrapper">
+             <span className="search-icon">🔍</span>
+             <input 
+               type="text" 
+               className="search-field"
+               placeholder="Search stocks..."
+               value={searchQuery}
+               onChange={(e) => setSearchQuery(e.target.value)}
+             />
+          </div>
+          
+          {(searchResults.length > 0 || (searchQuery.length >= 2 && !isSearching)) && (
+            <div className="search-results-dropdown">
+              {searchResults.map(result => (
+                <div 
+                  key={result.symbol} 
+                  className="search-result-item"
+                  onClick={() => {
+                    setSelectedStock({ symbol: result.symbol, name: result.description, price: 0 });
+                    setSearchQuery('');
+                    setSearchResults([]);
+                  }}
+                >
+                  <div className="search-result-info">
+                    <span className="search-result-symbol">{result.symbol}</span>
+                    <span className="search-result-name">{result.description}</span>
+                  </div>
+                  <span className="search-result-type">{result.type}</span>
+                </div>
+              ))}
+              {searchResults.length === 0 && !isSearching && searchQuery.length >= 2 && (
+                <div className="no-results">No results for "{searchQuery}"</div>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="stock-list">
           {popularStocks.map(stock => (
             <a

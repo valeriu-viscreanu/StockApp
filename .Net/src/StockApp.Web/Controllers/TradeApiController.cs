@@ -38,6 +38,22 @@ namespace StockApp.Controllers
             return Ok(popularStocks);
         }
 
+        [HttpGet("search")]
+        [AllowAnonymous]
+        public async Task<ActionResult<StockSearchResponse>> SearchStocks([FromQuery] string q)
+        {
+            if (string.IsNullOrWhiteSpace(q))
+            {
+                return BadRequest("Query parameter 'q' is required.");
+            }
+            var result = await _stockProfileService.SearchStocks(q);
+            if (result == null)
+            {
+                return NotFound();
+            }
+            return Ok(result);
+        }
+
         public TradeApiController(
             IStockProfileService stockProfileService,
             IStockQuoteService stockQuoteService,

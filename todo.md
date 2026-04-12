@@ -13,4 +13,5 @@
     - Replace the placeholder in `Trade.jsx` with the real `PriceChart`.
     - Wire up the "Day", "Month", "Year" buttons to update the chart.
 
-[]  push
+[]  country list
+[]  edit Details popup when clicking on the user name in the top bar
