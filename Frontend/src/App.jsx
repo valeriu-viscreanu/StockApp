@@ -105,9 +105,6 @@ function App() {
       if (selectedStock.symbol && !stockChartData) {
         fetchStockChartData(selectedStock.symbol, 'month');
       }
-      if (!user) {
-        setUser('User'); // Fallback if user name not set
-      }
     }
   }, [isLoggedIn, token, refreshUserData, user, setUser, selectedStock.symbol, stockChartData]);
 

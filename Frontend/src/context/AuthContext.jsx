@@ -4,13 +4,14 @@ import * as api from '../services/api';
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(localStorage.getItem('email'));
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [isLoggedIn, setIsLoggedIn] = useState(!!token);
   const [error, setError] = useState('');
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem('token');
+    localStorage.removeItem('email');
     setToken(null);
     setIsLoggedIn(false);
     setUser(null);
@@ -24,6 +25,7 @@ export function AuthProvider({ children }) {
       setToken(result.token);
       setIsLoggedIn(true);
       setUser(email);
+      localStorage.setItem('email', email);
       return true;
     } else {
       setError('Invalid email or password');
