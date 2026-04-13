@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import PriceChart from './PriceChart';
+import FavoriteToggle from './FavoriteToggle';
 import * as api from '../services/api';
 
-function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQuantity, onBuy, onSell, tradeMessage, stockChartData, fetchStockChartData }) {
+function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQuantity, onBuy, onSell, tradeMessage, stockChartData, fetchStockChartData, userHoldings = [] }) {
+  const [favorites, setFavorites] = useState(() => {
+    const saved = localStorage.getItem('favorites');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [timeframe, setTimeframe] = useState('month');
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -32,6 +37,22 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
     setTimeframe(tf);
     fetchStockChartData(selectedStock.symbol, tf);
   };
+
+  const toggleFavorite = (symbol) => {
+    setFavorites(prev => {
+      const newFavs = prev.includes(symbol) 
+        ? prev.filter(s => s !== symbol) 
+        : [...prev, symbol];
+      localStorage.setItem('favorites', JSON.stringify(newFavs));
+      return newFavs;
+    });
+  };
+
+  const sortedStocks = [...popularStocks].sort((a, b) => {
+    const aOwned = userHoldings.includes(a.symbol.toUpperCase()) ? 1 : 0;
+    const bOwned = userHoldings.includes(b.symbol.toUpperCase()) ? 1 : 0;
+    return bOwned - aOwned;
+  });
 
   return (
     <div className="advanced-dashboard">
@@ -79,7 +100,7 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
         </div>
 
         <div className="stock-list">
-          {popularStocks.map(stock => (
+          {sortedStocks.map(stock => (
             <a
               key={stock.symbol}
               href="#"
@@ -88,7 +109,14 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
             >
               <div className="stock-icon">{stock.symbol.substring(0, 1)}</div>
               <div className="stock-details">
-                <span className="stock-symbol">{stock.symbol}</span>
+                <span className="stock-symbol" style={{ display: 'flex', alignItems: 'center' }}>
+                  {stock.symbol}
+                  <FavoriteToggle 
+                    symbol={stock.symbol} 
+                    isFavorite={favorites.includes(stock.symbol)} 
+                    onToggle={toggleFavorite} 
+                  />
+                </span>
                 <span className="stock-company">{stock.name}</span>
               </div>
               <div className="stock-mini-chart">
@@ -104,7 +132,14 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
       <div className="main-view-panel">
         <div className="trade-container">
           <div className="stock-info">
-            <h1 className="stock-name">{selectedStock.name} ({selectedStock.symbol})</h1>
+            <h1 className="stock-name" style={{ display: 'flex', alignItems: 'center' }}>
+              {selectedStock.name} ({selectedStock.symbol})
+              <FavoriteToggle 
+                symbol={selectedStock.symbol} 
+                isFavorite={favorites.includes(selectedStock.symbol)} 
+                onToggle={toggleFavorite} 
+              />
+            </h1>
             <div className="stock-price">
               <span className="currency">$</span>
               <span className="price-value">

@@ -40,7 +40,7 @@
                    class="stock-item @(isActive ? "active" : "")">
                     <div class="stock-icon">@stock.Symbol.Substring(0, 1)</div>
                     <div class="stock-details">
-                        <span class="stock-symbol">@stock.Symbol</span>
+                        <span class="stock-symbol" style="display:inline-flex; align-items:center;">@stock.Symbol @await Html.PartialAsync("_FavoriteToggle", stock.Symbol)</span>
                         <span class="stock-company">@stock.Name</span>
                     </div>
                     <div class="stock-mini-chart">
@@ -74,7 +74,10 @@
         
         <div class="trade-container">
             <div class="stock-info">
-                <h1 class="stock-name">@name (@symbol)</h1>
+                <div style="display:flex; align-items:center; margin-bottom: 5px;">
+                    <h1 class="stock-name" style="margin:0; margin-right:10px;">@name (@symbol)</h1>
+                    @await Html.PartialAsync("_FavoriteToggle", symbol)
+                </div>
                 <div class="stock-price">
                     <span class="currency">$</span>
                     <span id="price-@symbol" class="price price-value">@price.ToString("F2")</span>
@@ -312,6 +315,69 @@
     }
 
     loadSidebarPrices();
+
+    function updateFavoriteUI() {
+        const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+        document.querySelectorAll('.favorite-toggle').forEach(el => {
+            const sym = el.getAttribute('data-symbol');
+            if (favs.includes(sym)) {
+                el.innerHTML = '★';
+                el.style.color = '#f1c40f'; // Gold star
+            } else {
+                el.innerHTML = '☆';
+                el.style.color = '#ccc';
+            }
+        });
+    }
+    updateFavoriteUI();
+
+    document.querySelectorAll('.favorite-toggle').forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const sym = el.getAttribute('data-symbol');
+            let favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+            if (favs.includes(sym)) {
+                favs = favs.filter(s => s !== sym);
+            } else {
+                favs.push(sym);
+            }
+            localStorage.setItem('favorites', JSON.stringify(favs));
+            updateFavoriteUI();
+        });
+    });
+
+    async function loadAndSortStocks() {
+        try {
+            const response = await fetch('/api/v1/TradeApi/orders');
+            if (response.ok) {
+                const data = await response.json();
+                const holdings = (data.currentHoldings || []).map(h => h.stockSymbol.toUpperCase());
+                
+                const list = document.querySelector('.stock-list');
+                if (list) {
+                    const items = Array.from(list.querySelectorAll('.stock-item'));
+                    items.sort((a, b) => {
+                        const toggleA = a.querySelector('.favorite-toggle');
+                        const symbolA = toggleA ? toggleA.getAttribute('data-symbol').toUpperCase() : '';
+                        
+                        const toggleB = b.querySelector('.favorite-toggle');
+                        const symbolB = toggleB ? toggleB.getAttribute('data-symbol').toUpperCase() : '';
+                        
+                        const aOwned = holdings.includes(symbolA) ? 1 : 0;
+                        const bOwned = holdings.includes(symbolB) ? 1 : 0;
+                        
+                        return bOwned - aOwned;
+                    });
+                    
+                    items.forEach(item => list.appendChild(item));
+                }
+            }
+        } catch(err) {
+            console.error('Failed to sort stocks:', err);
+        }
+    }
+    loadAndSortStocks();
 
     // WebSocket only for the active stock's live price
     if (token) {

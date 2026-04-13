@@ -27,6 +27,7 @@ function App() {
   const [sellOrders, setSellOrders] = useState([]);
   const [tradeMessage, setTradeMessage] = useState('');
   const [stockChartData, setStockChartData] = useState(null);
+  const [userHoldings, setUserHoldings] = useState([]);
 
   // Theme setup
   useEffect(() => {
@@ -57,6 +58,7 @@ function App() {
         const sOrders = (ordersData.sellOrders || []).map(mapOrder);
         setBuyOrders(bOrders);
         setSellOrders(sOrders);
+        setUserHoldings((ordersData.currentHoldings || []).map(h => h.stockSymbol.toUpperCase()));
 
         const totalBought = bOrders.reduce((sum, o) => sum + o.quantity, 0);
         const totalSold = sOrders.reduce((sum, o) => sum + o.quantity, 0);
@@ -188,6 +190,7 @@ function App() {
               tradeMessage={tradeMessage} 
               stockChartData={stockChartData} 
               fetchStockChartData={fetchStockChartData} 
+              userHoldings={userHoldings}
             />
           } 
         />
