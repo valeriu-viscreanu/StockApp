@@ -49,9 +49,25 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
   };
 
   const sortedStocks = [...popularStocks].sort((a, b) => {
-    const aOwned = userHoldings.includes(a.symbol.toUpperCase()) ? 1 : 0;
-    const bOwned = userHoldings.includes(b.symbol.toUpperCase()) ? 1 : 0;
-    return bOwned - aOwned;
+    const symbolA = a.symbol.toUpperCase();
+    const symbolB = b.symbol.toUpperCase();
+
+    const isOwnedA = userHoldings.includes(symbolA);
+    const isOwnedB = userHoldings.includes(symbolB);
+
+    // Prioritize owned stocks
+    if (isOwnedA && !isOwnedB) return -1;
+    if (!isOwnedA && isOwnedB) return 1;
+
+    const isFavoriteA = favorites.includes(symbolA);
+    const isFavoriteB = favorites.includes(symbolB);
+
+    // Prioritize favorite stocks next
+    if (isFavoriteA && !isFavoriteB) return -1;
+    if (!isFavoriteA && isFavoriteB) return 1;
+
+    // Otherwise maintain order
+    return 0;
   });
 
   return (
