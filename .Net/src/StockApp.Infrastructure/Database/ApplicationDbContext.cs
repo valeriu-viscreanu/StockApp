@@ -84,11 +84,9 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.RoleName).IsRequired().HasMaxLength(50);
 
             entity.HasData(
-                new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000001"), RoleName = "User" },
+                new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000001"), RoleName = "Customer" },
                 new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000002"), RoleName = "Admin" },
-                new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000003"), RoleName = "Analyst" },
-                new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000004"), RoleName = "Moderator" },
-                new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000005"), RoleName = "Viewer" }
+                new UserRole { RoleID = Guid.Parse("10000000-0000-0000-0000-000000000003"), RoleName = "Advisor" }
             );
         });
 
