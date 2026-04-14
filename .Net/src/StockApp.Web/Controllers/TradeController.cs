@@ -18,7 +18,7 @@ namespace StockApp.Controllers
         private readonly IStockQuoteService _stockQuoteService;
         private readonly IBuyOrdersService _buyOrdersService;
         private readonly ISellOrdersService _sellOrdersService;
-        private readonly IUserBalanceService _userBalanceService;
+        private readonly IAccountProfileService _accountProfileService;
         private readonly TradingOptions _tradingOptions;
         private readonly IConfiguration _configuration;
 
@@ -27,7 +27,7 @@ namespace StockApp.Controllers
             IStockQuoteService stockQuoteService,
             IBuyOrdersService buyOrdersService,
             ISellOrdersService sellOrdersService,
-            IUserBalanceService userBalanceService,
+            IAccountProfileService accountProfileService,
             IOptions<TradingOptions> tradingOptions,
             IConfiguration configuration)
         {
@@ -35,7 +35,7 @@ namespace StockApp.Controllers
             _stockQuoteService = stockQuoteService;
             _buyOrdersService = buyOrdersService;
             _sellOrdersService = sellOrdersService;
-            _userBalanceService = userBalanceService;
+            _accountProfileService = accountProfileService;
             _tradingOptions = tradingOptions.Value;
             _configuration = configuration;
         }
@@ -84,7 +84,7 @@ namespace StockApp.Controllers
             var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (Guid.TryParse(userIdString, out Guid userId))
             {
-                stockTrade.CashBalance = _userBalanceService.GetBalance(userId);
+                stockTrade.CashBalance = _accountProfileService.GetBalance(userId);
             }
 
             return View(stockTrade);
@@ -100,7 +100,7 @@ namespace StockApp.Controllers
             {
                 buyOrderRequest.UserID = userId;
                 double totalCost = buyOrderRequest.Price * buyOrderRequest.Quantity;
-                if (!_userBalanceService.DeductBalance(userId, totalCost))
+                if (!_accountProfileService.DeductBalance(userId, totalCost))
                 {
                     TempData["Error"] = "Insufficient funds for this purchase.";
                     return RedirectToAction("Trade", new { stock = buyOrderRequest.StockSymbol });
@@ -131,7 +131,7 @@ namespace StockApp.Controllers
                 if (Guid.TryParse(userIdString, out Guid validUserId))
                 {
                     double totalProceeds = sellOrderRequest.Price * sellOrderRequest.Quantity;
-                    _userBalanceService.AddBalance(validUserId, totalProceeds);
+                    _accountProfileService.AddBalance(validUserId, totalProceeds);
                 }
 
                 return RedirectToAction("Orders");
@@ -173,7 +173,7 @@ namespace StockApp.Controllers
             var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (Guid.TryParse(userIdString, out Guid userId))
             {
-                ViewBag.CashBalance = _userBalanceService.GetBalance(userId);
+                ViewBag.CashBalance = _accountProfileService.GetBalance(userId);
             }
             else
             {
@@ -190,7 +190,7 @@ namespace StockApp.Controllers
             var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (Guid.TryParse(userIdString, out Guid userId) && amount > 0)
             {
-                _userBalanceService.AddBalance(userId, amount);
+                _accountProfileService.AddBalance(userId, amount);
             }
 
             return RedirectToAction("Cash");
@@ -203,7 +203,7 @@ namespace StockApp.Controllers
             var userIdString = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (Guid.TryParse(userIdString, out Guid userId) && amount > 0)
             {
-                if (!_userBalanceService.DeductBalance(userId, amount))
+                if (!_accountProfileService.DeductBalance(userId, amount))
                 {
                     TempData["Error"] = "Insufficient funds for withdrawal.";
                 }

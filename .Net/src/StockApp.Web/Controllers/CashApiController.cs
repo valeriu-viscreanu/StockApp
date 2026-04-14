@@ -11,11 +11,11 @@ namespace StockApp.Controllers
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class CashApiController : ControllerBase
     {
-        private readonly IUserBalanceService _userBalanceService;
+        private readonly IAccountProfileService _accountProfileService;
 
-        public CashApiController(IUserBalanceService userBalanceService)
+        public CashApiController(IAccountProfileService accountProfileService)
         {
-            _userBalanceService = userBalanceService;
+            _accountProfileService = accountProfileService;
         }
 
         [HttpGet("balance")]
@@ -24,7 +24,7 @@ namespace StockApp.Controllers
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (Guid.TryParse(userIdString, out Guid userId))
             {
-                return Ok(_userBalanceService.GetBalance(userId));
+                return Ok(_accountProfileService.GetBalance(userId));
             }
             return Unauthorized(new { message = "User ID not found in token." });
         }
@@ -40,8 +40,8 @@ namespace StockApp.Controllers
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (Guid.TryParse(userIdString, out Guid userId))
             {
-                _userBalanceService.AddBalance(userId, amount);
-                return Ok(new { balance = _userBalanceService.GetBalance(userId) });
+                _accountProfileService.AddBalance(userId, amount);
+                return Ok(new { balance = _accountProfileService.GetBalance(userId) });
             }
             return Unauthorized(new { message = "User ID not found in token." });
         }
@@ -57,9 +57,9 @@ namespace StockApp.Controllers
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (Guid.TryParse(userIdString, out Guid userId))
             {
-                if (_userBalanceService.DeductBalance(userId, amount))
+                if (_accountProfileService.DeductBalance(userId, amount))
                 {
-                    return Ok(new { balance = _userBalanceService.GetBalance(userId) });
+                    return Ok(new { balance = _accountProfileService.GetBalance(userId) });
                 }
                 return BadRequest(new { message = "Insufficient funds." });
             }

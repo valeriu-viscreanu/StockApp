@@ -7,23 +7,26 @@ namespace StockApp.Application.Services
     public class SellOrdersService : ISellOrdersService
     {
         private readonly ISellOrderRepository _sellOrderRepository;
-        private readonly IUserHoldingRepository _userHoldingRepository;
+        private readonly ICashRepository _cashRepository;
         private readonly IRequestValidator<SellOrderRequest> _sellOrderValidator;
         private readonly ISellOrderMapper _sellOrderMapper;
         private readonly IUserOperationRepository _userOperationRepository;
+        private readonly IAccountRepository _accountRepository;
 
         public SellOrdersService(
             ISellOrderRepository sellOrderRepository,
-            IUserHoldingRepository userHoldingRepository,
+            ICashRepository cashRepository,
             IRequestValidator<SellOrderRequest> sellOrderValidator,
             ISellOrderMapper sellOrderMapper,
-            IUserOperationRepository userOperationRepository)
+            IUserOperationRepository userOperationRepository,
+            IAccountRepository accountRepository)
         {
             _sellOrderRepository = sellOrderRepository;
-            _userHoldingRepository = userHoldingRepository;
+            _cashRepository = cashRepository;
             _sellOrderValidator = sellOrderValidator;
             _sellOrderMapper = sellOrderMapper;
             _userOperationRepository = userOperationRepository;
+            _accountRepository = accountRepository;
         }
 
         public Task<SellOrderResponse> CreateSellOrder(SellOrderRequest? sellOrderRequest)
@@ -38,18 +41,21 @@ namespace StockApp.Application.Services
             var sellOrder = _sellOrderMapper.MapToEntity(sellOrderRequest);
             _sellOrderRepository.Add(sellOrder);
 
-            // Update holdings
-            var holding = _userHoldingRepository.GetBySymbol(sellOrderRequest.UserID, sellOrderRequest.StockSymbol);
-            if (holding != null)
+            // Update holdings (Cash)
+            var account = _accountRepository.GetByUserID(sellOrderRequest.UserID) 
+                ?? throw new InvalidOperationException("User has no account");
+
+            var cash = _cashRepository.GetBySymbol(account.AccountID, sellOrderRequest.StockSymbol);
+            if (cash != null)
             {
-                holding.Quantity -= sellOrder.Quantity;
-                if (holding.Quantity == 0)
+                cash.Quantity -= sellOrder.Quantity;
+                if (cash.Quantity == 0)
                 {
-                    _userHoldingRepository.Delete(holding.HoldingID);
+                    _cashRepository.Delete(cash.CashID);
                 }
                 else
                 {
-                    _userHoldingRepository.Update(holding);
+                    _cashRepository.Update(cash);
                 }
             }
 

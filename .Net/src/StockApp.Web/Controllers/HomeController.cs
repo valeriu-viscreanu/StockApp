@@ -9,11 +9,11 @@ namespace StockApp.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        private readonly IUserBalanceService _userBalanceService;
+        private readonly IAccountProfileService _accountProfileService;
 
-        public HomeController(IUserBalanceService userBalanceService)
+        public HomeController(IAccountProfileService accountProfileService)
         {
-            _userBalanceService = userBalanceService;
+            _accountProfileService = accountProfileService;
         }
 
         [Route("/Home")]
@@ -24,7 +24,7 @@ namespace StockApp.Controllers
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (Guid.TryParse(userIdString, out Guid userId))
             {
-                cashBalance = _userBalanceService.GetBalance(userId);
+                cashBalance = _accountProfileService.GetBalance(userId);
             }
 
             var viewModel = new PortfolioSummary

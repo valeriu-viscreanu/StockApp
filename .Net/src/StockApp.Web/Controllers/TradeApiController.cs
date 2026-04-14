@@ -15,9 +15,10 @@ namespace StockApp.Controllers
         private readonly IStockQuoteService _stockQuoteService;
         private readonly IBuyOrdersService _buyOrdersService;
         private readonly ISellOrdersService _sellOrdersService;
-        private readonly IUserBalanceService _userBalanceService;
+        private readonly IAccountProfileService _accountProfileService;
         private readonly IMarketDataService _marketDataService;
-        private readonly IUserHoldingRepository _userHoldingRepository;
+        private readonly ICashRepository _cashRepository;
+        private readonly IAccountRepository _accountRepository;
 
         [HttpGet("popular-stocks")]
         public ActionResult<List<PopularStockResponse>> GetPopularStocks()
@@ -59,17 +60,19 @@ namespace StockApp.Controllers
             IStockQuoteService stockQuoteService,
             IBuyOrdersService buyOrdersService,
             ISellOrdersService sellOrdersService,
-            IUserBalanceService userBalanceService,
+            IAccountProfileService accountProfileService,
             IMarketDataService marketDataService,
-            IUserHoldingRepository userHoldingRepository)
+            ICashRepository cashRepository,
+            IAccountRepository accountRepository)
         {
             _stockProfileService = stockProfileService;
             _stockQuoteService = stockQuoteService;
             _buyOrdersService = buyOrdersService;
             _sellOrdersService = sellOrdersService;
-            _userBalanceService = userBalanceService;
+            _accountProfileService = accountProfileService;
             _marketDataService = marketDataService;
-            _userHoldingRepository = userHoldingRepository;
+            _cashRepository = cashRepository;
+            _accountRepository = accountRepository;
         }
 
         [HttpGet("profile/{stockSymbol}")]
@@ -137,13 +140,20 @@ namespace StockApp.Controllers
 
             var buyOrders = await _buyOrdersService.GetBuyOrders(userId);
             var sellOrders = await _sellOrdersService.GetSellOrders(userId);
-            var holdings = _userHoldingRepository.GetByUserID(userId)
-                .Select(h => new HoldingResponse
-                {
-                    StockSymbol = h.StockSymbol,
-                    StockName = h.StockName,
-                    Quantity = h.Quantity
-                }).ToList();
+            
+            var account = _accountRepository.GetByUserID(userId);
+            List<HoldingResponse> holdings = new();
+            
+            if (account != null)
+            {
+                holdings = _cashRepository.GetByAccountID(account.AccountID)
+                    .Select(h => new HoldingResponse
+                    {
+                        StockSymbol = h.StockSymbol,
+                        StockName = h.StockName,
+                        Quantity = h.Quantity
+                    }).ToList();
+            }
 
             var orders = new Models.Orders
             {
@@ -170,7 +180,7 @@ namespace StockApp.Controllers
                 {
                     buyOrderRequest.UserID = userId;
                     double totalCost = buyOrderRequest.Price * buyOrderRequest.Quantity;
-                    if (!_userBalanceService.DeductBalance(userId, totalCost))
+                    if (!_accountProfileService.DeductBalance(userId, totalCost))
                     {
                         return BadRequest(new { message = "Insufficient funds for this purchase." });
                     }
@@ -229,13 +239,17 @@ namespace StockApp.Controllers
                 {
                     sellOrderRequest.UserID = userId;
                     
-                    // Explicitly check UserHoldings table
-                    var holding = _userHoldingRepository.GetBySymbol(userId, sellOrderRequest.StockSymbol);
-                    long currentQuantity = holding?.Quantity ?? 0;
+                    var account = _accountRepository.GetByUserID(userId);
+                    long currentQuantity = 0;
+                    if (account != null)
+                    {
+                        var cash = _cashRepository.GetBySymbol(account.AccountID, sellOrderRequest.StockSymbol);
+                        currentQuantity = cash?.Quantity ?? 0;
+                    }
 
                     if (currentQuantity < sellOrderRequest.Quantity)
                     {
-                        return BadRequest(new { message = $"Sell order denied: You only have {currentQuantity} shares of {sellOrderRequest.StockSymbol} in your UserHoldings table, but attempted to sell {sellOrderRequest.Quantity}." });
+                        return BadRequest(new { message = $"Sell order denied: You only have {currentQuantity} shares of {sellOrderRequest.StockSymbol} in your CashAllocations table, but attempted to sell {sellOrderRequest.Quantity}." });
                     }
                 }
 
@@ -245,7 +259,7 @@ namespace StockApp.Controllers
                 if (Guid.TryParse(userIdString, out Guid validUserId))
                 {
                     double totalProceeds = sellOrderRequest.Price * sellOrderRequest.Quantity;
-                    _userBalanceService.AddBalance(validUserId, totalProceeds);
+                    _accountProfileService.AddBalance(validUserId, totalProceeds);
                 }
 
                 return CreatedAtAction(nameof(GetOrders), response);

@@ -15,9 +15,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<SellOrder> SellOrders { get; set; } = null!;
     public DbSet<ApplicationUser> Users { get; set; } = null!;
     public DbSet<RefreshToken> RefreshTokens { get; set; } = null!;
-    public DbSet<UserBalance> UserBalances { get; set; } = null!;
+    public DbSet<Account> Accounts { get; set; } = null!;
     public DbSet<UserOperation> UserOperations { get; set; } = null!;
-    public DbSet<UserHolding> UserHoldings { get; set; } = null!;
+    public DbSet<Cash> CashAllocations { get; set; } = null!;
     public DbSet<UserDetails> UserDetails { get; set; } = null!;
     public DbSet<UserRole> UserRoles { get; set; } = null!;
 
@@ -92,26 +92,31 @@ public class ApplicationDbContext : DbContext
             );
         });
 
-        // Configuration for UserBalance
-        modelBuilder.Entity<UserBalance>(entity =>
+        // Configuration for Account
+        modelBuilder.Entity<Account>(entity =>
         {
-            entity.HasKey(e => e.UserID);
+            entity.HasKey(e => e.AccountID);
             entity.Property(e => e.Balance).HasColumnType("decimal(18,4)");
+            entity.Property(e => e.DateOfBirth).IsRequired();
 
-            entity.HasOne<ApplicationUser>()
-                .WithOne()
-                .HasForeignKey<UserBalance>(e => e.UserID);
+            entity.HasOne(a => a.User)
+                .WithOne(u => u.Account)
+                .HasForeignKey<Account>(a => a.UserID);
 
             entity.HasData(
-                new UserBalance
+                new Account
                 {
+                    AccountID = Guid.Parse("A0000000-0000-0000-0000-000000000001"),
                     UserID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                    Balance = 1000.00
+                    Balance = 1000.00,
+                    DateOfBirth = new DateTime(1990, 1, 1)
                 },
-                new UserBalance
+                new Account
                 {
+                    AccountID = Guid.Parse("A0000000-0000-0000-0000-000000000002"),
                     UserID = Guid.Parse("00000000-0000-0000-0000-000000000002"),
-                    Balance = 1000.00
+                    Balance = 1000.00,
+                    DateOfBirth = new DateTime(1995, 5, 20)
                 }
             );
         });
@@ -140,16 +145,16 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(uo => uo.UserID);
         });
 
-        // Configuration for UserHolding
-        modelBuilder.Entity<UserHolding>(entity =>
+        // Configuration for Cash (formerly UserHolding)
+        modelBuilder.Entity<Cash>(entity =>
         {
-            entity.HasKey(e => e.HoldingID);
+            entity.HasKey(e => e.CashID);
             entity.Property(e => e.StockSymbol).IsRequired().HasMaxLength(10);
             entity.Property(e => e.StockName).IsRequired().HasMaxLength(100);
             
-            entity.HasOne<ApplicationUser>()
-                .WithMany()
-                .HasForeignKey(h => h.UserID);
+            entity.HasOne(c => c.Account)
+                .WithMany(a => a.CashAllocations)
+                .HasForeignKey(c => c.AccountID);
         });
 
         // Configuration for UserDetails

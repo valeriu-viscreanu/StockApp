@@ -16,6 +16,8 @@ namespace StockApp.Domain.Entities
         public Guid? RoleID { get; set; }
         public virtual UserRole? Role { get; set; }
 
+        public virtual Account? Account { get; set; }
+
         public virtual ICollection<BuyOrder> BuyOrders { get; set; } = new List<BuyOrder>();
         public virtual ICollection<SellOrder> SellOrders { get; set; } = new List<SellOrder>();
         public virtual ICollection<UserOperation> UserOperations { get; set; } = new List<UserOperation>();

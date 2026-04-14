@@ -7,23 +7,26 @@ namespace StockApp.Application.Services
     public class BuyOrdersService : IBuyOrdersService
     {
         private readonly IBuyOrderRepository _buyOrderRepository;
-        private readonly IUserHoldingRepository _userHoldingRepository;
+        private readonly ICashRepository _cashRepository;
         private readonly IRequestValidator<BuyOrderRequest> _buyOrderValidator;
         private readonly IBuyOrderMapper _buyOrderMapper;
         private readonly IUserOperationRepository _userOperationRepository;
+        private readonly IAccountRepository _accountRepository;
 
         public BuyOrdersService(
             IBuyOrderRepository buyOrderRepository,
-            IUserHoldingRepository userHoldingRepository,
+            ICashRepository cashRepository,
             IRequestValidator<BuyOrderRequest> buyOrderValidator,
             IBuyOrderMapper buyOrderMapper,
-            IUserOperationRepository userOperationRepository)
+            IUserOperationRepository userOperationRepository,
+            IAccountRepository accountRepository)
         {
             _buyOrderRepository = buyOrderRepository;
-            _userHoldingRepository = userHoldingRepository;
+            _cashRepository = cashRepository;
             _buyOrderValidator = buyOrderValidator;
             _buyOrderMapper = buyOrderMapper;
             _userOperationRepository = userOperationRepository;
+            _accountRepository = accountRepository;
         }
 
         public Task<BuyOrderResponse> CreateBuyOrder(BuyOrderRequest? buyOrderRequest)
@@ -49,14 +52,17 @@ namespace StockApp.Application.Services
                 Description = $"Bought {buyOrder.Quantity} shares of {buyOrder.StockSymbol} at {buyOrder.Price:C}"
             });
 
-            // Update holdings
-            var holding = _userHoldingRepository.GetBySymbol(buyOrder.UserID, buyOrder.StockSymbol);
-            if (holding == null)
+            // Update holdings (Cash)
+            var account = _accountRepository.GetByUserID(buyOrder.UserID) 
+                ?? throw new InvalidOperationException("User has no account");
+
+            var cash = _cashRepository.GetBySymbol(account.AccountID, buyOrder.StockSymbol);
+            if (cash == null)
             {
-                _userHoldingRepository.Add(new Domain.Entities.UserHolding
+                _cashRepository.Add(new Domain.Entities.Cash
                 {
-                    HoldingID = Guid.NewGuid(),
-                    UserID = buyOrder.UserID,
+                    CashID = Guid.NewGuid(),
+                    AccountID = account.AccountID,
                     StockSymbol = buyOrder.StockSymbol,
                     StockName = buyOrder.StockName,
                     Quantity = buyOrder.Quantity
@@ -64,8 +70,8 @@ namespace StockApp.Application.Services
             }
             else
             {
-                holding.Quantity += buyOrder.Quantity;
-                _userHoldingRepository.Update(holding);
+                cash.Quantity += buyOrder.Quantity;
+                _cashRepository.Update(cash);
             }
 
             return Task.FromResult(_buyOrderMapper.MapToResponse(buyOrder));

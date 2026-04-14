@@ -95,7 +95,8 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IBuyOrderRepository, BuyOrderRepository>();
 builder.Services.AddScoped<ISellOrderRepository, SellOrderRepository>();
 builder.Services.AddScoped<IUserOperationRepository, UserOperationRepository>();
-builder.Services.AddScoped<IUserHoldingRepository, UserHoldingRepository>();
+builder.Services.AddScoped<ICashRepository, CashRepository>();
+builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IUserDetailsRepository, UserDetailsRepository>();
 
 builder.Services.AddScoped<IRequestValidator<BuyOrderRequest>, DataAnnotationsRequestValidator<BuyOrderRequest>>();
@@ -106,15 +107,15 @@ builder.Services.AddScoped<IBuyOrdersService, BuyOrdersService>();
 builder.Services.AddScoped<ISellOrdersService, SellOrdersService>();
 if (provider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
 {
-    builder.Services.AddScoped<IAccountService, AccountService>();
+    builder.Services.AddScoped<IAccountService, AccountAuthService>();
     builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
-    builder.Services.AddScoped<IUserBalanceService, UserBalanceService>();
+    builder.Services.AddScoped<IAccountProfileService, AccountProfileService>();
 }
 else
 {
     builder.Services.AddScoped<IAccountService, StockApp.Infrastructure.Services.InMemoryAccountService>();
     builder.Services.AddScoped<IRefreshTokenService, StockApp.Infrastructure.Services.InMemoryRefreshTokenService>();
-    builder.Services.AddSingleton<IUserBalanceService, StockApp.Infrastructure.Services.InMemoryUserBalanceService>();
+    builder.Services.AddScoped<IAccountProfileService, AccountProfileService>(); // Using same implementation for simplified in-memory
 }
 
 builder.Services.AddEndpointsApiExplorer();

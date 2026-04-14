@@ -1,13 +1,15 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace StockApp.Domain.Entities
 {
-    public class UserHolding
+    public class Cash
     {
         [Key]
-        public Guid HoldingID { get; set; }
+        public Guid CashID { get; set; }
 
-        public Guid UserID { get; set; }
+        public Guid AccountID { get; set; }
+        public virtual Account Account { get; set; } = null!;
 
         [Required]
         public string StockSymbol { get; set; } = string.Empty;
