@@ -1,4 +1,5 @@
 import StatsGrid from './StatsGrid';
+import NewsFeed from './NewsFeed';
 
 function Dashboard({ user, data, handleCashAction }) {
   return (
@@ -9,6 +10,8 @@ function Dashboard({ user, data, handleCashAction }) {
       </div>
 
       <StatsGrid data={data} handleCashAction={handleCashAction} />
+
+      <NewsFeed />
     </main>
   );
 }
