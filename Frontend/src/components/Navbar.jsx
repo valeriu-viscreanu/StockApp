@@ -6,19 +6,37 @@ import EditDetailsModal from './EditDetailsModal';
 function Navbar({ theme, toggleTheme }) {
   const { user, token, handleLogout } = useAuth();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <nav className="navbar">
-      <NavLink to="/dashboard" className="brand">
-        <span>&#128200;</span> Stocks
-      </NavLink>
-      <div className="nav-links">
-        <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''}>Dashboard</NavLink>
-        <NavLink to="/trade" className={({ isActive }) => isActive ? 'active' : ''}>Trade</NavLink>
-        <NavLink to="/orders" className={({ isActive }) => isActive ? 'active' : ''}>Orders</NavLink>
-        <NavLink to="/activities" className={({ isActive }) => isActive ? 'active' : ''}>Activities</NavLink>
-        <NavLink to="/cash" className={({ isActive }) => isActive ? 'active' : ''}>Cash</NavLink>
+      <div className="navbar-left">
+        <NavLink to="/dashboard" className="brand">
+          <span>&#128200;</span> Stocks
+        </NavLink>
+        <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)}>
+          <span className="bar"></span>
+          <span className="bar"></span>
+          <span className="bar"></span>
+        </button>
       </div>
+
+      <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
+        <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Dashboard</NavLink>
+        <NavLink to="/trade" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Trade</NavLink>
+        <NavLink to="/orders" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Orders</NavLink>
+        <NavLink to="/activities" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Activities</NavLink>
+        <NavLink to="/cash" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Cash</NavLink>
+
+        {/* Mobile-only logout/theme (optional, but good for UX) */}
+        <div className="mobile-actions">
+          <button className="theme-toggle" onClick={toggleTheme}>
+            {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+          </button>
+          <button onClick={handleLogout} className="btn-logout-mobile">Logout</button>
+        </div>
+      </div>
+
       <div className="nav-right">
         <button
           className="user-badge"
@@ -32,7 +50,7 @@ function Navbar({ theme, toggleTheme }) {
         </button>
         <button
           onClick={handleLogout}
-          style={{ background: '#dc3545', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontWeight: 600, marginLeft: '12px' }}
+          className="btn-logout"
         >
           Logout
         </button>
