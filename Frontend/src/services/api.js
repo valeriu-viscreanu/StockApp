@@ -155,3 +155,9 @@ export const fetchRoles = async () => {
   if (response.ok) return await response.json();
   return [];
 };
+
+export const fetchNews = async () => {
+  const response = await fetch(`${API_BASE}/News`);
+  if (response.ok) return await response.json();
+  return null;
+};
