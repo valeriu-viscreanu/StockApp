@@ -21,5 +21,7 @@ namespace StockApp.Domain.Entities
         public double Price { get; set; }
 
         public Guid UserID { get; set; }
+
+        public string Status { get; set; } = "Pending";
     }
 }

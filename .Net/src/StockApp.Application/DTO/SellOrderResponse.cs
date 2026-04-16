@@ -9,5 +9,6 @@ namespace StockApp.Application.DTO
         public uint Quantity { get; set; }
         public double Price { get; set; }
         public double TradeAmount { get; set; }
+        public string Status { get; set; } = string.Empty;
     }
 }

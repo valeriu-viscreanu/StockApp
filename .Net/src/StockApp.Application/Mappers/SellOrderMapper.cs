@@ -30,7 +30,8 @@ namespace StockApp.Application.Mappers
                 DateAndTimeOfOrder = entity.DateAndTimeOfOrder,
                 Quantity = entity.Quantity,
                 Price = entity.Price,
-                TradeAmount = entity.Quantity * entity.Price
+                TradeAmount = entity.Quantity * entity.Price,
+                Status = entity.Status
             };
         }
     }

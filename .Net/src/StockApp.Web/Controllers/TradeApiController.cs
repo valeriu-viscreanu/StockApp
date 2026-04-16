@@ -19,6 +19,8 @@ namespace StockApp.Controllers
         private readonly IMarketDataService _marketDataService;
         private readonly ICashRepository _cashRepository;
         private readonly IAccountRepository _accountRepository;
+        private readonly IBuyOrderRepository _buyOrderRepository;
+        private readonly ISellOrderRepository _sellOrderRepository;
 
         [HttpGet("popular-stocks")]
         public ActionResult<List<PopularStockResponse>> GetPopularStocks()
@@ -63,7 +65,9 @@ namespace StockApp.Controllers
             IAccountProfileService accountProfileService,
             IMarketDataService marketDataService,
             ICashRepository cashRepository,
-            IAccountRepository accountRepository)
+            IAccountRepository accountRepository,
+            IBuyOrderRepository buyOrderRepository,
+            ISellOrderRepository sellOrderRepository)
         {
             _stockProfileService = stockProfileService;
             _stockQuoteService = stockQuoteService;
@@ -73,6 +77,8 @@ namespace StockApp.Controllers
             _marketDataService = marketDataService;
             _cashRepository = cashRepository;
             _accountRepository = accountRepository;
+            _buyOrderRepository = buyOrderRepository;
+            _sellOrderRepository = sellOrderRepository;
         }
 
         [HttpGet("profile/{stockSymbol}")]
@@ -186,7 +192,22 @@ namespace StockApp.Controllers
                     }
                 }
 
+                // Create order with Pending status
                 var response = await _buyOrdersService.CreateBuyOrder(buyOrderRequest);
+
+                // Simulate order processing
+                await Task.Delay(1000);
+
+                // Mark order as Processed
+                var orders = _buyOrderRepository.GetByUserID(buyOrderRequest.UserID);
+                var order = orders.FirstOrDefault(o => o.BuyOrderID == response.BuyOrderID);
+                if (order != null)
+                {
+                    order.Status = "Processed";
+                    _buyOrderRepository.Update(order);
+                    response.Status = "Processed";
+                }
+
                 return CreatedAtAction(nameof(GetOrders), response);
             }
             catch (ArgumentException)
@@ -253,9 +274,23 @@ namespace StockApp.Controllers
                     }
                 }
 
+                // Create order with Pending status
                 var response = await _sellOrdersService.CreateSellOrder(sellOrderRequest);
-                
-                // Only add balance after order is successfully validated and created
+
+                // Simulate order processing
+                await Task.Delay(1000);
+
+                // Mark order as Processed
+                var orders = _sellOrderRepository.GetByUserID(sellOrderRequest.UserID);
+                var order = orders.FirstOrDefault(o => o.SellOrderID == response.SellOrderID);
+                if (order != null)
+                {
+                    order.Status = "Processed";
+                    _sellOrderRepository.Update(order);
+                    response.Status = "Processed";
+                }
+
+                // Only add balance after order is successfully processed
                 if (Guid.TryParse(userIdString, out Guid validUserId))
                 {
                     double totalProceeds = sellOrderRequest.Price * sellOrderRequest.Quantity;

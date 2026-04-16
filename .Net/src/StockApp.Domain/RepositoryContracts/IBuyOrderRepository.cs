@@ -5,6 +5,7 @@ namespace StockApp.Domain.RepositoryContracts
     public interface IBuyOrderRepository
     {
         void Add(BuyOrder order);
+        void Update(BuyOrder order);
         List<BuyOrder> GetAll();
         List<BuyOrder> GetByUserID(Guid userID);
     }

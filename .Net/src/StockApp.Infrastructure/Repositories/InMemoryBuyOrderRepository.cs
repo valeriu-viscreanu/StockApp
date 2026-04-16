@@ -13,6 +13,11 @@ namespace StockApp.Infrastructure.Repositories
             _orders.Add(order);
         }
 
+        public void Update(BuyOrder order)
+        {
+            // In-memory: object reference is already updated in the list
+        }
+
         public List<BuyOrder> GetAll()
         {
             return _orders.ToList();

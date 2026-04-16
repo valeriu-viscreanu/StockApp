@@ -19,6 +19,12 @@ public class SellOrderRepository : ISellOrderRepository
         _dbContext.SaveChanges();
     }
 
+    public void Update(SellOrder order)
+    {
+        _dbContext.SellOrders.Update(order);
+        _dbContext.SaveChanges();
+    }
+
     public List<SellOrder> GetAll()
     {
         return _dbContext.SellOrders.ToList();
