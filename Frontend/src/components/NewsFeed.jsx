@@ -36,18 +36,19 @@ function NewsFeed() {
             <div className="news-scroll-area">
                 {newsItems.map((item) => (
                     <div key={item.id || item.ID} className="news-item">
-                        {item.image && (
-                            <div className="news-image-container">
+                        <div className="news-image-container">
+                            {item.image && (
                                 <img
                                     src={item.image}
                                     alt="News thumbnail"
                                     className="news-image"
                                     onError={(e) => {
-                                        e.target.parentElement.style.display = 'none';
+                                        // Hide only the image, keep the container's space
+                                        e.target.style.display = 'none';
                                     }}
                                 />
-                            </div>
-                        )}
+                            )}
+                        </div>
                         <div className="news-content">
                             <h3 className="news-headline">{item.headline}</h3>
                             <p className="news-text">{item.text}</p>

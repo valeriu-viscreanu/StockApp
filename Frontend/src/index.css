@@ -44,7 +44,8 @@ body {
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
-    z-index: 1000; /* Increased to ensure it's above other elements */
+    z-index: 1000;
+    /* Increased to ensure it's above other elements */
     transition: background-color 0.3s, border-color 0.3s;
 }
 
@@ -170,7 +171,8 @@ body {
         display: none;
         flex-direction: column;
         position: absolute;
-        top: 61px; /* Navbar height */
+        top: 61px;
+        /* Navbar height */
         left: 0;
         width: 100%;
         background: var(--nav-bg);
@@ -178,7 +180,7 @@ body {
         padding: 20px;
         margin-left: 0;
         gap: 10px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
 
     .nav-links.open {
@@ -197,7 +199,8 @@ body {
 
     .nav-right .btn-logout,
     .nav-right .theme-toggle {
-        display: none; /* Hidden on mobile to move to links menu */
+        display: none;
+        /* Hidden on mobile to move to links menu */
     }
 
     .mobile-actions {
@@ -1243,6 +1246,7 @@ body {
     font-size: 0.85rem;
     font-style: italic;
 }
+
 /* ===== News Feed ===== */
 .news-feed-container {
     margin-top: 50px;
@@ -1300,6 +1304,10 @@ body {
     flex: 0 0 160px;
     width: 160px;
     height: 100px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .news-image {
@@ -1307,12 +1315,13 @@ body {
     height: 100%;
     object-fit: cover;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .news-content {
     flex: 1;
-    min-width: 0; /* Important for text wrapping in flexbox */
+    min-width: 0;
+    /* Important for text wrapping in flexbox */
 }
 
 .news-headline {
@@ -1336,15 +1345,14 @@ body {
         flex-direction: column;
         gap: 15px;
     }
-    
+
     .news-image-container {
         flex: none;
         width: 100%;
         height: 180px;
     }
-    
+
     .news-image {
         height: 100%;
     }
 }
-
