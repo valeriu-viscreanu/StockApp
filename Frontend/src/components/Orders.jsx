@@ -13,7 +13,10 @@ function Orders({ buyOrders, sellOrders, totalBuyAmount, totalSellAmount }) {
             <p className="no-orders">No buy orders yet.</p>
           ) : (
             buyOrders.map(order => (
-              <div key={order.id} className="order-card">
+              <div key={order.id || order.buyOrderID} className="order-card">
+                <span className={`status-badge ${order.status?.toLowerCase() === 'pending' ? 'status-pending' : 'status-processed'}`}>
+                  {order.status || 'Processed'}
+                </span>
                 <div className="order-stock-name">{order.stockName} ({order.stockSymbol})</div>
                 <div className="order-details">
                   <span className="order-quantity">{order.quantity} shares</span> at <span className="order-price">${order.price.toFixed(2)}</span>
@@ -34,7 +37,10 @@ function Orders({ buyOrders, sellOrders, totalBuyAmount, totalSellAmount }) {
             <p className="no-orders">No sell orders yet.</p>
           ) : (
             sellOrders.map(order => (
-              <div key={order.id} className="order-card">
+              <div key={order.id || order.sellOrderID} className="order-card">
+                <span className={`status-badge ${order.status?.toLowerCase() === 'pending' ? 'status-pending' : 'status-processed'}`}>
+                  {order.status || 'Processed'}
+                </span>
                 <div className="order-stock-name">{order.stockName} ({order.stockSymbol})</div>
                 <div className="order-details">
                   <span className="order-quantity">{order.quantity} shares</span> at <span className="order-price">${order.price.toFixed(2)}</span>
