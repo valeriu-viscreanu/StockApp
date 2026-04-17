@@ -29,7 +29,7 @@ namespace StockApp.Application.Services
             _accountRepository = accountRepository;
         }
 
-        public Task<BuyOrderResponse> CreateBuyOrder(BuyOrderRequest? buyOrderRequest)
+        public async Task<BuyOrderResponse> CreateBuyOrder(BuyOrderRequest? buyOrderRequest)
         {
             if (buyOrderRequest == null)
             {
@@ -39,6 +39,7 @@ namespace StockApp.Application.Services
             _buyOrderValidator.Validate(buyOrderRequest);
 
             var buyOrder = _buyOrderMapper.MapToEntity(buyOrderRequest);
+            buyOrder.Status = "Pending";
             _buyOrderRepository.Add(buyOrder);
 
             _userOperationRepository.Add(new Domain.Entities.UserOperation
@@ -74,17 +75,23 @@ namespace StockApp.Application.Services
                 _cashRepository.Update(cash);
             }
 
-            return Task.FromResult(_buyOrderMapper.MapToResponse(buyOrder));
+            // Simulate order processing
+            await Task.Delay(500);
+
+            buyOrder.Status = "Processed";
+            _buyOrderRepository.Update(buyOrder);
+
+            return _buyOrderMapper.MapToResponse(buyOrder);
         }
 
-        public Task<List<BuyOrderResponse>> GetBuyOrders(Guid userID)
+        public async Task<List<BuyOrderResponse>> GetBuyOrders(Guid userID)
         {
             var buyOrderResponses = _buyOrderRepository
                 .GetByUserID(userID)
                 .Select(_buyOrderMapper.MapToResponse)
                 .ToList();
 
-            return Task.FromResult(buyOrderResponses);
+            return await Task.FromResult(buyOrderResponses);
         }
     }
 }

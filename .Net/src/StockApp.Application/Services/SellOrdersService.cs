@@ -29,7 +29,7 @@ namespace StockApp.Application.Services
             _accountRepository = accountRepository;
         }
 
-        public Task<SellOrderResponse> CreateSellOrder(SellOrderRequest? sellOrderRequest)
+        public async Task<SellOrderResponse> CreateSellOrder(SellOrderRequest? sellOrderRequest)
         {
             if (sellOrderRequest == null)
             {
@@ -39,6 +39,7 @@ namespace StockApp.Application.Services
             _sellOrderValidator.Validate(sellOrderRequest);
 
             var sellOrder = _sellOrderMapper.MapToEntity(sellOrderRequest);
+            sellOrder.Status = "Pending";
             _sellOrderRepository.Add(sellOrder);
 
             // Update holdings (Cash)
@@ -70,17 +71,23 @@ namespace StockApp.Application.Services
                 Description = $"Sold {sellOrder.Quantity} shares of {sellOrder.StockSymbol} at {sellOrder.Price:C}"
             });
 
-            return Task.FromResult(_sellOrderMapper.MapToResponse(sellOrder));
+            // Simulate order processing
+            await Task.Delay(500);
+
+            sellOrder.Status = "Processed";
+            _sellOrderRepository.Update(sellOrder);
+
+            return _sellOrderMapper.MapToResponse(sellOrder);
         }
 
-        public Task<List<SellOrderResponse>> GetSellOrders(Guid userID)
+        public async Task<List<SellOrderResponse>> GetSellOrders(Guid userID)
         {
             var sellOrderResponses = _sellOrderRepository
                 .GetByUserID(userID)
                 .Select(_sellOrderMapper.MapToResponse)
                 .ToList();
 
-            return Task.FromResult(sellOrderResponses);
+            return await Task.FromResult(sellOrderResponses);
         }
     }
 }
