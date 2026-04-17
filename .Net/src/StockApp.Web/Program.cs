@@ -98,6 +98,7 @@ builder.Services.AddScoped<IUserOperationRepository, UserOperationRepository>();
 builder.Services.AddScoped<ICashRepository, CashRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IUserDetailsRepository, UserDetailsRepository>();
+builder.Services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
 
 builder.Services.AddScoped<IRequestValidator<BuyOrderRequest>, DataAnnotationsRequestValidator<BuyOrderRequest>>();
 builder.Services.AddScoped<IRequestValidator<SellOrderRequest>, DataAnnotationsRequestValidator<SellOrderRequest>>();

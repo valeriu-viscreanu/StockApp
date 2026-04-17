@@ -1,5 +1,6 @@
 using StockApp.Domain.Entities;
 using StockApp.Domain.RepositoryContracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace StockApp.Infrastructure.Database.Repositories;
 
@@ -27,11 +28,14 @@ public class SellOrderRepository : ISellOrderRepository
 
     public List<SellOrder> GetAll()
     {
-        return _dbContext.SellOrders.ToList();
+        return _dbContext.SellOrders.Include(o => o.OrderStatus).ToList();
     }
 
     public List<SellOrder> GetByUserID(Guid userID)
     {
-        return _dbContext.SellOrders.Where(so => so.UserID == userID).ToList();
+        return _dbContext.SellOrders
+            .Include(o => o.OrderStatus)
+            .Where(so => so.UserID == userID)
+            .ToList();
     }
 }

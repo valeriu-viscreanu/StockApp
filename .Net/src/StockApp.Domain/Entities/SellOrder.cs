@@ -22,6 +22,7 @@ namespace StockApp.Domain.Entities
 
         public Guid UserID { get; set; }
 
-        public string Status { get; set; } = "Pending";
+        public Guid OrderStatusID { get; set; }
+        public virtual OrderStatus OrderStatus { get; set; } = null!;
     }
 }

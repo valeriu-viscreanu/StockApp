@@ -31,7 +31,7 @@ namespace StockApp.Application.Mappers
                 Quantity = entity.Quantity,
                 Price = entity.Price,
                 TradeAmount = entity.Quantity * entity.Price,
-                Status = entity.Status
+                Status = entity.OrderStatus?.StatusName ?? "Pending"
             };
         }
     }

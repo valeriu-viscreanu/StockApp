@@ -12,6 +12,7 @@ namespace StockApp.Application.Services
         private readonly ISellOrderMapper _sellOrderMapper;
         private readonly IUserOperationRepository _userOperationRepository;
         private readonly IAccountRepository _accountRepository;
+        private readonly IOrderStatusRepository _orderStatusRepository;
 
         public SellOrdersService(
             ISellOrderRepository sellOrderRepository,
@@ -19,7 +20,8 @@ namespace StockApp.Application.Services
             IRequestValidator<SellOrderRequest> sellOrderValidator,
             ISellOrderMapper sellOrderMapper,
             IUserOperationRepository userOperationRepository,
-            IAccountRepository accountRepository)
+            IAccountRepository accountRepository,
+            IOrderStatusRepository orderStatusRepository)
         {
             _sellOrderRepository = sellOrderRepository;
             _cashRepository = cashRepository;
@@ -27,6 +29,7 @@ namespace StockApp.Application.Services
             _sellOrderMapper = sellOrderMapper;
             _userOperationRepository = userOperationRepository;
             _accountRepository = accountRepository;
+            _orderStatusRepository = orderStatusRepository;
         }
 
         public async Task<SellOrderResponse> CreateSellOrder(SellOrderRequest? sellOrderRequest)
@@ -39,7 +42,9 @@ namespace StockApp.Application.Services
             _sellOrderValidator.Validate(sellOrderRequest);
 
             var sellOrder = _sellOrderMapper.MapToEntity(sellOrderRequest);
-            sellOrder.Status = "Pending";
+            var pendingStatus = await _orderStatusRepository.GetByName("Pending");
+            sellOrder.OrderStatusID = pendingStatus?.OrderStatusID ?? Guid.Empty;
+            sellOrder.OrderStatus = pendingStatus!;
             _sellOrderRepository.Add(sellOrder);
 
             // Update holdings (Cash)
@@ -74,7 +79,9 @@ namespace StockApp.Application.Services
             // Simulate order processing
             await Task.Delay(500);
 
-            sellOrder.Status = "Processed";
+            var processedStatus = await _orderStatusRepository.GetByName("Processed");
+            sellOrder.OrderStatusID = processedStatus?.OrderStatusID ?? Guid.Empty;
+            sellOrder.OrderStatus = processedStatus!;
             _sellOrderRepository.Update(sellOrder);
 
             return _sellOrderMapper.MapToResponse(sellOrder);

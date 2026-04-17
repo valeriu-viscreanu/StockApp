@@ -20,6 +20,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Cash> CashAllocations { get; set; } = null!;
     public DbSet<UserDetails> UserDetails { get; set; } = null!;
     public DbSet<UserRole> UserRoles { get; set; } = null!;
+    public DbSet<OrderStatus> OrderStatuses { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +33,10 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.StockSymbol).IsRequired().HasMaxLength(10);
             entity.Property(e => e.StockName).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Price).HasColumnType("decimal(18,4)");
+
+            entity.HasOne(e => e.OrderStatus)
+                .WithMany()
+                .HasForeignKey(e => e.OrderStatusID);
         });
 
         // Configuration for SellOrder
@@ -41,6 +46,10 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.StockSymbol).IsRequired().HasMaxLength(10);
             entity.Property(e => e.StockName).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Price).HasColumnType("decimal(18,4)");
+
+            entity.HasOne(e => e.OrderStatus)
+                .WithMany()
+                .HasForeignKey(e => e.OrderStatusID);
         });
 
         // Configuration for ApplicationUser
@@ -172,6 +181,20 @@ public class ApplicationDbContext : DbContext
             entity.HasOne<ApplicationUser>()
                 .WithOne()
                 .HasForeignKey<UserDetails>(e => e.UserID);
+        });
+
+        // Configuration for OrderStatus
+        modelBuilder.Entity<OrderStatus>(entity =>
+        {
+            entity.HasKey(e => e.OrderStatusID);
+            entity.Property(e => e.StatusName).IsRequired().HasMaxLength(50);
+
+            entity.HasData(
+                new OrderStatus { OrderStatusID = Guid.Parse("20000000-0000-0000-0000-000000000001"), StatusName = "Pending" },
+                new OrderStatus { OrderStatusID = Guid.Parse("20000000-0000-0000-0000-000000000002"), StatusName = "Authorized" },
+                new OrderStatus { OrderStatusID = Guid.Parse("20000000-0000-0000-0000-000000000003"), StatusName = "Processed" },
+                new OrderStatus { OrderStatusID = Guid.Parse("20000000-0000-0000-0000-000000000004"), StatusName = "Canceled" }
+            );
         });
     }
 }
