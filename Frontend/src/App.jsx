@@ -58,13 +58,13 @@ function App() {
         const sOrders = (ordersData.sellOrders || []).map(mapOrder);
         setBuyOrders(bOrders);
         setSellOrders(sOrders);
-        setUserHoldings((ordersData.currentHoldings || []).map(h => h.stockSymbol.toUpperCase()));
+        setUserHoldings(ordersData.currentHoldings || []);
 
         const totalBought = bOrders.reduce((sum, o) => sum + o.quantity, 0);
         const totalSold = sOrders.reduce((sum, o) => sum + o.quantity, 0);
         const totalBuyValue = bOrders.reduce((sum, o) => sum + o.tradeAmount, 0);
         const totalSellValue = sOrders.reduce((sum, o) => sum + o.tradeAmount, 0);
-        
+
         setData(prev => ({
           ...prev,
           stocks: totalBought - totalSold,
@@ -130,7 +130,7 @@ function App() {
       quantity,
       price: selectedStock.price
     };
-    
+
     const result = await api.createOrder(type, orderData, token, handleLogout);
     if (result.data) {
       setTradeMessage(`${type === 'buy' ? 'Bought' : 'Sold'} ${quantity} share(s) of ${selectedStock.symbol}`);
@@ -155,11 +155,11 @@ function App() {
 
   if (!isLoggedIn) {
     return showRegister ? (
-      <Register 
+      <Register
         onSwitchToLogin={() => { setShowRegister(false); }}
       />
     ) : (
-      <Login 
+      <Login
         onSwitchToRegister={() => { setShowRegister(true); }}
       />
     );
@@ -173,23 +173,23 @@ function App() {
       <Routes>
         <Route path="/" element={<Dashboard user={user} data={data} handleCashAction={handleCashAction} />} />
         <Route path="/dashboard" element={<Dashboard user={user} data={data} handleCashAction={handleCashAction} />} />
-        <Route 
-          path="/trade" 
+        <Route
+          path="/trade"
           element={
-            <Trade 
-              popularStocks={popularStocks} 
-              selectedStock={selectedStock} 
-              setSelectedStock={handleSelectStock} 
-              quantity={quantity} 
-              setQuantity={setQuantity} 
-              onBuy={() => executeOrder('buy')} 
-              onSell={() => executeOrder('sell')} 
-              tradeMessage={tradeMessage} 
-              stockChartData={stockChartData} 
-              fetchStockChartData={fetchStockChartData} 
+            <Trade
+              popularStocks={popularStocks}
+              selectedStock={selectedStock}
+              setSelectedStock={handleSelectStock}
+              quantity={quantity}
+              setQuantity={setQuantity}
+              onBuy={() => executeOrder('buy')}
+              onSell={() => executeOrder('sell')}
+              tradeMessage={tradeMessage}
+              stockChartData={stockChartData}
+              fetchStockChartData={fetchStockChartData}
               userHoldings={userHoldings}
             />
-          } 
+          }
         />
         <Route path="/orders" element={<Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />} />
         <Route path="/activities" element={<Activities />} />

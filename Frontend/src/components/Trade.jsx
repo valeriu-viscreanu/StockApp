@@ -40,8 +40,8 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
 
   const toggleFavorite = (symbol) => {
     setFavorites(prev => {
-      const newFavs = prev.includes(symbol) 
-        ? prev.filter(s => s !== symbol) 
+      const newFavs = prev.includes(symbol)
+        ? prev.filter(s => s !== symbol)
         : [...prev, symbol];
       localStorage.setItem('favorites', JSON.stringify(newFavs));
       return newFavs;
@@ -52,8 +52,8 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
     const symbolA = a.symbol.toUpperCase();
     const symbolB = b.symbol.toUpperCase();
 
-    const isOwnedA = userHoldings.includes(symbolA);
-    const isOwnedB = userHoldings.includes(symbolB);
+    const isOwnedA = userHoldings.some(h => h.stockSymbol.toUpperCase() === symbolA);
+    const isOwnedB = userHoldings.some(h => h.stockSymbol.toUpperCase() === symbolB);
 
     // Prioritize owned stocks
     if (isOwnedA && !isOwnedB) return -1;
@@ -116,32 +116,35 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
         </div>
 
         <div className="stock-list">
-          {sortedStocks.map(stock => (
-            <a
-              key={stock.symbol}
-              href="#"
-              className={`stock-item ${selectedStock.symbol === stock.symbol ? 'active' : ''}`}
-              onClick={(e) => { e.preventDefault(); setSelectedStock(stock); }}
-            >
-              <div className="stock-icon">{stock.symbol.substring(0, 1)}</div>
-              <div className="stock-details">
-                <span className="stock-symbol" style={{ display: 'flex', alignItems: 'center' }}>
-                  {stock.symbol}
-                  <FavoriteToggle 
-                    symbol={stock.symbol} 
-                    isFavorite={favorites.includes(stock.symbol)} 
-                    onToggle={toggleFavorite} 
-                  />
-                </span>
-                <span className="stock-company">{stock.name}</span>
-              </div>
-              <div className="stock-mini-chart">
-                <span className="stock-mini-price">
-                  {stock.price > 0 ? `$${stock.price.toFixed(2)}` : 'Loading...'}
-                </span>
-              </div>
-            </a>
-          ))}
+          {sortedStocks.map(stock => {
+            const holding = userHoldings.find(h => h.stockSymbol.toUpperCase() === stock.symbol.toUpperCase());
+            return (
+              <a
+                key={stock.symbol}
+                href="#"
+                className={`stock-item ${selectedStock.symbol === stock.symbol ? 'active' : ''}`}
+                onClick={(e) => { e.preventDefault(); setSelectedStock(stock); }}
+              >
+                <div className="stock-icon">{stock.symbol.substring(0, 1)}</div>
+                <div className="stock-details">
+                  <span className="stock-symbol" style={{ display: 'flex', alignItems: 'center' }}>
+                    {stock.symbol}
+                    <FavoriteToggle
+                      symbol={stock.symbol}
+                      isFavorite={favorites.includes(stock.symbol)}
+                      onToggle={toggleFavorite}
+                    />
+                  </span>
+                  <span className="stock-company">{stock.name}</span>
+                </div>
+                <div className="stock-mini-chart">
+                  <span className="stock-mini-price">
+                    {stock.price > 0 ? `$${stock.price.toFixed(2)}` : 'Loading...'}
+                  </span>
+                </div>
+              </a>
+            );
+          })}
         </div>
       </div>
 
@@ -150,10 +153,10 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
           <div className="stock-info">
             <h1 className="stock-name" style={{ display: 'flex', alignItems: 'center' }}>
               {selectedStock.name} ({selectedStock.symbol})
-              <FavoriteToggle 
-                symbol={selectedStock.symbol} 
-                isFavorite={favorites.includes(selectedStock.symbol)} 
-                onToggle={toggleFavorite} 
+              <FavoriteToggle
+                symbol={selectedStock.symbol}
+                isFavorite={favorites.includes(selectedStock.symbol)}
+                onToggle={toggleFavorite}
               />
             </h1>
             <div className="stock-price">
@@ -161,6 +164,23 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
               <span className="price-value">
                 {selectedStock.price > 0 ? selectedStock.price.toFixed(2) : '...'}
               </span>
+              {userHoldings.find(h => h.stockSymbol.toUpperCase() === selectedStock.symbol.toUpperCase()) && (
+                <div style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  marginLeft: '15px',
+                  fontSize: '0.9rem',
+                  background: 'rgba(0, 209, 158, 0.1)',
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(0, 209, 158, 0.2)',
+                  color: 'var(--primary)',
+                  fontWeight: '600'
+                }}>
+                  <span style={{ marginRight: '5px', opacity: 0.8 }}>Owned:</span>
+                  {userHoldings.find(h => h.stockSymbol.toUpperCase() === selectedStock.symbol.toUpperCase()).quantity} shares
+                </div>
+              )}
             </div>
             <div className="stock-price-label">Live Market Price</div>
           </div>
