@@ -164,25 +164,20 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
               <span className="price-value">
                 {selectedStock.price > 0 ? selectedStock.price.toFixed(2) : '...'}
               </span>
-              {userHoldings.find(h => h.stockSymbol.toUpperCase() === selectedStock.symbol.toUpperCase()) && (
-                <div style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  marginLeft: '15px',
-                  fontSize: '0.9rem',
-                  background: 'rgba(0, 209, 158, 0.1)',
-                  padding: '4px 10px',
-                  borderRadius: '6px',
-                  border: '1px solid rgba(0, 209, 158, 0.2)',
-                  color: 'var(--primary)',
-                  fontWeight: '600'
-                }}>
-                  <span style={{ marginRight: '5px', opacity: 0.8 }}>Owned:</span>
-                  {userHoldings.find(h => h.stockSymbol.toUpperCase() === selectedStock.symbol.toUpperCase()).quantity} shares
-                </div>
-              )}
             </div>
             <div className="stock-price-label">Live Market Price</div>
+            {userHoldings.find(h => h.stockSymbol.toUpperCase() === selectedStock.symbol.toUpperCase()) && (
+              <div style={{
+                marginTop: '8px',
+                fontSize: '0.95rem',
+                color: 'var(--text-muted)'
+              }}>
+                <span style={{ marginRight: '5px' }}>Portfolio:</span>
+                <span style={{ fontWeight: '600', color: 'var(--text)' }}>
+                  {userHoldings.find(h => h.stockSymbol.toUpperCase() === selectedStock.symbol.toUpperCase()).quantity} shares
+                </span>
+              </div>
+            )}
           </div>
 
           <div className="order-panel">

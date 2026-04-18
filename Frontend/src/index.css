@@ -647,8 +647,13 @@ body {
 }
 
 .stock-price-label {
-    color: #888;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 2px;
+    display: inline-block;
 }
 
 .order-panel {
