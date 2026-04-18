@@ -14,10 +14,15 @@
 ## 🗺️ 2. PROJECT TOPOLOGY (Don't search blindly)
 This is a hybrid web application. Do not waste tokens scanning directories; instead, read the architectural maps based on your current task:
 
-*   **Backend Details**: Read `c:\Code\StockApp\.Net\AGENT_CONTEXT.md` for C# Clean Architecture mapping and services.
-*   **Frontend Details**: Read `c:\Code\StockApp\Frontend\AGENT_CONTEXT.md` for React components, styling, and `api.js` mappings.
+*   **Backend Details**: Read `./.Net/AGENT_CONTEXT.md` for C# Clean Architecture mapping and services.
+*   **Frontend Details**: Read `./Frontend/AGENT_CONTEXT.md` for React components, styling, and `api.js` mappings.
 
 **⚠️ STRICT RULE 5 (MAINTENANCE)**: Agents must proactively edit the relevant `AGENT_CONTEXT.md` files if they make structural changes or introduce major new architectural patterns.
+
+## 🚀 2.5 STARTING THE APPLICATION
+To save tokens, use these commands immediately when asked to "start the app":
+- **Backend**: `cd .Net/src/StockApp.Web && dotnet watch run`
+- **Frontend**: `cd Frontend && npm run dev`
 
 ## 🎯 3. CURRENT TASK STATE
 - **Check `todo.md`**: Found at `<project_root>\todo.md`. ALWAYS read this file first to understand the current checklist and objective before taking action.

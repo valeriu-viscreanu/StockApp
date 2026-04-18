@@ -6,7 +6,7 @@ This file maps the frontend architecture so agents do not need to scan directori
 - React / Vite / CSS Modules (Vanilla JS)
 
 ## Architecture
-The frontend is built as a Single Page Application (SPA) located at `c:\Code\StockApp\Frontend\src\`.
+The frontend is built as a Single Page Application (SPA) located at `./src/`.
 
 ### Directory Structure
 - **`components/`**: All visual React UI components.

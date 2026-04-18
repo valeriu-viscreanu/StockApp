@@ -6,7 +6,7 @@ This file maps the backend architecture so agents do not need to scan directorie
 - C# / .NET 8 / ASP.NET Core MVC & API
 
 ## Architecture (Clean Architecture Pattern)
-The backend is located in `c:\Code\StockApp\.Net\src\` and separated into four main projects:
+The backend is located in `./src/` and separated into four main projects:
 
 1.  **`StockApp.Application`**: 
     - Purpose: Interfaces, DTOs, and Business Logic.
@@ -25,4 +25,4 @@ The backend is located in `c:\Code\StockApp\.Net\src\` and separated into four m
     - Key Files: `TradeApiController.cs`, `Program.cs`.
 
 ## Development Commands
-- Start Server: `dotnet run` (Typically runs on `http://localhost:5002` or `5000`).
+- Start Server: `dotnet watch run` (Run from `./src/StockApp.Web`).
