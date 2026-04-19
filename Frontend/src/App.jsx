@@ -169,7 +169,11 @@ function App() {
 
   return (
     <div className="layout">
-      <Navbar theme={theme} toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')} />
+      <Navbar
+        theme={theme}
+        toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')}
+        totalValue={data.totalValue}
+      />
       <Routes>
         <Route path="/" element={<Dashboard user={user} data={data} handleCashAction={handleCashAction} />} />
         <Route path="/dashboard" element={<Dashboard user={user} data={data} handleCashAction={handleCashAction} />} />

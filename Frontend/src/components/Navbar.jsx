@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { NavLink } from 'react-router-dom';
 import EditDetailsModal from './EditDetailsModal';
 
-function Navbar({ theme, toggleTheme }) {
+function Navbar({ theme, toggleTheme, totalValue = 0 }) {
   const { user, token, handleLogout } = useAuth();
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -38,6 +38,10 @@ function Navbar({ theme, toggleTheme }) {
       </div>
 
       <div className="nav-right">
+        <div className="portfolio-badge">
+          <span className="portfolio-label">Portfolio:</span>
+          <span className="portfolio-amount">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+        </div>
         <button
           className="user-badge"
           onClick={() => setIsDetailsOpen(true)}

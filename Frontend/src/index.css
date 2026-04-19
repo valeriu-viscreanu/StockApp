@@ -136,6 +136,31 @@ body {
     color: #fff;
 }
 
+.portfolio-badge {
+    font-weight: 700;
+    font-size: 0.85rem;
+    background: var(--border);
+    padding: 6px 14px;
+    border-radius: 20px;
+    color: var(--text);
+    display: flex;
+    gap: 6px;
+    cursor: default;
+    transition: background 0.2s;
+}
+
+.portfolio-label {
+    opacity: 0.8;
+    font-weight: 500;
+}
+
+@media (max-width: 600px) {
+    .portfolio-badge {
+        display: none;
+        /* Hide on mobile to save space */
+    }
+}
+
 .btn-logout {
     background: #dc3545;
     color: #fff;
