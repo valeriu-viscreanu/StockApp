@@ -1366,6 +1366,82 @@ body {
     overflow-wrap: break-word;
 }
 
+/* ===== Responsive Trade Page ===== */
+@media (max-width: 1100px) {
+    .trade-container {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .order-panel {
+        flex: none;
+        padding: 20px 0;
+        border-left: none;
+        border-top: 1px solid var(--border);
+        margin-top: 20px;
+    }
+
+    .graph-panel {
+        padding: 20px 0;
+        border-left: none;
+        border-top: 1px solid var(--border);
+        margin-top: 20px;
+    }
+}
+
+@media (max-width: 992px) {
+    .advanced-dashboard {
+        flex-direction: column;
+    }
+
+    .sidebar-panel {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        max-height: 400px;
+    }
+
+    .main-view-panel {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 600px) {
+    .price-value {
+        font-size: 2.2rem;
+    }
+
+    .stock-name {
+        font-size: 1.3rem;
+    }
+
+    .trade-container {
+        padding: 15px;
+    }
+
+    .order-buttons {
+        gap: 10px;
+    }
+
+    .btn-buy,
+    .btn-sell {
+        padding: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .orders-total-footer {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 20px;
+    }
+
+    .sidebar-panel {
+        max-height: 300px;
+    }
+}
+
 @media (max-width: 768px) {
     .news-item {
         flex-direction: column;
