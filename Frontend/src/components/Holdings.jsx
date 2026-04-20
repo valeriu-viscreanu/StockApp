@@ -1,7 +1,12 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
-function Holdings({ userHoldings = [], popularStocks = [] }) {
-    const isDummy = userHoldings.length === 0;
+function Holdings({ popularStocks = [] }) {
+    const { holdings: userHoldings, balance, totalValue, isSynced } = useSelector((state) => state.portfolio);
+
+    // If we haven't synced yet, we can't be sure if we have holdings or not. 
+    // However, for this demo/exercise, we'll treat empty synced holdings as the trigger for demo data.
+    const isDummy = isSynced && userHoldings.length === 0;
     const holdingsToDisplay = isDummy ? [
         { stockSymbol: 'AAPL', stockName: 'Apple Inc.', quantity: 10 },
         { stockSymbol: 'MSFT', stockName: 'Microsoft Corp.', quantity: 5 },
@@ -19,7 +24,8 @@ function Holdings({ userHoldings = [], popularStocks = [] }) {
         };
     });
 
-    const totalPortfolioValue = displayHoldings.reduce((sum, h) => sum + h.totalValue, 0);
+    const stockMarketValue = displayHoldings.reduce((sum, h) => sum + h.totalValue, 0);
+    const netWorth = isSynced && userHoldings.length > 0 ? totalValue : stockMarketValue + balance;
 
     return (
         <div className="main-view-panel">
@@ -31,13 +37,13 @@ function Holdings({ userHoldings = [], popularStocks = [] }) {
                 <div className="orders-column">
                     <div className="stats-grid" style={{ marginBottom: '30px', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
                         <div className="stat-card">
-                            <div className="stat-label">Total Holdings Value</div>
+                            <div className="stat-label">Portfolio</div>
                             <div className="stat-value" style={{ color: 'var(--primary)' }}>
-                                ${totalPortfolioValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                ${stockMarketValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                             </div>
                         </div>
                         <div className="stat-card">
-                            <div className="stat-label">Unique Stocks Items</div>
+                            <div className="stat-label">Unique Stock Items</div>
                             <div className="stat-value">{displayHoldings.length}</div>
                         </div>
                     </div>

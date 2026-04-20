@@ -10,11 +10,14 @@ import Activities from './components/Activities';
 import Holdings from './components/Holdings';
 import * as api from './services/api';
 import { useAuth } from './context/AuthContext';
+import { useDispatch } from 'react-redux';
+import { setPortfolioData, updateBalance } from './store/slices/portfolioSlice';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
 
 function App() {
   const { isLoggedIn, token, user, setUser, handleLogout } = useAuth();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
   const [showRegister, setShowRegister] = useState(false);
@@ -42,8 +45,7 @@ function App() {
 
     try {
       const balance = await api.fetchBalance(token, handleLogout);
-      if (balance !== null) setData(prev => ({ ...prev, balance }));
-
+      let currentHoldings = userHoldings;
       const ordersData = await api.fetchOrders(token, handleLogout);
       if (ordersData) {
         const mapOrder = (o) => ({
@@ -59,17 +61,16 @@ function App() {
         const sOrders = (ordersData.sellOrders || []).map(mapOrder);
         setBuyOrders(bOrders);
         setSellOrders(sOrders);
-        setUserHoldings(ordersData.currentHoldings || []);
+        currentHoldings = ordersData.currentHoldings || [];
+        setUserHoldings(currentHoldings);
 
         const totalBought = bOrders.reduce((sum, o) => sum + o.quantity, 0);
         const totalSold = sOrders.reduce((sum, o) => sum + o.quantity, 0);
-        const totalBuyValue = bOrders.reduce((sum, o) => sum + o.tradeAmount, 0);
-        const totalSellValue = sOrders.reduce((sum, o) => sum + o.tradeAmount, 0);
 
         setData(prev => ({
           ...prev,
-          stocks: totalBought - totalSold,
-          totalValue: (balance ?? prev.balance) + (totalBuyValue - totalSellValue)
+          balance: balance ?? prev.balance,
+          stocks: totalBought - totalSold
         }));
       }
 
@@ -82,23 +83,49 @@ function App() {
         }
       }
 
-      if (currentStocks.length > 0) {
-        const quotes = await api.fetchStockPrices(currentStocks.map(s => s.symbol), token, handleLogout);
+      const symbolsToFetch = [
+        ...new Set([
+          ...currentStocks.map(s => s.symbol),
+          ...currentHoldings.map(h => h.stockSymbol)
+        ])
+      ];
+
+      if (symbolsToFetch.length > 0) {
+        const quotes = await api.fetchStockPrices(symbolsToFetch, token, handleLogout);
         if (quotes) {
           setPopularStocks(prev => prev.map(stock => ({
             ...stock,
             price: quotes[stock.symbol]?.c || stock.price
           })));
+
           setSelectedStock(prev => ({
             ...prev,
             price: quotes[prev.symbol]?.c || prev.price
           }));
+
+          // Calculate LIVE Stock Value: SUM(Price * Quantity)
+          const marketValue = currentHoldings.reduce((sum, h) => {
+            const price = quotes[h.stockSymbol]?.c || 0;
+            return sum + (price * h.quantity);
+          }, 0);
+
+          const liveNetWorth = (balance ?? data.balance) + marketValue;
+
+          dispatch(setPortfolioData({
+            holdings: currentHoldings,
+            balance: balance ?? data.balance,
+            totalValue: liveNetWorth,
+            stockValue: marketValue,
+            stocksCount: data.stocks
+          }));
+
+          setData(prev => ({ ...prev, totalValue: marketValue, balance: balance ?? prev.balance }));
         }
       }
     } catch (err) {
       console.error('Refresh data error:', err);
     }
-  }, [token, handleLogout]);
+  }, [token, handleLogout, data]);
 
   useEffect(() => {
     if (isLoggedIn && token) {
@@ -146,7 +173,9 @@ function App() {
     try {
       const result = await api.handleCashActionApi(type, finalAmount, token, handleLogout);
       if (result) {
-        setData(prev => ({ ...prev, balance: result.balance }));
+        const newBalance = result.balance;
+        dispatch(updateBalance(newBalance));
+        setData(prev => ({ ...prev, balance: newBalance }));
         if (overrideAmount === undefined) setAmount(100);
       }
     } catch (err) {
@@ -173,7 +202,6 @@ function App() {
       <Navbar
         theme={theme}
         toggleTheme={() => setTheme(p => p === 'light' ? 'dark' : 'light')}
-        totalValue={data.totalValue}
       />
       <Routes>
         <Route path="/" element={<Dashboard user={user} data={data} handleCashAction={handleCashAction} />} />
@@ -192,17 +220,16 @@ function App() {
               tradeMessage={tradeMessage}
               stockChartData={stockChartData}
               fetchStockChartData={fetchStockChartData}
-              userHoldings={userHoldings}
             />
           }
         />
         <Route
           path="/holdings"
-          element={<Holdings userHoldings={userHoldings} popularStocks={popularStocks} />}
+          element={<Holdings popularStocks={popularStocks} />}
         />
         <Route path="/orders" element={<Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />} />
         <Route path="/activities" element={<Activities />} />
-        <Route path="/cash" element={<Cash data={data} handleCashAction={handleCashAction} />} />
+        <Route path="/cash" element={<Cash handleCashAction={handleCashAction} />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </div>

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import PriceChart from './PriceChart';
 import FavoriteToggle from './FavoriteToggle';
 import * as api from '../services/api';
 
-function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQuantity, onBuy, onSell, tradeMessage, stockChartData, fetchStockChartData, userHoldings = [] }) {
+function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQuantity, onBuy, onSell, tradeMessage, stockChartData, fetchStockChartData }) {
+  const userHoldings = useSelector((state) => state.portfolio.holdings);
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem('favorites');
     return saved ? JSON.parse(saved) : [];

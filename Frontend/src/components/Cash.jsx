@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import AddCashModal from './AddCashModal';
 import WithdrawCashModal from './WithdrawCashModal';
 
-function Cash({ data, handleCashAction }) {
+function Cash({ handleCashAction }) {
+  const balance = useSelector((state) => state.portfolio.balance);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
 
@@ -15,7 +17,7 @@ function Cash({ data, handleCashAction }) {
 
         <div className="cash-balance-display">
           <span className="cash-currency">$</span>
-          <span className="cash-amount" id="cash-amount">{data.balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span className="cash-amount" id="cash-amount">{balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
 
         <div className="cash-message">
@@ -37,14 +39,14 @@ function Cash({ data, handleCashAction }) {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onConfirm={(amount) => handleCashAction('add', amount)}
-        currentBalance={data.balance}
+        currentBalance={balance}
       />
 
       <WithdrawCashModal
         isOpen={isWithdrawModalOpen}
         onClose={() => setIsWithdrawModalOpen(false)}
         onConfirm={(amount) => handleCashAction('withdraw', amount)}
-        currentBalance={data.balance}
+        currentBalance={balance}
       />
     </div>
   );

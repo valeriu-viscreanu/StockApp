@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
 import EditDetailsModal from './EditDetailsModal';
 
-function Navbar({ theme, toggleTheme, totalValue = 0 }) {
+function Navbar({ theme, toggleTheme }) {
   const { user, token, handleLogout } = useAuth();
+  const portfolioAmount = useSelector((state) => state.portfolio.stockValue);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -41,7 +43,7 @@ function Navbar({ theme, toggleTheme, totalValue = 0 }) {
       <div className="nav-right">
         <div className="portfolio-badge">
           <span className="portfolio-label">Portfolio:</span>
-          <span className="portfolio-amount">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+          <span className="portfolio-amount">${portfolioAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
         <button
           className="user-badge"
