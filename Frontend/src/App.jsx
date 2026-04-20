@@ -109,23 +109,30 @@ function App() {
             return sum + (price * h.quantity);
           }, 0);
 
-          const liveNetWorth = (balance ?? data.balance) + marketValue;
+          setData(prev => {
+            const currentBalance = balance ?? prev.balance;
+            const liveNetWorth = currentBalance + marketValue;
 
-          dispatch(setPortfolioData({
-            holdings: currentHoldings,
-            balance: balance ?? data.balance,
-            totalValue: liveNetWorth,
-            stockValue: marketValue,
-            stocksCount: data.stocks
-          }));
+            dispatch(setPortfolioData({
+              holdings: currentHoldings,
+              balance: currentBalance,
+              totalValue: liveNetWorth,
+              stockValue: marketValue,
+              stocksCount: prev.stocks // Use previous count if logic wasn't updated here
+            }));
 
-          setData(prev => ({ ...prev, totalValue: marketValue, balance: balance ?? prev.balance }));
+            return {
+              ...prev,
+              totalValue: marketValue,
+              balance: currentBalance
+            };
+          });
         }
       }
     } catch (err) {
       console.error('Refresh data error:', err);
     }
-  }, [token, handleLogout, data]);
+  }, [token, handleLogout, dispatch]);
 
   useEffect(() => {
     if (isLoggedIn && token) {
