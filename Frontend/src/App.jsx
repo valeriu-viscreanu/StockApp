@@ -7,6 +7,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Navbar from './components/Navbar';
 import Activities from './components/Activities';
+import Holdings from './components/Holdings';
 import * as api from './services/api';
 import { useAuth } from './context/AuthContext';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
@@ -194,6 +195,10 @@ function App() {
               userHoldings={userHoldings}
             />
           }
+        />
+        <Route
+          path="/holdings"
+          element={<Holdings userHoldings={userHoldings} popularStocks={popularStocks} />}
         />
         <Route path="/orders" element={<Orders buyOrders={buyOrders} sellOrders={sellOrders} totalBuyAmount={totals.buy} totalSellAmount={totals.sell} />} />
         <Route path="/activities" element={<Activities />} />

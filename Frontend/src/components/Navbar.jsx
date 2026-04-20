@@ -24,6 +24,7 @@ function Navbar({ theme, toggleTheme, totalValue = 0 }) {
       <div className={`nav-links ${menuOpen ? 'open' : ''}`}>
         <NavLink to="/dashboard" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Dashboard</NavLink>
         <NavLink to="/trade" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Trade</NavLink>
+        <NavLink to="/holdings" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Holdings</NavLink>
         <NavLink to="/orders" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Orders</NavLink>
         <NavLink to="/activities" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Activities</NavLink>
         <NavLink to="/cash" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Cash</NavLink>
