@@ -1,6 +1,12 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
-function Orders({ buyOrders, sellOrders, totalBuyAmount, totalSellAmount }) {
+function Orders() {
+  const { buyOrders, sellOrders } = useSelector((state) => state.orders);
+
+  const totalBuyAmount = buyOrders.reduce((sum, o) => sum + o.tradeAmount, 0);
+  const totalSellAmount = sellOrders.reduce((sum, o) => sum + o.tradeAmount, 0);
+
   return (
     <>
       <div className="breadcrumb">

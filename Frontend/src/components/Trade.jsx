@@ -4,7 +4,10 @@ import PriceChart from './PriceChart';
 import FavoriteToggle from './FavoriteToggle';
 import * as api from '../services/api';
 
-function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQuantity, onBuy, onSell, tradeMessage, stockChartData, fetchStockChartData }) {
+function Trade({ quantity, setQuantity, onBuy, onSell, tradeMessage, fetchStockChartData, handleSelectStock }) {
+  const popularStocks = useSelector((state) => state.market.popularStocks);
+  const selectedStock = useSelector((state) => state.market.selectedStock);
+  const stockChartData = useSelector((state) => state.market.stockChartData);
   const userHoldings = useSelector((state) => state.portfolio.holdings);
   const [favorites, setFavorites] = useState(() => {
     const saved = localStorage.getItem('favorites');
@@ -98,7 +101,7 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
                   key={result.symbol}
                   className="search-result-item"
                   onClick={() => {
-                    setSelectedStock({ symbol: result.symbol, name: result.description, price: 0 });
+                    handleSelectStock({ symbol: result.symbol, name: result.description, price: 0 });
                     setSearchQuery('');
                     setSearchResults([]);
                   }}
@@ -125,7 +128,7 @@ function Trade({ popularStocks, selectedStock, setSelectedStock, quantity, setQu
                 key={stock.symbol}
                 href="#"
                 className={`stock-item ${selectedStock.symbol === stock.symbol ? 'active' : ''}`}
-                onClick={(e) => { e.preventDefault(); setSelectedStock(stock); }}
+                onClick={(e) => { e.preventDefault(); handleSelectStock(stock); }}
               >
                 <div className="stock-icon">{stock.symbol.substring(0, 1)}</div>
                 <div className="stock-details">

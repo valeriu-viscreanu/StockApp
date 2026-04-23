@@ -1,8 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 
-function Holdings({ popularStocks = [] }) {
+function Holdings() {
     const { holdings: userHoldings, balance, totalValue, isSynced } = useSelector((state) => state.portfolio);
+    const popularStocks = useSelector((state) => state.market.popularStocks);
 
     // If we haven't synced yet, we can't be sure if we have holdings or not. 
     // However, for this demo/exercise, we'll treat empty synced holdings as the trigger for demo data.

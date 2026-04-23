@@ -1,7 +1,7 @@
 import StatsGrid from './StatsGrid';
 import NewsFeed from './NewsFeed';
 
-function Dashboard({ user, data, handleCashAction }) {
+function Dashboard({ user, handleCashAction }) {
   return (
     <main className="container">
       <div className="header">
@@ -9,7 +9,7 @@ function Dashboard({ user, data, handleCashAction }) {
         <p style={{ color: 'var(--text-muted)' }}>Here's your portfolio overview for today.</p>
       </div>
 
-      <StatsGrid data={data} handleCashAction={handleCashAction} />
+      <StatsGrid handleCashAction={handleCashAction} />
 
       <NewsFeed />
     </main>
