@@ -15,9 +15,12 @@ namespace StockAppTests
         {
             _sellOrdersService = new SellOrdersService(
                 new InMemorySellOrderRepository(),
+                new InMemoryCashRepository(),
                 new DataAnnotationsRequestValidator<SellOrderRequest>(),
                 new SellOrderMapper(),
-                new InMemoryUserOperationRepository());
+                new InMemoryUserOperationRepository(),
+                new InMemoryAccountRepository(),
+                new InMemoryOrderStatusRepository());
         }
 
         #region CreateSellOrder

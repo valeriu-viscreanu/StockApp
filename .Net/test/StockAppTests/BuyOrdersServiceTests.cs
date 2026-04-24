@@ -15,9 +15,12 @@ namespace StockAppTests
         {
             _buyOrdersService = new BuyOrdersService(
                 new InMemoryBuyOrderRepository(),
+                new InMemoryCashRepository(),
                 new DataAnnotationsRequestValidator<BuyOrderRequest>(),
                 new BuyOrderMapper(),
-                new InMemoryUserOperationRepository());
+                new InMemoryUserOperationRepository(),
+                new InMemoryAccountRepository(),
+                new InMemoryOrderStatusRepository());
         }
 
         #region CreateBuyOrder

@@ -33,18 +33,18 @@ public class TradeRouteIntegrationTests
         {
             builder.ConfigureServices(services =>
             {
-                services.RemoveAll<IFinnhubService>();
+                services.RemoveAll<IMarketDataService>();
                 services.RemoveAll<IStockProfileService>();
                 services.RemoveAll<IStockQuoteService>();
-                services.AddSingleton<FakeFinnhubService>();
-                services.AddSingleton<IFinnhubService>(sp => sp.GetRequiredService<FakeFinnhubService>());
-                services.AddSingleton<IStockProfileService>(sp => sp.GetRequiredService<FakeFinnhubService>());
-                services.AddSingleton<IStockQuoteService>(sp => sp.GetRequiredService<FakeFinnhubService>());
+                services.AddSingleton<FakeMarketDataService>();
+                services.AddSingleton<IMarketDataService>(sp => sp.GetRequiredService<FakeMarketDataService>());
+                services.AddSingleton<IStockProfileService>(sp => sp.GetRequiredService<FakeMarketDataService>());
+                services.AddSingleton<IStockQuoteService>(sp => sp.GetRequiredService<FakeMarketDataService>());
             });
         }
     }
 
-    private sealed class FakeFinnhubService : IFinnhubService
+    private sealed class FakeMarketDataService : IMarketDataService
     {
         private static readonly IReadOnlyDictionary<string, string> CompanyNames =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
@@ -64,37 +64,37 @@ public class TradeRouteIntegrationTests
                 ["TSLA"] = 207.10
             };
 
-        public Task<FinnhubCompanyProfileResponse?> GetCompanyProfile(string stockSymbol)
+        public Task<CompanyProfileResponse?> GetCompanyProfile(string stockSymbol)
         {
             if (!CompanyNames.TryGetValue(stockSymbol, out string? companyName))
             {
-                return Task.FromResult<FinnhubCompanyProfileResponse?>(null);
+                return Task.FromResult<CompanyProfileResponse?>(null);
             }
 
-            return Task.FromResult<FinnhubCompanyProfileResponse?>(new FinnhubCompanyProfileResponse
+            return Task.FromResult<CompanyProfileResponse?>(new CompanyProfileResponse
             {
                 Name = companyName
             });
         }
 
-        public Task<FinnhubStockQuoteResponse?> GetStockPriceQuote(string stockSymbol)
+        public Task<StockQuoteResponse?> GetStockPriceQuote(string stockSymbol)
         {
             if (!LastPrices.TryGetValue(stockSymbol, out double currentPrice))
             {
-                return Task.FromResult<FinnhubStockQuoteResponse?>(null);
+                return Task.FromResult<StockQuoteResponse?>(null);
             }
 
-            return Task.FromResult<FinnhubStockQuoteResponse?>(new FinnhubStockQuoteResponse
+            return Task.FromResult<StockQuoteResponse?>(new StockQuoteResponse
             {
                 CurrentPrice = currentPrice
             });
         }
 
-        public Task<FinnhubSearchResponse?> SearchStocks(string query)
+        public Task<StockSearchResponse?> SearchStocks(string query)
         {
             var results = CompanyNames
                 .Where(kvp => kvp.Value.Contains(query, StringComparison.OrdinalIgnoreCase) || kvp.Key.Equals(query, StringComparison.OrdinalIgnoreCase))
-                .Select(kvp => new FinnhubSearchResult
+                .Select(kvp => new StockSearchResult
                 {
                     Symbol = kvp.Key,
                     Description = kvp.Value,
@@ -102,16 +102,16 @@ public class TradeRouteIntegrationTests
                 })
                 .ToList();
 
-            return Task.FromResult<FinnhubSearchResponse?>(new FinnhubSearchResponse
+            return Task.FromResult<StockSearchResponse?>(new StockSearchResponse
             {
                 Count = results.Count,
                 Result = results
             });
         }
 
-        public Task<FinnhubStockDataResponse?> GetStockData(string stockSymbol, string resolution, long from, long to)
+        public Task<StockDataResponse?> GetStockData(string stockSymbol, string resolution, long from, long to)
         {
-            return Task.FromResult<FinnhubStockDataResponse?>(new FinnhubStockDataResponse
+            return Task.FromResult<StockDataResponse?>(new StockDataResponse
             {
                 ClosePrices = new List<double> { 100, 101, 102 },
                 Status = "ok"

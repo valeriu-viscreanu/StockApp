@@ -25,12 +25,12 @@ public class TradeControllerTests
         var stockProfileServiceMock = new IStockProfileServiceImposter();
         stockProfileServiceMock
             .GetCompanyProfile(expectedStockSymbol)
-            .ReturnsAsync(new FinnhubCompanyProfileResponse { Name = expectedStockName });
+            .ReturnsAsync(new CompanyProfileResponse { Name = expectedStockName });
 
         var stockQuoteServiceMock = new IStockQuoteServiceImposter();
         stockQuoteServiceMock
             .GetStockPriceQuote(expectedStockSymbol)
-            .ReturnsAsync(new FinnhubStockQuoteResponse { CurrentPrice = expectedPrice });
+            .ReturnsAsync(new StockQuoteResponse { CurrentPrice = expectedPrice });
 
         var buyOrdersServiceMock = new IBuyOrdersServiceImposter();
         var sellOrdersServiceMock = new ISellOrdersServiceImposter();
@@ -44,14 +44,14 @@ public class TradeControllerTests
             .AddInMemoryCollection(new Dictionary<string, string?> { ["FinnhubToken"] = "test-token" })
             .Build();
 
-        var userBalanceServiceMock = new IUserBalanceServiceImposter();
+        var accountProfileServiceMock = new IAccountProfileServiceImposter();
 
         TradeController controller = new(
             stockProfileServiceMock.Instance(),
             stockQuoteServiceMock.Instance(),
             buyOrdersServiceMock.Instance(),
             sellOrdersServiceMock.Instance(),
-            userBalanceServiceMock.Instance(),
+            accountProfileServiceMock.Instance(),
             tradingOptions,
             configuration);
 
