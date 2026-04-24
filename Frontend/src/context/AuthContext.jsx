@@ -1,61 +1,55 @@
-import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useContext, useCallback } from 'react';
 import * as api from '../services/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginSuccess, logout, setError, clearError, setUser as setReduxUser } from '../store/slices/authSlice';
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(localStorage.getItem('email'));
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [isLoggedIn, setIsLoggedIn] = useState(!!token);
-  const [error, setError] = useState('');
+  const dispatch = useDispatch();
+  const { user, token, isLoggedIn, error } = useSelector(state => state.auth);
 
   const handleLogout = useCallback(() => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('email');
-    setToken(null);
-    setIsLoggedIn(false);
-    setUser(null);
-  }, []);
+    dispatch(logout());
+  }, [dispatch]);
 
   const handleLogin = async (email, password) => {
-    setError('');
+    dispatch(clearError());
     const result = await api.loginApi(email, password);
     if (result?.token) {
-      localStorage.setItem('token', result.token);
-      setToken(result.token);
-      setIsLoggedIn(true);
-      setUser(email);
-      localStorage.setItem('email', email);
+      dispatch(loginSuccess({ email, token: result.token }));
       return true;
     } else {
-      setError('Invalid email or password');
+      dispatch(setError('Invalid email or password'));
       return false;
     }
   };
 
   const handleRegister = async (name, email, password, details) => {
-    setError('');
+    dispatch(clearError());
     const result = await api.registerApi(name, email, password, details);
     if (result.data) {
       // Auto-login after registration
       return await handleLogin(email, password);
     } else {
-      setError(result.error);
+      dispatch(setError(result.error));
       return false;
     }
   };
 
-  const clearError = () => setError('');
+  const handleSetUser = (name) => {
+    dispatch(setReduxUser(name));
+  };
 
   return (
     <AuthContext.Provider value={{
       user,
-      setUser,
+      setUser: handleSetUser,
       token,
       isLoggedIn,
       error,
-      setError,
-      clearError,
+      setError: (msg) => dispatch(setError(msg)),
+      clearError: () => dispatch(clearError()),
       handleLogin,
       handleRegister,
       handleLogout
