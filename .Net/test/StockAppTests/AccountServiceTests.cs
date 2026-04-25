@@ -40,6 +40,10 @@ namespace StockAppTests
             // Assert
             Assert.True(response.IsSuccess);
             Assert.True(_db.Users.Any(u => u.Email == "test@example.com"));
+            
+            var user = _db.Users.First(u => u.Email == "test@example.com");
+            var account = _db.Accounts.First(a => a.UserID == user.UserID);
+            Assert.Equal(0.00, account.Balance);
         }
 
         [Fact]

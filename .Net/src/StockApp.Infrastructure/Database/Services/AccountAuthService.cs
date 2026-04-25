@@ -51,7 +51,7 @@ namespace StockApp.Infrastructure.Database.Services
             {
                 AccountID = Guid.NewGuid(),
                 UserID = userId,
-                Balance = 1000.00, // Initial balance
+                Balance = 0.00, // Initial balance
                 DateOfBirth = DateTime.UtcNow.AddYears(-20) // Default DOB as it's not in DTO
             };
 
