@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../services/api';
-import { useAuth } from '../context/AuthContext';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout } from '../store/slices/authSlice';
 
 function Activities() {
   const [activities, setActivities] = useState([]);
-  const { token, handleLogout } = useAuth();
+  const dispatch = useDispatch();
+  const { token } = useSelector(state => state.auth);
+  const handleLogout = () => dispatch(logout());
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

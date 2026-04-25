@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { registerUser } from '../store/slices/authSlice';
 import * as api from '../services/api';
 
 function Register({ onSwitchToLogin }) {
+  const dispatch = useDispatch();
+  const { error } = useSelector(state => state.auth);
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -23,8 +26,6 @@ function Register({ onSwitchToLogin }) {
     phoneNumber: ''
   });
 
-  const { handleRegister, error } = useAuth();
-
   useEffect(() => {
     api.fetchRoles().then(setRoles);
   }, []);
@@ -36,7 +37,7 @@ function Register({ onSwitchToLogin }) {
 
   const onSubmit = (e) => {
     e.preventDefault();
-    handleRegister(name, email, password, { ...details, roleId });
+    dispatch(registerUser({ name, email, password, details: { ...details, roleId } }));
   };
 
   const nextStep = (e) => {

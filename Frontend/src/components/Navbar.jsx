@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../store/slices/authSlice';
 import { NavLink } from 'react-router-dom';
 import EditDetailsModal from './EditDetailsModal';
 
 function Navbar({ theme, toggleTheme }) {
-  const { user, token, handleLogout } = useAuth();
+  const dispatch = useDispatch();
+  const { user, token } = useSelector(state => state.auth);
+  const handleLogout = () => dispatch(logout());
   const portfolioAmount = useSelector((state) => state.portfolio.stockValue);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);

@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser } from '../store/slices/authSlice';
 
 function Login({ onSwitchToRegister }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { handleLogin, error } = useAuth();
+  const dispatch = useDispatch();
+  const { error } = useSelector(state => state.auth);
 
   const onSubmit = (e) => {
     e.preventDefault();
-    handleLogin(email, password);
+    dispatch(loginUser({ email, password }));
   };
 
   return (

@@ -9,8 +9,8 @@ import Navbar from './components/Navbar';
 import Activities from './components/Activities';
 import Holdings from './components/Holdings';
 import * as api from './services/api';
-import { useAuth } from './context/AuthContext';
 import { useDispatch, useSelector } from 'react-redux';
+import { logout } from './store/slices/authSlice';
 import { setPortfolioData, updateBalance } from './store/slices/portfolioSlice';
 import { setPopularStocks, updateStockPrices, setSelectedStock, setStockChartData } from './store/slices/marketSlice';
 import { setOrders } from './store/slices/ordersSlice';
@@ -18,8 +18,9 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 
 
 function App() {
-  const { isLoggedIn, token, user, setUser, handleLogout } = useAuth();
   const dispatch = useDispatch();
+  const { isLoggedIn, token, user } = useSelector(state => state.auth);
+  const handleLogout = () => dispatch(logout());
   const navigate = useNavigate();
 
   // Market state now lives in Redux
