@@ -81,7 +81,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state) => {
         state.status = 'succeeded';
       })
-      .addCase(loginUser.failed, (state) => {
+      .addCase(loginUser.rejected, (state) => {
         state.status = 'failed';
       });
   }
