@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import StatCard from './StatCard';
 import AddCashModal from './AddCashModal';
 
 function StatsGrid({ handleCashAction }) {
   const { totalValue, balance, stocksCount } = useSelector((state) => state.portfolio);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="stats-grid">
@@ -18,6 +20,8 @@ function StatsGrid({ handleCashAction }) {
       <StatCard
         label="Stocks Held"
         value={stocksCount}
+        isClickable={true}
+        onClick={() => navigate('/holdings')}
       />
 
       <StatCard
