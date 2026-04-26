@@ -23,7 +23,8 @@ function Register({ onSwitchToLogin }) {
     zipCode: '',
     country: '',
     additionalInfo: '',
-    phoneNumber: ''
+    phoneNumber: '',
+    DateOfBirth: ''
   });
 
   useEffect(() => {
@@ -161,6 +162,18 @@ function Register({ onSwitchToLogin }) {
                     required
                   />
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label>Date of Birth</label>
+                <input
+                  type="date"
+                  name="DateOfBirth"
+                  value={details.DateOfBirth}
+                  onChange={handleDetailsChange}
+                  className="login-input"
+                  required
+                />
               </div>
 
               <button type="submit" className="login-button">

@@ -52,7 +52,7 @@ namespace StockApp.Infrastructure.Database.Services
                 AccountID = Guid.NewGuid(),
                 UserID = userId,
                 Balance = 0.00, // Initial balance
-                DateOfBirth = DateTime.UtcNow.AddYears(-20) // Default DOB as it's not in DTO
+                DateOfBirth = registerRequest.DateOfBirth ?? DateTime.UtcNow.AddYears(-20)
             };
 
             var userDetails = new UserDetails

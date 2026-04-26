@@ -16,6 +16,10 @@ namespace StockApp.Application.DTO
         [DataType(DataType.Password)]
         public string? Password { get; set; }
 
+        [Required(ErrorMessage = "Date of Birth can't be blank")]
+        [DataType(DataType.Date)]
+        public DateTime? DateOfBirth { get; set; }
+
         // User Details
         [MaxLength(100)]
         public string? Street { get; set; }

@@ -31,7 +31,8 @@ namespace StockAppTests
             {
                 Name = "Test User",
                 Email = "test@example.com",
-                Password = "123"
+                Password = "123",
+                DateOfBirth = DateTime.UtcNow.AddYears(-25)
             };
 
             // Act
@@ -55,7 +56,8 @@ namespace StockAppTests
             {
                 Name = "Login User",
                 Email = email,
-                Password = "123"
+                Password = "123",
+                DateOfBirth = DateTime.UtcNow.AddYears(-25)
             });
 
             var loginRequest = new LoginRequest
@@ -81,7 +83,8 @@ namespace StockAppTests
             {
                 Name = "Wrong Pass User",
                 Email = email,
-                Password = "123"
+                Password = "123",
+                DateOfBirth = DateTime.UtcNow.AddYears(-25)
             });
 
             var loginRequest = new LoginRequest
@@ -106,7 +109,8 @@ namespace StockAppTests
             {
                 Name = "First User",
                 Email = email,
-                Password = "123"
+                Password = "123",
+                DateOfBirth = DateTime.UtcNow.AddYears(-25)
             };
             _accountService.Register(request);
 
@@ -114,7 +118,8 @@ namespace StockAppTests
             {
                 Name = "Second User",
                 Email = email,
-                Password = "123"
+                Password = "123",
+                DateOfBirth = DateTime.UtcNow.AddYears(-25)
             };
 
             // Act
