@@ -20,7 +20,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 function App() {
   const dispatch = useDispatch();
   const { isLoggedIn, token, user } = useSelector(state => state.auth);
-  const handleLogout = () => dispatch(logout());
+  const handleLogout = useCallback(() => dispatch(logout()), [dispatch]);
   const navigate = useNavigate();
 
   // Market state now lives in Redux

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import * as api from '../services/api';
 import { useSelector, useDispatch } from 'react-redux';
 import { logout } from '../store/slices/authSlice';
@@ -7,7 +7,7 @@ function Activities() {
   const [activities, setActivities] = useState([]);
   const dispatch = useDispatch();
   const { token } = useSelector(state => state.auth);
-  const handleLogout = () => dispatch(logout());
+  const handleLogout = useCallback(() => dispatch(logout()), [dispatch]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
