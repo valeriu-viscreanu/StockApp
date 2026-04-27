@@ -142,19 +142,19 @@ function App() {
   }, [isLoggedIn, token, refreshUserData]);
 
   // Handlers
-  const fetchStockChartData = async (symbol, timeframe) => {
+  const fetchStockChartData = useCallback(async (symbol, timeframe) => {
     const chartData = await api.fetchStockData(symbol, timeframe, token, handleLogout);
     dispatch(setStockChartData(chartData));
-  };
+  }, [token, handleLogout, dispatch]);
 
-  const handleSelectStock = async (stock) => {
+  const handleSelectStock = useCallback(async (stock) => {
     dispatch(setSelectedStock(stock));
     const quote = await api.fetchStockQuote(stock.symbol, token, handleLogout);
     if (quote?.c) dispatch(setSelectedStock({ ...stock, price: quote.c }));
     fetchStockChartData(stock.symbol, 'month');
-  };
+  }, [token, handleLogout, dispatch, fetchStockChartData]);
 
-  const executeOrder = async (type) => {
+  const executeOrder = useCallback(async (type) => {
     setTradeMessage('');
     const orderData = {
       stockSymbol: selectedStock.symbol,
@@ -171,9 +171,9 @@ function App() {
     } else {
       setTradeMessage(result.error);
     }
-  };
+  }, [selectedStock, quantity, token, handleLogout, refreshUserData]);
 
-  const handleCashAction = async (type, overrideAmount) => {
+  const handleCashAction = useCallback(async (type, overrideAmount) => {
     const finalAmount = overrideAmount !== undefined ? overrideAmount : amount;
     try {
       const result = await api.handleCashActionApi(type, finalAmount, token, handleLogout);
@@ -186,7 +186,7 @@ function App() {
     } catch (err) {
       alert(err.message);
     }
-  };
+  }, [amount, token, handleLogout, dispatch]);
 
   if (!isLoggedIn) {
     return showRegister ? (
