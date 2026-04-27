@@ -76,12 +76,7 @@ function Holdings() {
 
                 <div style={{ marginTop: '40px', paddingTop: '20px', borderTop: '1px solid var(--border)', fontSize: '0.75rem', color: 'var(--text-muted)', fontStyle: 'italic', textAlign: 'center' }}>
                     * Holdings data is synced with your account profile. Prices are updated periodically from live market data.
-                    <br />
-                    <span style={{ fontSize: '0.65rem', opacity: 0.7 }}>
-                        {isDummy
-                            ? "Fine print: You currently have no owned stocks. Displaying dummy data for showcase purposes as per system instructions."
-                            : "Fine print: This view uses live portfolio data from the StockApp API core services."}
-                    </span>
+
                 </div>
             </div>
         </div>
