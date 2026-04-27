@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Dashboard from './components/Dashboard';
 import Trade from './components/Trade';
 import Orders from './components/Orders';
@@ -26,6 +26,8 @@ function App() {
   // Market state now lives in Redux
   const selectedStock = useSelector(state => state.market.selectedStock);
   const popularStocks = useSelector(state => state.market.popularStocks);
+  const popularStocksRef = useRef(popularStocks);
+  useEffect(() => { popularStocksRef.current = popularStocks; }, [popularStocks]);
   const stockChartData = useSelector(state => state.market.stockChartData);
 
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
@@ -77,8 +79,8 @@ function App() {
       }
 
       // Fetch popular stocks list only once (when Redux store is empty)
-      let currentStocks = popularStocks;
-      if (popularStocks.length === 0) {
+      let currentStocks = popularStocksRef.current;
+      if (currentStocks.length === 0) {
         const stocks = await api.fetchPopularStocks(token, handleLogout);
         if (stocks) {
           currentStocks = stocks.map(s => ({ ...s, price: 0 }));
@@ -128,7 +130,7 @@ function App() {
     } catch (err) {
       console.error('Refresh data error:', err);
     }
-  }, [token, handleLogout, dispatch, popularStocks]);
+  }, [token, handleLogout, dispatch]);
 
   useEffect(() => {
     if (isLoggedIn && token) {
@@ -137,7 +139,7 @@ function App() {
         fetchStockChartData(selectedStock.symbol, 'month');
       }
     }
-  }, [isLoggedIn, token]);
+  }, [isLoggedIn, token, refreshUserData]);
 
   // Handlers
   const fetchStockChartData = async (symbol, timeframe) => {
