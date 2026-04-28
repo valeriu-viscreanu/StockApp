@@ -1,0 +1,291 @@
+# =============================================================================
+# StockApp - Kubernetes Manifests
+# Architecture: Browser -> Ingress -> frontend-service -> React (nginx)
+#                                  -> backend-service  -> ASP.NET API
+#                                                      -> sqlserver-service -> SQL Server
+#
+# NOTE: Frontend api.js has API_BASE hardcoded to http://localhost:5002.
+# The nginx ConfigMap below proxies /api -> backend-service so the browser
+# can reach the API via the Ingress. Update api.js to use a relative path:
+#   const API_BASE = '/api/v1';
+# =============================================================================
+
+---
+# ── Namespace ──────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: stockapp
+
+---
+# ── Secrets ────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Secret
+metadata:
+  name: stockapp-secrets
+  namespace: stockapp
+type: Opaque
+stringData:
+  sqlserver-password: "StrongPassword123!"
+  jwt-key: "ThisIsASecretKeyForDev-MustBeAtLeast32Bytes!"
+  db-connection-string: "Server=sqlserver-service,1433;Database=StockApp;User Id=sa;Password=StrongPassword123!;TrustServerCertificate=True;"
+
+---
+# ── Frontend nginx ConfigMap ────────────────────────────────────────────────────
+# Proxies /api/* -> backend-service so the React app works without
+# a hardcoded backend hostname in the browser.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-nginx-config
+  namespace: stockapp
+data:
+  default.conf: |
+    server {
+        listen 80;
+        root /usr/share/nginx/html;
+        index index.html;
+
+        # SPA fallback
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        # Proxy API calls to the backend service
+        location /api/ {
+            proxy_pass http://backend-service:8080/api/;
+            proxy_http_version 1.1;
+            proxy_set_header Host              $host;
+            proxy_set_header X-Real-IP         $remote_addr;
+            proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+    }
+
+---
+# ── SQL Server PersistentVolumeClaim ───────────────────────────────────────────
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: sqlserver-pvc
+  namespace: stockapp
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+# ── SQL Server Deployment ───────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sqlserver
+  namespace: stockapp
+  labels:
+    app: sqlserver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sqlserver
+  template:
+    metadata:
+      labels:
+        app: sqlserver
+    spec:
+      containers:
+        - name: sqlserver
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          ports:
+            - containerPort: 1433
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: stockapp-secrets
+                  key: sqlserver-password
+          volumeMounts:
+            - name: sqlserver-storage
+              mountPath: /var/opt/mssql
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -Q "SELECT 1" -No
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 6
+      volumes:
+        - name: sqlserver-storage
+          persistentVolumeClaim:
+            claimName: sqlserver-pvc
+
+---
+# ── SQL Server Service (ClusterIP) ─────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: sqlserver-service
+  namespace: stockapp
+spec:
+  selector:
+    app: sqlserver
+  ports:
+    - port: 1433
+      targetPort: 1433
+
+---
+# ── Backend Deployment ─────────────────────────────────────────────────────────
+# Build the image first:  docker build -t stockapp-nettutorial-backend:latest ./.Net
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: stockapp
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: stockapp-nettutorial-backend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ASPNETCORE_ENVIRONMENT
+              value: "Production"
+            - name: DatabaseProvider
+              value: "SqlServer"
+            - name: ConnectionStrings__SqlServerConnection
+              valueFrom:
+                secretKeyRef:
+                  name: stockapp-secrets
+                  key: db-connection-string
+            - name: Jwt__Key
+              valueFrom:
+                secretKeyRef:
+                  name: stockapp-secrets
+                  key: jwt-key
+            - name: Jwt__Issuer
+              value: "StockApp"
+            - name: Jwt__Audience
+              value: "StockAppUsers"
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            failureThreshold: 6
+
+---
+# ── Backend Service (ClusterIP) ────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+  namespace: stockapp
+spec:
+  selector:
+    app: backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+
+---
+# ── Frontend Deployment ────────────────────────────────────────────────────────
+# Build the image first:  docker build -t stockapp-nettutorial-frontend:latest ./Frontend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: stockapp
+  labels:
+    app: frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: stockapp-nettutorial-frontend:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d/default.conf
+              subPath: default.conf
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: frontend-nginx-config
+
+---
+# ── Frontend Service (LoadBalancer) ───────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: stockapp
+spec:
+  type: LoadBalancer
+  selector:
+    app: frontend
+  ports:
+    - port: 8081
+      targetPort: 80
+      nodePort: 30081
+
+---
+# ── Ingress ────────────────────────────────────────────────────────────────────
+# Requires an nginx ingress controller:
+#   kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: stockapp-ingress
+  namespace: stockapp
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+spec:
+  ingressClassName: nginx
+  rules:
+    - http:
+        paths:
+          # API traffic goes directly to the backend service
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-service
+                port:
+                  number: 8080
+          # All other traffic goes to the frontend (SPA)
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-service
+                port:
+                  number: 80
