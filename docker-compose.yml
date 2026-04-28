@@ -1,6 +1,14 @@
 version: '3.8'
 
 services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=StrongPassword123!
+    ports:
+      - "1433:1433"
+
   backend:
     build:
       context: ./.Net
@@ -9,7 +17,10 @@ services:
       - "5002:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-    # If the backend needs a database, it should be defined here
+      - DatabaseProvider=SqlServer
+      - ConnectionStrings__SqlServerConnection=Server=db;Database=StockApp;User Id=sa;Password=StrongPassword123!;TrustServerCertificate=True;
+    depends_on:
+      - db
 
   frontend:
     build:
