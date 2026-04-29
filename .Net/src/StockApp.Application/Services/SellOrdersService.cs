@@ -47,22 +47,28 @@ namespace StockApp.Application.Services
             sellOrder.OrderStatus = pendingStatus!;
             _sellOrderRepository.Add(sellOrder);
 
-            // Update holdings (Cash)
+            // Update balance and holdings (Cash)
             var account = _accountRepository.GetByUserID(sellOrderRequest.UserID) 
                 ?? throw new InvalidOperationException("User has no account");
 
             var cash = _cashRepository.GetBySymbol(account.AccountID, sellOrderRequest.StockSymbol);
-            if (cash != null)
+            if (cash == null || cash.Quantity < sellOrder.Quantity)
             {
-                cash.Quantity -= sellOrder.Quantity;
-                if (cash.Quantity == 0)
-                {
-                    _cashRepository.Delete(cash.CashID);
-                }
-                else
-                {
-                    _cashRepository.Update(cash);
-                }
+                throw new InvalidOperationException($"Insufficient shares of {sellOrder.StockSymbol} to complete the sale");
+            }
+
+            double totalRevenue = sellOrder.Price * sellOrder.Quantity;
+            account.Balance += totalRevenue;
+            _accountRepository.Update(account);
+
+            cash.Quantity -= sellOrder.Quantity;
+            if (cash.Quantity == 0)
+            {
+                _cashRepository.Delete(cash.CashID);
+            }
+            else
+            {
+                _cashRepository.Update(cash);
             }
 
             _userOperationRepository.Add(new Domain.Entities.UserOperation
