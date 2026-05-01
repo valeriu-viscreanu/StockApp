@@ -32,6 +32,7 @@ function Navbar({ theme, toggleTheme }) {
         <NavLink to="/orders" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Orders</NavLink>
         <NavLink to="/activities" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Activities</NavLink>
         <NavLink to="/cash" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Cash</NavLink>
+        <NavLink to="/goals" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Goals</NavLink>
 
         {/* Mobile-only logout/theme (optional, but good for UX) */}
         <div className="mobile-actions">
