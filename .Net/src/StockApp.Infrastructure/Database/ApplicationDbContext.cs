@@ -21,6 +21,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<UserDetails> UserDetails { get; set; } = null!;
     public DbSet<UserRole> UserRoles { get; set; } = null!;
     public DbSet<OrderStatus> OrderStatuses { get; set; } = null!;
+    public DbSet<GoalType> GoalTypes { get; set; } = null!;
+    public DbSet<FinancialGoal> FinancialGoals { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -195,6 +197,40 @@ public class ApplicationDbContext : DbContext
                 new OrderStatus { OrderStatusID = Guid.Parse("20000000-0000-0000-0000-000000000003"), StatusName = "Processed" },
                 new OrderStatus { OrderStatusID = Guid.Parse("20000000-0000-0000-0000-000000000004"), StatusName = "Canceled" }
             );
+        });
+
+        // Configuration for GoalType
+        modelBuilder.Entity<GoalType>(entity =>
+        {
+            entity.HasKey(e => e.GoalTypeID);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(50);
+
+            entity.HasData(
+                new GoalType { GoalTypeID = Guid.Parse("30000000-0000-0000-0000-000000000001"), Name = "Retirement" },
+                new GoalType { GoalTypeID = Guid.Parse("30000000-0000-0000-0000-000000000002"), Name = "University" },
+                new GoalType { GoalTypeID = Guid.Parse("30000000-0000-0000-0000-000000000003"), Name = "Emergency Fund" },
+                new GoalType { GoalTypeID = Guid.Parse("30000000-0000-0000-0000-000000000004"), Name = "Vacation" },
+                new GoalType { GoalTypeID = Guid.Parse("30000000-0000-0000-0000-000000000005"), Name = "Custom" }
+            );
+        });
+
+        // Configuration for FinancialGoal
+        modelBuilder.Entity<FinancialGoal>(entity =>
+        {
+            entity.HasKey(e => e.FinancialGoalID);
+            entity.Property(e => e.Title).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.TargetAmount).HasColumnType("decimal(18,4)");
+            entity.Property(e => e.InitialAmount).HasColumnType("decimal(18,4)");
+            entity.Property(e => e.MonthlyContribution).HasColumnType("decimal(18,4)");
+            entity.Property(e => e.CurrentAmount).HasColumnType("decimal(18,4)");
+
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserID);
+
+            entity.HasOne(e => e.GoalType)
+                .WithMany()
+                .HasForeignKey(e => e.GoalTypeID);
         });
     }
 }
