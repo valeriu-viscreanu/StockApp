@@ -9,5 +9,6 @@ namespace StockApp.Domain.RepositoryContracts
         void Delete(Guid goalId);
         FinancialGoal? GetByID(Guid goalId);
         List<FinancialGoal> GetByUserID(Guid userId);
+        List<GoalType> GetGoalTypes();
     }
 }

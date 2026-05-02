@@ -10,5 +10,6 @@ namespace StockApp.Application.ServiceContracts
         Task<bool> UpdateGoal(Guid goalId, FinancialGoalRequest request);
         Task<bool> DeleteGoal(Guid goalId);
         Task<bool> AddContribution(Guid goalId, double amount);
+        Task<List<GoalTypeResponse>> GetGoalTypes();
     }
 }

@@ -119,6 +119,10 @@ else
     builder.Services.AddScoped<IAccountProfileService, AccountProfileService>(); // Using same implementation for simplified in-memory
 }
 
+builder.Services.AddScoped<IFinancialGoalRepository, FinancialGoalRepository>();
+builder.Services.AddScoped<IFinancialGoalMapper, FinancialGoalMapper>();
+builder.Services.AddScoped<IFinancialGoalService, FinancialGoalService>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

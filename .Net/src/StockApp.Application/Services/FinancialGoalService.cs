@@ -76,5 +76,15 @@ namespace StockApp.Application.Services
             _financialGoalRepository.Update(goal);
             return await Task.FromResult(true);
         }
+
+        public async Task<List<GoalTypeResponse>> GetGoalTypes()
+        {
+            var goalTypes = _financialGoalRepository.GetGoalTypes();
+            return await Task.FromResult(goalTypes.Select(gt => new GoalTypeResponse
+            {
+                GoalTypeID = gt.GoalTypeID,
+                Name = gt.Name
+            }).ToList());
+        }
     }
 }
