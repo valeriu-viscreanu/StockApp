@@ -61,26 +61,14 @@ function FinancialGoals() {
             <div className="goal-info">
               <span className="label">Type:</span> <span>{goal.goalTypeName}</span>
             </div>
-            <div className="goal-progress-container">
-              <div className="goal-progress-bar">
-                <div 
-                  className="goal-progress-fill" 
-                  style={{ width: `${Math.min((goal.currentAmount / goal.targetAmount) * 100, 100)}%` }}
-                ></div>
-              </div>
-              <div className="goal-progress-labels">
-                <span>${goal.currentAmount.toLocaleString()}</span>
-                <span>${goal.targetAmount.toLocaleString()}</span>
-              </div>
-            </div>
             <div className="goal-details">
               <div className="detail-item">
                 <span className="label">Monthly:</span>
                 <span>${goal.monthlyContribution}/mo</span>
               </div>
               <div className="detail-item">
-                <span className="label">Progress:</span>
-                <span>{((goal.currentAmount / goal.targetAmount) * 100).toFixed(1)}%</span>
+                <span className="label">Balance:</span>
+                <span>${goal.currentAmount.toLocaleString()} / ${goal.targetAmount.toLocaleString()}</span>
               </div>
             </div>
           </div>
@@ -160,27 +148,6 @@ function FinancialGoals() {
       )}
 
       <style jsx>{`
-        .goal-progress-container {
-          margin: 1.5rem 0;
-        }
-        .goal-progress-bar {
-          height: 10px;
-          background: var(--bg-secondary);
-          border-radius: 5px;
-          overflow: hidden;
-          margin-bottom: 0.5rem;
-        }
-        .goal-progress-fill {
-          height: 100%;
-          background: var(--primary-color);
-          transition: width 0.3s ease;
-        }
-        .goal-progress-labels {
-          display: flex;
-          justify-content: space-between;
-          font-size: 0.85rem;
-          color: var(--text-secondary);
-        }
         .goal-details {
           display: flex;
           justify-content: space-between;
@@ -234,6 +201,11 @@ function FinancialGoals() {
           background: var(--bg-secondary);
           color: var(--text-primary);
           border-radius: 4px;
+          outline: none;
+        }
+        .form-group select option {
+          background: var(--bg-secondary);
+          color: var(--text-primary);
         }
         .modal-actions {
           display: flex;
