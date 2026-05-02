@@ -162,3 +162,65 @@ export const fetchNews = async () => {
   if (response.ok) return await response.json();
   return null;
 };
+
+// Financial Goals
+export const fetchFinancialGoals = async (token, logout) => {
+  const response = await fetch(`${API_BASE}/FinancialGoal`, {
+    headers: authHeaders(token)
+  });
+  if (handleApiError(response, logout)) return null;
+  if (response.ok) return await response.json();
+  return null;
+};
+
+export const fetchGoalTypes = async (token, logout) => {
+  const response = await fetch(`${API_BASE}/FinancialGoal/types`, {
+    headers: authHeaders(token)
+  });
+  if (handleApiError(response, logout)) return null;
+  if (response.ok) return await response.json();
+  return null;
+};
+
+export const createFinancialGoal = async (goalData, token, logout) => {
+  const response = await fetch(`${API_BASE}/FinancialGoal`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify(goalData)
+  });
+  if (handleApiError(response, logout)) return null;
+  if (response.ok) return await response.json();
+  return null;
+};
+
+export const updateFinancialGoal = async (id, goalData, token, logout) => {
+  const response = await fetch(`${API_BASE}/FinancialGoal/${id}`, {
+    method: 'PUT',
+    headers: authHeaders(token),
+    body: JSON.stringify(goalData)
+  });
+  if (handleApiError(response, logout)) return null;
+  if (response.ok) return true;
+  return null;
+};
+
+export const deleteFinancialGoal = async (id, token, logout) => {
+  const response = await fetch(`${API_BASE}/FinancialGoal/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(token)
+  });
+  if (handleApiError(response, logout)) return null;
+  if (response.ok) return true;
+  return null;
+};
+
+export const addGoalContribution = async (id, amount, token, logout) => {
+  const response = await fetch(`${API_BASE}/FinancialGoal/${id}/contribution`, {
+    method: 'POST',
+    headers: authHeaders(token),
+    body: JSON.stringify(amount)
+  });
+  if (handleApiError(response, logout)) return null;
+  if (response.ok) return true;
+  return null;
+};
