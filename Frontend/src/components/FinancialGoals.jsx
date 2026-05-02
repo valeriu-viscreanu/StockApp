@@ -164,7 +164,7 @@ function FinancialGoals() {
           text-transform: uppercase;
         }
         .add-goal-card:hover {
-          background: var(--bg-secondary);
+          background: var(--bg);
         }
         .modal-overlay {
           position: fixed;
@@ -172,40 +172,52 @@ function FinancialGoals() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(0,0,0,0.5);
+          background: rgba(0,0,0,0.7);
           display: flex;
           align-items: center;
           justify-content: center;
           z-index: 1000;
         }
         .modal-content {
-          background: var(--bg-primary);
+          background: var(--bg-card);
+          color: var(--text);
           padding: 2rem;
-          border-radius: 8px;
+          border-radius: 12px;
           width: 100%;
           max-width: 500px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+          box-shadow: var(--card-shadow);
+          border: 1px solid var(--border);
         }
         .form-group {
-          margin-bottom: 1rem;
+          margin-bottom: 1.2rem;
         }
         .form-group label {
           display: block;
           margin-bottom: 0.5rem;
           font-size: 0.9rem;
+          font-weight: 600;
+          color: var(--text);
         }
         .form-group input, .form-group select {
           width: 100%;
-          padding: 0.6rem;
-          border: 1px solid var(--border-color);
-          background: var(--bg-secondary);
-          color: var(--text-primary);
-          border-radius: 4px;
+          padding: 0.75rem;
+          border: 1px solid var(--border);
+          background: var(--bg);
+          color: var(--text);
+          border-radius: 8px;
           outline: none;
+          font-size: 1rem;
+          transition: border-color 0.2s;
+        }
+        .form-group input:focus, .form-group select:focus {
+          border-color: var(--primary);
+        }
+        .form-group select {
+          color-scheme: dark light;
         }
         .form-group select option {
-          background: var(--bg-secondary);
-          color: var(--text-primary);
+          background: var(--bg-card);
+          color: var(--text);
         }
         .modal-actions {
           display: flex;
@@ -214,23 +226,25 @@ function FinancialGoals() {
           margin-top: 1.5rem;
         }
         .primary-btn {
-          background: var(--primary-color);
+          background: var(--primary);
           color: white;
           border: none;
-          padding: 0.5rem 1.5rem;
-          border-radius: 4px;
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
           cursor: pointer;
+          font-weight: 600;
         }
         .primary-btn:hover {
           opacity: 0.9;
         }
         button[type="button"] {
           background: transparent;
-          border: 1px solid var(--border-color);
-          color: var(--text-primary);
-          padding: 0.5rem 1.5rem;
-          border-radius: 4px;
+          border: 1px solid var(--border);
+          color: var(--text);
+          padding: 0.75rem 1.5rem;
+          border-radius: 8px;
           cursor: pointer;
+          font-weight: 600;
         }
       `}</style>
     </div>
