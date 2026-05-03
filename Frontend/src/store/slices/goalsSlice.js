@@ -41,10 +41,12 @@ const goalsSlice = createSlice({
     builder
       .addCase(getGoals.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(getGoals.fulfilled, (state, action) => {
         state.loading = false;
         state.goals = action.payload;
+        state.error = null;
       })
       .addCase(getGoals.rejected, (state, action) => {
         state.loading = false;
@@ -52,9 +54,14 @@ const goalsSlice = createSlice({
       })
       .addCase(getGoalTypes.fulfilled, (state, action) => {
         state.types = action.payload;
+        state.error = null;
+      })
+      .addCase(getGoalTypes.rejected, (state, action) => {
+        state.error = action.payload;
       })
       .addCase(addGoal.fulfilled, (state, action) => {
         state.goals.push(action.payload);
+        state.error = null;
       });
   }
 });
