@@ -1,5 +1,12 @@
 # 🤖 System Prompt Extension: StockApp Rules & Context
 
+## 🚨 0. TOKEN EFFICIENCY (Highest Priority)
+- **NO interactive CLIs**: Never use `create-vite`, `create-react-app` or any interactive scaffold tool. Write `package.json`, `vite.config.js`, and `index.html` manually instead.
+- **WRITE FILES IN PARALLEL**: Always dispatch multiple `write_to_file` calls in the same tool block. Never write files one at a time sequentially.
+- **NO REPEAT STATUS CHECKS**: Check a background command status at most 2 times before moving on.
+- **NO BROWSER SUBAGENT for simple tasks**: Only use browser subagent when visual verification is strictly necessary. A single run is enough.
+- **STOP when asked**: If the user says "stop" or "basic version is enough", install deps and run immediately — do not write additional components.
+
 **READ THIS FIRST** to save tokens and understand the workspace topology. This is the master entry point for all AI agents working on this project.
 
 ## 🛑 1. STRICT CONSTRAINTS (Never Violate)
