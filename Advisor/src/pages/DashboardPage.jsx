@@ -54,30 +54,6 @@ export default function DashboardPage() {
           <div className="kpi-value">{fmt(totalAUM)}</div>
           <div className="kpi-label">Total AUM</div>
         </div>
-        <div className="kpi-card success">
-          <div className="kpi-top">
-            <div className="kpi-icon success"><TrendingUp size={18} /></div>
-            <span className="kpi-change up">↑ 3.1%</span>
-          </div>
-          <div className="kpi-value">{avgReturn}%</div>
-          <div className="kpi-label">Avg. Portfolio Return</div>
-        </div>
-        <div className="kpi-card warning">
-          <div className="kpi-top">
-            <div className="kpi-icon warning"><Users size={18} /></div>
-            <span className="kpi-change up">↑ 2</span>
-          </div>
-          <div className="kpi-value">{clients.length}</div>
-          <div className="kpi-label">Active Clients</div>
-        </div>
-        <div className="kpi-card info">
-          <div className="kpi-top">
-            <div className="kpi-icon info"><Award size={18} /></div>
-            <span className="kpi-change up">↑ 0.8</span>
-          </div>
-          <div className="kpi-value">4.9</div>
-          <div className="kpi-label">Satisfaction Score</div>
-        </div>
       </div>
 
       {/* Charts Row */}
