@@ -5,10 +5,10 @@ import {
 } from 'lucide-react';
 
 const NAV = [
-  { path: '/',          label: 'Dashboard',  icon: LayoutDashboard },
-  { path: '/clients',   label: 'Clients',    icon: Users,    badge: 6 },
-  { path: '/portfolio', label: 'Portfolio',  icon: PieChart },
-  { path: '/analytics', label: 'Analytics',  icon: BarChart3 },
+  { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { path: '/clients', label: 'Clients', icon: Users, badge: 6 },
+  { path: '/portfolio', label: 'Portfolio', icon: PieChart },
+  { path: '/analytics', label: 'Analytics', icon: BarChart3 },
 ];
 
 export default function Sidebar() {
@@ -20,7 +20,7 @@ export default function Sidebar() {
         <div className="sidebar-logo-icon">
           <TrendingUp size={18} color="#fff" />
         </div>
-        <span className="sidebar-logo-text">Fin<span>Consultant</span></span>
+        <span className="sidebar-logo-text">Advisor</span>
       </Link>
 
       <span className="sidebar-section-label">Main Menu</span>
