@@ -34,37 +34,6 @@ export default function ClientsPage() {
   return (
     <>
       {/* Summary Cards */}
-      <div className="kpi-grid" style={{ gridTemplateColumns: 'repeat(3, 1fr)', marginBottom: 24 }}>
-        <div className="kpi-card accent">
-          <div className="kpi-top">
-            <div className="kpi-icon accent">👥</div>
-            <span className="kpi-change up">↑ 2 this month</span>
-          </div>
-          <div className="kpi-value">{clients.length}</div>
-          <div className="kpi-label">Total Clients</div>
-        </div>
-        <div className="kpi-card success">
-          <div className="kpi-top">
-            <div className="kpi-icon success"><TrendingUp size={18} /></div>
-            <span className="kpi-change up">+2.4%</span>
-          </div>
-          <div className="kpi-value">
-            {fmt(clients.reduce((s, c) => s + c.aum, 0))}
-          </div>
-          <div className="kpi-label">Total AUM</div>
-        </div>
-        <div className="kpi-card warning">
-          <div className="kpi-top">
-            <div className="kpi-icon warning">📋</div>
-            <span className="kpi-change up">1 pending</span>
-          </div>
-          <div className="kpi-value">
-            {clients.filter(c => c.status === 'review').length}
-          </div>
-          <div className="kpi-label">Awaiting Review</div>
-        </div>
-      </div>
-
       {/* Client Table */}
       <div className="card">
         <div className="card-header">
@@ -72,9 +41,6 @@ export default function ClientsPage() {
             <div className="card-title">Client Roster</div>
             <div className="card-subtitle">{filtered.length} of {clients.length} clients shown</div>
           </div>
-          <button className="btn btn-primary btn-sm">
-            <UserPlus size={14} /> Add Client
-          </button>
         </div>
 
         <div className="filter-bar">

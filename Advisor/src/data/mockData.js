@@ -1,11 +1,4 @@
-export const clients = [
-  { id: 1, name: 'Eleanor Hartmann', avatar: 'EH', risk: 'Conservative', aum: 1_240_000, returns: 8.4, status: 'active', joined: '2020-03-12', advisor: 'You', sector: 'Real Estate & Bonds', lastContact: '2 days ago' },
-  { id: 2, name: 'Marcus Delacroix', avatar: 'MD', risk: 'Aggressive', aum: 3_870_000, returns: 22.1, status: 'active', joined: '2019-06-05', advisor: 'You', sector: 'Tech & Equities', lastContact: '1 day ago' },
-  { id: 3, name: 'Sophia Velandia', avatar: 'SV', risk: 'Moderate', aum: 890_000, returns: 11.3, status: 'review', joined: '2021-11-18', advisor: 'You', sector: 'Mixed Portfolio', lastContact: '5 days ago' },
-  { id: 4, name: 'James Thornton', avatar: 'JT', risk: 'Conservative', aum: 2_100_000, returns: 6.2, status: 'active', joined: '2018-02-27', advisor: 'You', sector: 'Fixed Income', lastContact: 'Today' },
-  { id: 5, name: 'Priya Mehta', avatar: 'PM', risk: 'Moderate', aum: 660_000, returns: 13.7, status: 'onboarding', joined: '2024-01-09', advisor: 'You', sector: 'ESG Funds', lastContact: 'Today' },
-  { id: 6, name: 'Lucas Ferreira', avatar: 'LF', risk: 'Aggressive', aum: 5_200_000, returns: 31.5, status: 'active', joined: '2017-08-14', advisor: 'You', sector: 'Private Equity', lastContact: '3 days ago' },
-];
+export const clients = [];
 
 export const portfolioHistory = [
   { month: 'Nov', value: 11.2 },
