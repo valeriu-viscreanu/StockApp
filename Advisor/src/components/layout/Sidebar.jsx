@@ -11,7 +11,7 @@ const NAV = [
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ user, onLogout }) {
   const location = useLocation();
 
   return (
@@ -47,16 +47,18 @@ export default function Sidebar() {
         <button className="nav-item">
           <Settings size={17} className="nav-icon" /> Settings
         </button>
-        <button className="nav-item" style={{ color: 'var(--danger)' }}>
+        <button className="nav-item" style={{ color: 'var(--danger)' }} onClick={onLogout}>
           <LogOut size={17} className="nav-icon" /> Sign Out
         </button>
       </nav>
 
       <div className="sidebar-footer">
         <div className="sidebar-user">
-          <div className="user-avatar">AK</div>
+          <div className="user-avatar">
+            {user?.email?.charAt(0).toUpperCase() || 'A'}
+          </div>
           <div className="user-info">
-            <div className="user-name">Alex Kovacs</div>
+            <div className="user-name">{user?.email?.split('@')[0] || 'Advisor'}</div>
             <div className="user-role">Senior Advisor</div>
           </div>
         </div>

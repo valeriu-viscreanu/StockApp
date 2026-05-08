@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
@@ -5,6 +6,7 @@ import DashboardPage from './pages/DashboardPage';
 import ClientsPage from './pages/ClientsPage';
 import PortfolioPage from './pages/PortfolioPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import LoginPage from './pages/LoginPage';
 
 const PAGE_META = {
   '/':          { title: 'Dashboard', subtitle: 'Welcome back, Alex — here\'s your overview.' },
@@ -14,14 +16,41 @@ const PAGE_META = {
 };
 
 function App() {
+  const [token, setToken] = useState(localStorage.getItem('advisor_token'));
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem('advisor_user') || 'null'));
+  const isLoggedIn = !!token;
+
   const location = useLocation();
-  const meta = PAGE_META[location.pathname] || PAGE_META['/'];
+  const rawMeta = PAGE_META[location.pathname] || PAGE_META['/'];
+  const userName = user?.email?.split('@')[0] || 'Advisor';
+  const meta = {
+    ...rawMeta,
+    subtitle: rawMeta.subtitle.replace('Alex', userName.charAt(0).toUpperCase() + userName.slice(1))
+  };
+
+  const handleLoginSuccess = (newToken, userData) => {
+    setToken(newToken);
+    setUser(userData);
+    localStorage.setItem('advisor_token', newToken);
+    localStorage.setItem('advisor_user', JSON.stringify(userData));
+  };
+
+  const handleLogout = () => {
+    setToken(null);
+    setUser(null);
+    localStorage.removeItem('advisor_token');
+    localStorage.removeItem('advisor_user');
+  };
+
+  if (!isLoggedIn) {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  }
 
   return (
     <div className="app-shell">
-      <Sidebar />
+      <Sidebar user={user} onLogout={handleLogout} />
       <div className="main-content">
-        <Topbar title={meta.title} subtitle={meta.subtitle} />
+        <Topbar title={meta.title} subtitle={meta.subtitle} user={user} />
         <div className="page-body">
           <Routes>
             <Route path="/"          element={<DashboardPage />} />

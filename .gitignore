@@ -3,3 +3,4 @@ implementation_plan.md
 Frontend/package-lock.json
 Advisor/node_modules/
 Advisor/package-lock.json
+.Net/src/StockApp.Web/appsettings.Development.json

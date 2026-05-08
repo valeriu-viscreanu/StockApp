@@ -25,6 +25,15 @@ namespace StockApp.Infrastructure.Services
                     Email = loginRequest.Email
                 };
             }
+            if (loginRequest.Email == "advisor@test.com" && loginRequest.Password == "123")
+            {
+                return new LoginResponse
+                {
+                    IsSuccess = true,
+                    UserID = Guid.Parse("00000000-0000-0000-0000-000000000003"), // Matching the Advisor role seed ID for consistency
+                    Email = loginRequest.Email
+                };
+            }
             return new LoginResponse { IsSuccess = false };
         }
 
