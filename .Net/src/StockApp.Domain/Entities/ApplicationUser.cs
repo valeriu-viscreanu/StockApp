@@ -16,6 +16,11 @@ namespace StockApp.Domain.Entities
         public Guid? RoleID { get; set; }
         public virtual UserRole? Role { get; set; }
 
+        // Self-referencing: a Client user is assigned to one Advisor
+        public Guid? AdvisorID { get; set; }
+        public virtual ApplicationUser? Advisor { get; set; }
+        public virtual ICollection<ApplicationUser> Clients { get; set; } = new List<ApplicationUser>();
+
         public virtual Account? Account { get; set; }
 
         public virtual ICollection<BuyOrder> BuyOrders { get; set; } = new List<BuyOrder>();
