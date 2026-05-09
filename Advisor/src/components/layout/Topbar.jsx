@@ -2,7 +2,7 @@ import { Bell, Search } from 'lucide-react';
 import { useState } from 'react';
 import SearchModal from '../shared/SearchModal';
 
-export default function Topbar({ title, subtitle }) {
+export default function Topbar({ title, subtitle, token, onLogout }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
@@ -31,8 +31,10 @@ export default function Topbar({ title, subtitle }) {
       <SearchModal 
         isOpen={isSearchOpen} 
         onClose={() => setIsSearchOpen(false)} 
+        token={token}
       />
     </>
   );
 }
+
 

@@ -50,7 +50,13 @@ function App() {
     <div className="app-shell">
       <Sidebar user={user} onLogout={handleLogout} />
       <div className="main-content">
-        <Topbar title={meta.title} subtitle={meta.subtitle} user={user} />
+        <Topbar 
+          title={meta.title} 
+          subtitle={meta.subtitle} 
+          user={user} 
+          token={token}
+          onLogout={handleLogout}
+        />
         <div className="page-body">
           <Routes>
             <Route path="/"          element={<DashboardPage />} />
