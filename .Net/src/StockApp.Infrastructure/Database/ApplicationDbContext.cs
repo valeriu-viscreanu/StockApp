@@ -74,6 +74,13 @@ public class ApplicationDbContext : DbContext
                 .IsRequired(false)
                 .OnDelete(DeleteBehavior.SetNull);
 
+            // Self-referencing FK for Advisor -> Clients
+            entity.HasOne(u => u.Advisor)
+                .WithMany(u => u.Clients)
+                .HasForeignKey(u => u.AdvisorID)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
             entity.HasData(
                 new ApplicationUser
                 {

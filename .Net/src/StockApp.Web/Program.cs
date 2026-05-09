@@ -111,12 +111,14 @@ if (provider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
     builder.Services.AddScoped<IAccountService, AccountAuthService>();
     builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
     builder.Services.AddScoped<IAccountProfileService, AccountProfileService>();
+    builder.Services.AddScoped<IAdvisorService, AdvisorService>();
 }
 else
 {
     builder.Services.AddScoped<IAccountService, StockApp.Infrastructure.Services.InMemoryAccountService>();
     builder.Services.AddScoped<IRefreshTokenService, StockApp.Infrastructure.Services.InMemoryRefreshTokenService>();
     builder.Services.AddScoped<IAccountProfileService, AccountProfileService>(); // Using same implementation for simplified in-memory
+    builder.Services.AddScoped<IAdvisorService, StockApp.Infrastructure.Services.InMemoryAdvisorService>();
 }
 
 builder.Services.AddScoped<IFinancialGoalRepository, FinancialGoalRepository>();
