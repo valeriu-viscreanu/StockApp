@@ -43,7 +43,7 @@ export default function SearchModal({ isOpen, onClose, token }) {
 
   if (!isOpen) return null;
 
-  const filtered = clients.filter(c => 
+  const filtered = clients.filter(c =>
     c.email.toLowerCase().includes(query.toLowerCase()) ||
     c.clientID.toLowerCase().includes(query.toLowerCase())
   );
@@ -65,7 +65,7 @@ export default function SearchModal({ isOpen, onClose, token }) {
             <X size={18} />
           </button>
         </div>
-        
+
         <div className="search-modal-body">
           {loading ? (
             <div className="search-loading">
@@ -95,7 +95,6 @@ export default function SearchModal({ isOpen, onClose, token }) {
                     </div>
                     <div className="item-info">
                       <div className="item-name">{client.email}</div>
-                      <div className="item-meta">ID: {client.clientID}</div>
                     </div>
                     <button className="btn btn-ghost btn-xs">View</button>
                   </div>
