@@ -2,6 +2,7 @@ using StockApp.Options;
 using StockApp.Application.ServiceContracts;
 using StockApp.Application.Services;
 using StockApp.Application.Mappers;
+using StockApp.Application.Decorators;
 using StockApp.Application.DTO;
 using StockApp.Domain.RepositoryContracts;
 using StockApp.Infrastructure.Repositories;
@@ -104,8 +105,17 @@ builder.Services.AddScoped<IRequestValidator<BuyOrderRequest>, DataAnnotationsRe
 builder.Services.AddScoped<IRequestValidator<SellOrderRequest>, DataAnnotationsRequestValidator<SellOrderRequest>>();
 builder.Services.AddScoped<IBuyOrderMapper, BuyOrderMapper>();
 builder.Services.AddScoped<ISellOrderMapper, SellOrderMapper>();
-builder.Services.AddScoped<IBuyOrdersService, BuyOrdersService>();
-builder.Services.AddScoped<ISellOrdersService, SellOrdersService>();
+builder.Services.AddScoped<BuyOrdersService>();
+builder.Services.AddScoped<IBuyOrdersService>(sp =>
+    new LoggingBuyOrdersServiceDecorator(
+        sp.GetRequiredService<BuyOrdersService>(),
+        sp.GetRequiredService<ILogger<LoggingBuyOrdersServiceDecorator>>()));
+
+builder.Services.AddScoped<SellOrdersService>();
+builder.Services.AddScoped<ISellOrdersService>(sp =>
+    new LoggingSellOrdersServiceDecorator(
+        sp.GetRequiredService<SellOrdersService>(),
+        sp.GetRequiredService<ILogger<LoggingSellOrdersServiceDecorator>>()));
 if (provider.Equals("SqlServer", StringComparison.OrdinalIgnoreCase))
 {
     builder.Services.AddScoped<IAccountService, AccountAuthService>();
@@ -118,7 +128,7 @@ else
     builder.Services.AddScoped<IAccountService, StockApp.Infrastructure.Services.InMemoryAccountService>();
     builder.Services.AddScoped<IRefreshTokenService, StockApp.Infrastructure.Services.InMemoryRefreshTokenService>();
     builder.Services.AddScoped<IAccountProfileService, AccountProfileService>(); // Using same implementation for simplified in-memory
-    builder.Services.AddScoped<IAdvisorService, StockApp.Infrastructure.Services.InMemoryAdvisorService>();
+    builder.Services.AddScoped<IAdvisorService, AdvisorService>(); // Uses DbContext — works in InMemory mode too
 }
 
 builder.Services.AddScoped<IFinancialGoalRepository, FinancialGoalRepository>();

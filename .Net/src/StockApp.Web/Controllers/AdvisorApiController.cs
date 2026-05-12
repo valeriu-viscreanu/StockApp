@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using StockApp.Application.ServiceContracts;
 using System.Security.Claims;
@@ -7,7 +8,7 @@ namespace StockApp.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class AdvisorApiController : ControllerBase
     {
         private readonly IAdvisorService _advisorService;

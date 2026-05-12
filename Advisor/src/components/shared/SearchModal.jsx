@@ -1,8 +1,36 @@
-import { Search, X } from 'lucide-react';
+import { Search, X, Loader2, AlertCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { fetchClients } from '../../services/api';
 
-export default function SearchModal({ isOpen, onClose }) {
+export default function SearchModal({ isOpen, onClose, token }) {
   const [query, setQuery] = useState('');
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Load clients when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const loadClients = async () => {
+        setLoading(true);
+        setError(null);
+        try {
+          const data = await fetchClients(token);
+          if (data) {
+            setClients(data);
+          } else {
+            setError('Could not load clients. Check your connection.');
+          }
+        } catch (err) {
+          setError('An unexpected error occurred.');
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      };
+      loadClients();
+    }
+  }, [isOpen, token]);
 
   // Handle ESC key to close
   useEffect(() => {
@@ -15,6 +43,11 @@ export default function SearchModal({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  const filtered = clients.filter(c =>
+    c.email.toLowerCase().includes(query.toLowerCase()) ||
+    c.clientID.toLowerCase().includes(query.toLowerCase())
+  );
+
   return (
     <div className="search-overlay" onClick={onClose}>
       <div className="search-modal" onClick={(e) => e.stopPropagation()}>
@@ -23,7 +56,7 @@ export default function SearchModal({ isOpen, onClose }) {
           <input
             type="text"
             className="search-modal-input"
-            placeholder="Search for a client by name, email or ID..."
+            placeholder="Search for a client by email or ID..."
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -32,35 +65,45 @@ export default function SearchModal({ isOpen, onClose }) {
             <X size={18} />
           </button>
         </div>
-        
+
         <div className="search-modal-body">
-          {query.trim().length === 0 ? (
+          {loading ? (
+            <div className="search-loading">
+              <Loader2 className="animate-spin" size={24} />
+              <p>Fetching your clients...</p>
+            </div>
+          ) : error ? (
+            <div className="search-error">
+              <AlertCircle size={24} />
+              <p>{error}</p>
+            </div>
+          ) : query.trim().length === 0 ? (
             <div className="search-empty">
-              <p>Type to start searching...</p>
+              <p>Type to start searching among your {clients.length} clients...</p>
               <div className="search-shortcuts">
                 <span className="shortcut">ESC</span> to close
               </div>
             </div>
           ) : (
-            <div className="search-results-draft">
-              <p className="results-label">Searching for "{query}"...</p>
-              <div className="draft-items">
-                <div className="draft-item">
-                  <div className="item-avatar">JD</div>
-                  <div className="item-info">
-                    <div className="item-name">John Doe (Draft Result)</div>
-                    <div className="item-meta">john.doe@example.com</div>
+            <div className="search-results-list">
+              <p className="results-label">{filtered.length} matching clients</p>
+              <div className="search-items">
+                {filtered.map(client => (
+                  <div className="draft-item" key={client.clientID}>
+                    <div className="item-avatar">
+                      {client.email.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="item-info">
+                      <div className="item-name">{client.email}</div>
+                    </div>
+                    <button className="btn btn-ghost btn-xs">View</button>
                   </div>
-                  <button className="btn btn-ghost btn-xs">View</button>
-                </div>
-                <div className="draft-item">
-                  <div className="item-avatar">AS</div>
-                  <div className="item-info">
-                    <div className="item-name">Alice Smith (Draft Result)</div>
-                    <div className="item-meta">alice.s@example.com</div>
+                ))}
+                {filtered.length === 0 && (
+                  <div className="search-no-results">
+                    <p>No matches found for "{query}"</p>
                   </div>
-                  <button className="btn btn-ghost btn-xs">View</button>
-                </div>
+                )}
               </div>
             </div>
           )}
@@ -69,3 +112,4 @@ export default function SearchModal({ isOpen, onClose }) {
     </div>
   );
 }
+

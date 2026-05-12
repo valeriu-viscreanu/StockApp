@@ -1112,3 +1112,27 @@ tbody td {
   to { transform: translateY(0); opacity: 1; }
 }
 
+
+.search-loading, .search-error, .search-no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  gap: 12px;
+}
+
+.search-error {
+  color: var(--danger);
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+

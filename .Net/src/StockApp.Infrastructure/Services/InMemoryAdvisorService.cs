@@ -11,6 +11,14 @@ namespace StockApp.Infrastructure.Services
         // but for a stub service like the account one, we can maintain it here.
         private static readonly ConcurrentDictionary<Guid, Guid?> _assignments = new();
 
+        static InMemoryAdvisorService()
+        {
+            var advisorId = Guid.Parse("00000000-0000-0000-0000-000000000003");
+            _assignments[Guid.NewGuid()] = advisorId;
+            _assignments[Guid.NewGuid()] = advisorId;
+            _assignments[Guid.NewGuid()] = advisorId;
+        }
+
         public Task<IEnumerable<AdvisorClientDto>> GetClientsForAdvisorAsync(Guid advisorId)
         {
             // Note: Since this is an in-memory mock and we don't have all users here, 

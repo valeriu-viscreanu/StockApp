@@ -91,6 +91,35 @@ public class ApplicationDbContext : DbContext
                 {
                     UserID = Guid.Parse("00000000-0000-0000-0000-000000000002"),
                     Email = "admin1@test.com"
+                },
+                // Advisor account (matches InMemoryAccountService credentials)
+                new ApplicationUser
+                {
+                    UserID = Guid.Parse("00000000-0000-0000-0000-000000000003"),
+                    Email = "advisor@test.com",
+                    RoleID = Guid.Parse("10000000-0000-0000-0000-000000000003")
+                },
+                // Clients assigned to the advisor
+                new ApplicationUser
+                {
+                    UserID = Guid.Parse("00000000-0000-0000-0000-000000000010"),
+                    Email = "john.carter@example.com",
+                    RoleID = Guid.Parse("10000000-0000-0000-0000-000000000001"),
+                    AdvisorID = Guid.Parse("00000000-0000-0000-0000-000000000003")
+                },
+                new ApplicationUser
+                {
+                    UserID = Guid.Parse("00000000-0000-0000-0000-000000000011"),
+                    Email = "sofia.hernandez@example.com",
+                    RoleID = Guid.Parse("10000000-0000-0000-0000-000000000001"),
+                    AdvisorID = Guid.Parse("00000000-0000-0000-0000-000000000003")
+                },
+                new ApplicationUser
+                {
+                    UserID = Guid.Parse("00000000-0000-0000-0000-000000000012"),
+                    Email = "marcus.lee@example.com",
+                    RoleID = Guid.Parse("10000000-0000-0000-0000-000000000001"),
+                    AdvisorID = Guid.Parse("00000000-0000-0000-0000-000000000003")
                 }
             );
         });
