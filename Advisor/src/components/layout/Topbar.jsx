@@ -2,7 +2,7 @@ import { Bell, Search } from 'lucide-react';
 import { useState } from 'react';
 import SearchModal from '../shared/SearchModal';
 
-export default function Topbar({ title, subtitle, token, onLogout }) {
+export default function Topbar({ title, subtitle, token, onLogout, onNewClient }) {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
@@ -24,7 +24,12 @@ export default function Topbar({ title, subtitle, token, onLogout }) {
             <Bell size={16} />
             <span className="notif-dot" />
           </button>
-          <button className="btn btn-primary btn-sm">+ New Client</button>
+          <button 
+            className="btn btn-primary btn-sm"
+            onClick={onNewClient}
+          >
+            + New Client
+          </button>
         </div>
       </header>
 

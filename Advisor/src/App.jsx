@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import Topbar from './components/layout/Topbar';
+import RegisterClientModal from './components/shared/RegisterClientModal';
 import DashboardPage from './pages/DashboardPage';
 import ClientsPage from './pages/ClientsPage';
 import PortfolioPage from './pages/PortfolioPage';
@@ -18,6 +19,7 @@ const PAGE_META = {
 function App() {
   const [token, setToken] = useState(localStorage.getItem('advisor_token'));
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('advisor_user') || 'null'));
+  const [isRegModalOpen, setIsRegModalOpen] = useState(false);
   const isLoggedIn = !!token;
 
   const location = useLocation();
@@ -56,17 +58,23 @@ function App() {
           user={user} 
           token={token}
           onLogout={handleLogout}
+          onNewClient={() => setIsRegModalOpen(true)}
         />
         <div className="page-body">
           <Routes>
             <Route path="/"          element={<DashboardPage />} />
-            <Route path="/clients"   element={<ClientsPage />} />
+            <Route path="/clients"   element={<ClientsPage onNewClient={() => setIsRegModalOpen(true)} />} />
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
             <Route path="*"          element={<Navigate to="/" replace />} />
           </Routes>
         </div>
       </div>
+
+      <RegisterClientModal 
+        isOpen={isRegModalOpen} 
+        onClose={() => setIsRegModalOpen(false)} 
+      />
     </div>
   );
 }

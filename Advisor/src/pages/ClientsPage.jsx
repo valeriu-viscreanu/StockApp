@@ -18,7 +18,7 @@ const STATUS_CLASS = {
   onboarding: 'badge-onboarding',
 };
 
-export default function ClientsPage() {
+export default function ClientsPage({ onNewClient }) {
   const [search, setSearch] = useState('');
   const [filterRisk, setFilterRisk] = useState('All');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -41,6 +41,12 @@ export default function ClientsPage() {
             <div className="card-title">Client Roster</div>
             <div className="card-subtitle">{filtered.length} of {clients.length} clients shown</div>
           </div>
+          <button 
+            className="btn btn-primary btn-sm"
+            onClick={onNewClient}
+          >
+            <UserPlus size={14} /> New Client
+          </button>
         </div>
 
         <div className="filter-bar">
