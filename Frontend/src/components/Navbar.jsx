@@ -34,6 +34,7 @@ function Navbar({ theme, toggleTheme }) {
         <NavLink to="/activities" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Activities</NavLink>
         <NavLink to="/cash" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Cash</NavLink>
         <NavLink to="/goals" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Goals</NavLink>
+        <NavLink to="/advisor" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Advisor</NavLink>
 
         {/* Mobile-only logout/theme (optional, but good for UX) */}
         <div className="mobile-actions">
@@ -61,6 +62,23 @@ function Navbar({ theme, toggleTheme }) {
         >
           {user}
         </button>
+        <div className="advisor-badge" style={{ 
+          background: 'rgba(40, 167, 69, 0.1)', 
+          padding: '6px 14px', 
+          borderRadius: '20px', 
+          color: 'var(--primary)', 
+          fontSize: '0.85rem', 
+          fontWeight: '700',
+          display: 'flex',
+          gap: '8px',
+          alignItems: 'center',
+          cursor: 'pointer'
+        }}
+        onClick={() => navigate('/advisor')}
+        title="Your Advisor"
+        >
+          <span style={{ fontSize: '1rem' }}>👨‍💼</span> Jonathan S.
+        </div>
         <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
           {theme === 'light' ? '🌙' : '☀️'}
         </button>

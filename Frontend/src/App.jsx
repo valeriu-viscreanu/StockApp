@@ -9,6 +9,7 @@ import Navbar from './components/Navbar';
 import Activities from './components/Activities';
 import Holdings from './components/Holdings';
 import FinancialGoals from './components/FinancialGoals';
+import Advisor from './components/Advisor';
 import * as api from './services/api';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from './store/slices/authSlice';
@@ -225,6 +226,7 @@ function App() {
         <Route path="/activities" element={<Activities />} />
         <Route path="/cash" element={<Cash handleCashAction={handleCashAction} />} />
         <Route path="/goals" element={<FinancialGoals />} />
+        <Route path="/advisor" element={<Advisor />} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </div>
