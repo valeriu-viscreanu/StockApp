@@ -77,7 +77,7 @@ function Navbar({ theme, toggleTheme }) {
         onClick={() => navigate('/advisor')}
         title="Your Advisor"
         >
-          <span style={{ fontSize: '1rem' }}>👨‍💼</span> Jonathan S.
+          Jonathan S.
         </div>
         <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
           {theme === 'light' ? '🌙' : '☀️'}
