@@ -1,11 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/slices/authSlice';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import EditDetailsModal from './EditDetailsModal';
 
 function Navbar({ theme, toggleTheme }) {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user, token } = useSelector(state => state.auth);
   const handleLogout = useCallback(() => dispatch(logout()), [dispatch]);
   const portfolioAmount = useSelector((state) => state.portfolio.stockValue);
@@ -44,7 +45,12 @@ function Navbar({ theme, toggleTheme }) {
       </div>
 
       <div className="nav-right">
-        <div className="portfolio-badge">
+        <div 
+          className="portfolio-badge" 
+          onClick={() => navigate('/holdings')}
+          style={{ cursor: 'pointer' }}
+          title="View holdings"
+        >
           <span className="portfolio-label">Portfolio:</span>
           <span className="portfolio-amount">${portfolioAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </div>
