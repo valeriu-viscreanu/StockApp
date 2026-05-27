@@ -7,12 +7,14 @@ import ClientsPage from './pages/ClientsPage';
 import PortfolioPage from './pages/PortfolioPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import LoginPage from './pages/LoginPage';
+import SettingsPage from './pages/SettingsPage';
 
 const PAGE_META = {
   '/':          { title: 'Dashboard', subtitle: 'Welcome back, Alex — here\'s your overview.' },
   '/clients':   { title: 'Clients',   subtitle: 'Manage and monitor your client roster.' },
   '/portfolio': { title: 'Portfolio', subtitle: 'Aggregate view across all client holdings.' },
   '/analytics': { title: 'Analytics', subtitle: 'Performance insights and trend analysis.' },
+  '/settings':  { title: 'Settings',  subtitle: 'Configure your portal, notifications, and account credentials.' },
 };
 
 function App() {
@@ -63,6 +65,7 @@ function App() {
             <Route path="/clients"   element={<ClientsPage />} />
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/analytics" element={<AnalyticsPage />} />
+            <Route path="/settings"  element={<SettingsPage />} />
             <Route path="*"          element={<Navigate to="/" replace />} />
           </Routes>
         </div>

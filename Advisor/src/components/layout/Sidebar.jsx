@@ -44,9 +44,12 @@ export default function Sidebar({ user, onLogout }) {
         <button className="nav-item">
           <Bell size={17} className="nav-icon" /> Notifications <span className="nav-badge">3</span>
         </button>
-        <button className="nav-item">
+        <Link 
+          to="/settings" 
+          className={`nav-item ${location.pathname === '/settings' ? 'active' : ''}`}
+        >
           <Settings size={17} className="nav-icon" /> Settings
-        </button>
+        </Link>
         <button className="nav-item" style={{ color: 'var(--danger)' }} onClick={onLogout}>
           <LogOut size={17} className="nav-icon" /> Sign Out
         </button>
