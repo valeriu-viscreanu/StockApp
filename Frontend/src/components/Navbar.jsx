@@ -35,6 +35,7 @@ function Navbar({ theme, toggleTheme }) {
         <NavLink to="/cash" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Cash</NavLink>
         <NavLink to="/goals" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Goals</NavLink>
         <NavLink to="/advisor" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Advisor</NavLink>
+        <NavLink to="/settings" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setMenuOpen(false)}>Settings</NavLink>
 
         {/* Mobile-only logout/theme (optional, but good for UX) */}
         <div className="mobile-actions">
@@ -57,8 +58,8 @@ function Navbar({ theme, toggleTheme }) {
         </div>
         <button
           className="user-badge"
-          onClick={() => setIsDetailsOpen(true)}
-          title="Edit profile"
+          onClick={() => navigate('/settings')}
+          title="Account Settings"
         >
           {user}
         </button>
