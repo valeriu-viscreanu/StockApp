@@ -219,21 +219,7 @@ function Settings({ theme, setTheme, token, logout }) {
               <h2>Profile Details</h2>
               <p className="settings-panel-desc">Update your mailing address, contact information, and account theme.</p>
               
-              <div className="settings-section">
-                <h3>App Theme</h3>
-                <div className="theme-setting-row">
-                  <span className="theme-label">Current theme: <strong>{theme.toUpperCase()}</strong></span>
-                  <button 
-                    type="button" 
-                    className="btn-theme-select"
-                    onClick={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
-                  >
-                    Switch to {theme === 'light' ? '🌙 Dark Mode' : '☀️ Light Mode'}
-                  </button>
-                </div>
-              </div>
-
-              <hr className="settings-divider" />
+       
 
               {isProfileLoading ? (
                 <div className="settings-loading">Loading profile data...</div>
