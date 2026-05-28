@@ -7,5 +7,6 @@ namespace StockApp.Application.DTO
         public bool IsSuccess { get; set; }
         public Guid UserID { get; set; }
         public string? Email { get; set; }
+        public string? RoleName { get; set; }
     }
 }

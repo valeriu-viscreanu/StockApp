@@ -15,7 +15,11 @@ const LoginPage = ({ onLoginSuccess }) => {
 
     const result = await loginApi(email, password);
     if (result && result.token) {
-      onLoginSuccess(result.token, { email });
+      if (result.role !== 'Advisor') {
+        setError('Access denied. Only advisors can login to this portal.');
+      } else {
+        onLoginSuccess(result.token, { email, role: result.role });
+      }
     } else {
       setError('Invalid email or password. Use advisor@test.com / 123');
     }

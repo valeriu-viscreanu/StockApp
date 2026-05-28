@@ -45,7 +45,8 @@ namespace StockApp.Controllers
             return Ok(new 
             { 
                 token = accessToken, 
-                refreshToken = refreshToken.Token 
+                refreshToken = refreshToken.Token,
+                role = loginResponse.RoleName
             });
         }
 

@@ -4,6 +4,7 @@ using StockApp.Domain.Entities;
 using StockApp.Infrastructure.Database;
 using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace StockApp.Infrastructure.Database.Services
 {
@@ -18,7 +19,10 @@ namespace StockApp.Infrastructure.Database.Services
 
         public LoginResponse Login(LoginRequest loginRequest)
         {
-            var user = _db.Users.FirstOrDefault(u => u.Email == loginRequest.Email);
+            var user = _db.Users
+                .Include(u => u.Role)
+                .FirstOrDefault(u => u.Email == loginRequest.Email);
+                
             // Note: Password hashing is omitted as per current tutorial state ("123" hardcode)
             if (user != null && loginRequest.Password == "123") 
             {
@@ -26,9 +30,11 @@ namespace StockApp.Infrastructure.Database.Services
                 {
                     IsSuccess = true,
                     UserID = user.UserID,
-                    Email = user.Email
+                    Email = user.Email,
+                    RoleName = user.Role?.RoleName ?? "User" // Default to User if no role exists
                 };
             }
+
             return new LoginResponse { IsSuccess = false };
         }
 
