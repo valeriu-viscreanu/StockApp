@@ -475,7 +475,7 @@ function Settings({ theme, setTheme, token, logout }) {
               
               <form onSubmit={handleSecuritySave} className="settings-section">
                 <h3>Update Password</h3>
-                <div className="settings-grid">
+                <div className="settings-grid settings-grid-single">
                   <div className="settings-form-group">
                     <label>Current Password</label>
                     <input 
