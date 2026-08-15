@@ -23,6 +23,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<OrderStatus> OrderStatuses { get; set; } = null!;
     public DbSet<GoalType> GoalTypes { get; set; } = null!;
     public DbSet<FinancialGoal> FinancialGoals { get; set; } = null!;
+    public DbSet<News> NewsItems { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -267,6 +268,24 @@ public class ApplicationDbContext : DbContext
             entity.HasOne(e => e.GoalType)
                 .WithMany()
                 .HasForeignKey(e => e.GoalTypeID);
+        });
+
+        // Configuration for News
+        modelBuilder.Entity<News>(entity =>
+        {
+            entity.HasKey(e => e.NewsID);
+            entity.Property(e => e.Headline).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.Text).IsRequired();
+            entity.Property(e => e.Image).HasMaxLength(500);
+            entity.Property(e => e.Source).HasMaxLength(200);
+            entity.Property(e => e.Category).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.SourceUrl).HasMaxLength(500);
+            entity.Property(e => e.PublishedDate).IsRequired();
+            entity.Property(e => e.CreatedDate).IsRequired();
+
+            // Create index on PublishedDate for faster queries
+            entity.HasIndex(e => e.PublishedDate).IsDescending();
+            entity.HasIndex(e => e.Category);
         });
     }
 }

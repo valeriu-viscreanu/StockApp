@@ -135,6 +135,11 @@ builder.Services.AddScoped<IFinancialGoalRepository, FinancialGoalRepository>();
 builder.Services.AddScoped<IFinancialGoalMapper, FinancialGoalMapper>();
 builder.Services.AddScoped<IFinancialGoalService, FinancialGoalService>();
 
+// News Services
+builder.Services.AddScoped<INewsRepository, NewsRepository>();
+builder.Services.AddScoped<IRssFeedService, RssFeedService>();
+builder.Services.AddScoped<INewsService, NewsService>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

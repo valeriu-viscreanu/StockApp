@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockApp.Application.DTO;
+using StockApp.Application.Services;
 using System.Collections.Generic;
 
 namespace StockApp.Controllers
@@ -10,8 +11,25 @@ namespace StockApp.Controllers
     [AllowAnonymous]
     public class NewsController : ControllerBase
     {
+        private readonly INewsService _newsService;
+
+        public NewsController(INewsService newsService)
+        {
+            _newsService = newsService;
+        }
+
         [HttpGet]
-        public ActionResult<List<NewsResponse>> GetNews()
+        public async Task<ActionResult<List<NewsResponse>>> GetNews([FromQuery] int count = 20)
+        {
+            var news = await _newsService.GetLatestNewsAsync(count);
+            if (!news.Any())
+            {
+                return Ok(GetDefaultNews());
+            }
+            return Ok(news);
+        }
+
+        private List<NewsResponse> GetDefaultNews()
         {
             var newsItems = new List<NewsResponse>
             {
@@ -137,7 +155,7 @@ namespace StockApp.Controllers
                 }
             };
 
-            return Ok(newsItems);
+            return newsItems;
         }
     }
 }
