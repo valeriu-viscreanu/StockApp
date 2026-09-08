@@ -74,11 +74,13 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<TradingOptions>(builder.Configuration.GetSection("TradingOptions"));
 builder.Services.AddHttpClient();
 
-builder.Services.AddSingleton<ISpreadPricingService>(_ =>
-    new SpreadPricingService(builder.Configuration.GetValue<double>("TradingOptions:SpreadPercentage")));
-builder.Services.AddSingleton<IMarketDataService, MarketDataService>();
-builder.Services.AddSingleton<IStockProfileService>(sp => sp.GetRequiredService<IMarketDataService>());
-builder.Services.AddSingleton<IStockQuoteService>(sp => sp.GetRequiredService<IMarketDataService>());
+// Scoped rather than singleton: the spread is read from the database per request,
+// so it can be edited without a restart. MarketDataService follows suit because it
+// depends on it (its quote cache is static, so nothing is lost by the change).
+builder.Services.AddScoped<ISpreadPricingService, SpreadPricingService>();
+builder.Services.AddScoped<IMarketDataService, MarketDataService>();
+builder.Services.AddScoped<IStockProfileService>(sp => sp.GetRequiredService<IMarketDataService>());
+builder.Services.AddScoped<IStockQuoteService>(sp => sp.GetRequiredService<IMarketDataService>());
 
 var provider = builder.Configuration["DatabaseProvider"] ?? "InMemory";
 var sqlServerConnectionString = builder.Configuration.GetConnectionString("SqlServerConnection");
@@ -102,6 +104,7 @@ builder.Services.AddScoped<ICashRepository, CashRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IUserDetailsRepository, UserDetailsRepository>();
 builder.Services.AddScoped<IOrderStatusRepository, OrderStatusRepository>();
+builder.Services.AddScoped<ISpreadSettingRepository, SpreadSettingRepository>();
 
 builder.Services.AddScoped<IRequestValidator<BuyOrderRequest>, DataAnnotationsRequestValidator<BuyOrderRequest>>();
 builder.Services.AddScoped<IRequestValidator<SellOrderRequest>, DataAnnotationsRequestValidator<SellOrderRequest>>();

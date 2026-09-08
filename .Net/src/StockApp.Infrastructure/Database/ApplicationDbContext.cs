@@ -24,6 +24,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<GoalType> GoalTypes { get; set; } = null!;
     public DbSet<FinancialGoal> FinancialGoals { get; set; } = null!;
     public DbSet<News> NewsItems { get; set; } = null!;
+    public DbSet<SpreadSetting> SpreadSettings { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -233,6 +234,22 @@ public class ApplicationDbContext : DbContext
                 new OrderStatus { OrderStatusID = Guid.Parse("20000000-0000-0000-0000-000000000002"), StatusName = "Authorized" },
                 new OrderStatus { OrderStatusID = Guid.Parse("20000000-0000-0000-0000-000000000003"), StatusName = "Processed" },
                 new OrderStatus { OrderStatusID = Guid.Parse("20000000-0000-0000-0000-000000000004"), StatusName = "Canceled" }
+            );
+        });
+
+        // Configuration for SpreadSetting
+        modelBuilder.Entity<SpreadSetting>(entity =>
+        {
+            entity.HasKey(e => e.SpreadSettingID);
+            entity.Property(e => e.SpreadPercentage).HasColumnType("decimal(9,4)");
+
+            entity.HasData(
+                new SpreadSetting
+                {
+                    SpreadSettingID = Guid.Parse("30000000-0000-0000-0000-000000000001"),
+                    SpreadPercentage = 0.2,
+                    UpdatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                }
             );
         });
 

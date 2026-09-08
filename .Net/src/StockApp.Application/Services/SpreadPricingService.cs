@@ -1,31 +1,37 @@
 using StockApp.Application.ServiceContracts;
+using StockApp.Domain.RepositoryContracts;
 
 namespace StockApp.Application.Services
 {
     public class SpreadPricingService : ISpreadPricingService
     {
-        private readonly double _spreadPercentage;
+        private readonly ISpreadSettingRepository _spreadSettingRepository;
 
-        /// <param name="spreadPercentage">
-        /// The full bid-ask spread as a percentage of the mid price
-        /// (0.20 means 0.20%). Half of it is applied either side of the mid.
-        /// </param>
-        public SpreadPricingService(double spreadPercentage)
+        public SpreadPricingService(ISpreadSettingRepository spreadSettingRepository)
         {
-            if (spreadPercentage < 0)
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(spreadPercentage), "Spread percentage cannot be negative.");
-            }
-
-            _spreadPercentage = spreadPercentage;
+            _spreadSettingRepository = spreadSettingRepository;
         }
 
-        // Half the spread, expressed as a fraction of the mid price.
-        private double HalfSpreadFraction => _spreadPercentage / 200.0;
+        public double GetAskPrice(double midPrice) => midPrice * (1 + HalfSpreadFraction());
 
-        public double GetAskPrice(double midPrice) => midPrice * (1 + HalfSpreadFraction);
+        public double GetBidPrice(double midPrice) => midPrice * (1 - HalfSpreadFraction());
 
-        public double GetBidPrice(double midPrice) => midPrice * (1 - HalfSpreadFraction);
+        /// <summary>
+        /// Half the configured spread, as a fraction of the mid price. Read on every
+        /// call rather than cached, so editing the row takes effect immediately.
+        /// </summary>
+        private double HalfSpreadFraction()
+        {
+            // No row configured yet: trade at mid rather than invent a charge.
+            double spreadPercentage = _spreadSettingRepository.GetCurrent()?.SpreadPercentage ?? 0;
+
+            if (spreadPercentage < 0)
+            {
+                throw new InvalidOperationException(
+                    $"Configured spread percentage ({spreadPercentage}) cannot be negative.");
+            }
+
+            return spreadPercentage / 200.0;
+        }
     }
 }

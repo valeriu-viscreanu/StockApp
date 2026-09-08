@@ -1,31 +1,31 @@
 using StockApp.Application.ServiceContracts;
 using StockApp.Application.Services;
+using StockAppTests.Mocks;
 
 namespace StockAppTests
 {
     /// <summary>
-    /// The configured spread is a percentage of the mid price, split evenly
-    /// either side of it: ask = mid * (1 + s/200), bid = mid * (1 - s/200),
-    /// so that (ask - bid) / mid == s%.
+    /// The spread is read from the database so it can be changed without a
+    /// redeploy. It is a percentage of the mid price, split evenly either side:
+    /// ask = mid * (1 + s/200), bid = mid * (1 - s/200), so (ask - bid) / mid == s%.
     /// </summary>
     public class SpreadPricingServiceTests
     {
+        private static ISpreadPricingService PricingWithSpread(double spreadPercentage) =>
+            new SpreadPricingService(new InMemorySpreadSettingRepository(spreadPercentage));
+
         // 1. Half the spread is added above the mid for buyers.
         [Fact]
         public void GetAskPrice_AddsHalfTheSpreadAboveMid()
         {
-            ISpreadPricingService pricing = new SpreadPricingService(spreadPercentage: 0.20);
-
-            Assert.Equal(100.10, pricing.GetAskPrice(100.0), precision: 10);
+            Assert.Equal(100.10, PricingWithSpread(0.20).GetAskPrice(100.0), precision: 10);
         }
 
         // 2. Half the spread is taken off the mid for sellers.
         [Fact]
         public void GetBidPrice_SubtractsHalfTheSpreadBelowMid()
         {
-            ISpreadPricingService pricing = new SpreadPricingService(spreadPercentage: 0.20);
-
-            Assert.Equal(99.90, pricing.GetBidPrice(100.0), precision: 10);
+            Assert.Equal(99.90, PricingWithSpread(0.20).GetBidPrice(100.0), precision: 10);
         }
 
         // 3. The gap between bid and ask is exactly the configured percentage of mid.
@@ -35,7 +35,7 @@ namespace StockAppTests
         [InlineData(0.05, 499.70)]
         public void BidAskGap_IsTheConfiguredPercentageOfMid(double spreadPercentage, double mid)
         {
-            ISpreadPricingService pricing = new SpreadPricingService(spreadPercentage);
+            ISpreadPricingService pricing = PricingWithSpread(spreadPercentage);
 
             double spreadAsFractionOfMid = (pricing.GetAskPrice(mid) - pricing.GetBidPrice(mid)) / mid;
 
@@ -46,29 +46,57 @@ namespace StockAppTests
         [Fact]
         public void ZeroSpread_LeavesMidUnchanged()
         {
-            ISpreadPricingService pricing = new SpreadPricingService(spreadPercentage: 0);
+            ISpreadPricingService pricing = PricingWithSpread(0);
 
             Assert.Equal(100.0, pricing.GetAskPrice(100.0), precision: 10);
             Assert.Equal(100.0, pricing.GetBidPrice(100.0), precision: 10);
         }
 
-        // 5. Buying then immediately selling at an unchanged mid must lose the spread,
-        //    never gain - that round-trip cost is the whole point of the feature.
+        // 5. Buying then immediately selling at an unchanged mid must lose the spread.
         [Fact]
         public void BuyThenSellAtSameMid_CostsTheSpread()
         {
-            ISpreadPricingService pricing = new SpreadPricingService(spreadPercentage: 0.20);
+            ISpreadPricingService pricing = PricingWithSpread(0.20);
 
             double roundTrip = pricing.GetBidPrice(100.0) - pricing.GetAskPrice(100.0);
 
             Assert.Equal(-0.20, roundTrip, precision: 10);
         }
 
-        // 6. A negative spread is not a valid configuration.
+        // 6. Editing the row takes effect on the next trade - no restart, no caching.
         [Fact]
-        public void NegativeSpread_IsRejected()
+        public void SpreadChangedInDatabase_IsPickedUpWithoutRestart()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new SpreadPricingService(spreadPercentage: -0.1));
+            var repository = new InMemorySpreadSettingRepository(0.20);
+            ISpreadPricingService pricing = new SpreadPricingService(repository);
+
+            Assert.Equal(100.10, pricing.GetAskPrice(100.0), precision: 10);
+
+            repository.Set(1.0); // widened by an operator editing the table
+
+            Assert.Equal(100.50, pricing.GetAskPrice(100.0), precision: 10);
+        }
+
+        // 7. With no row configured, trading falls back to a zero spread rather than
+        //    inventing a charge the operator never set.
+        [Fact]
+        public void NoSpreadRowConfigured_FallsBackToZeroSpread()
+        {
+            var repository = new InMemorySpreadSettingRepository();
+            repository.Clear();
+            ISpreadPricingService pricing = new SpreadPricingService(repository);
+
+            Assert.Equal(100.0, pricing.GetAskPrice(100.0), precision: 10);
+            Assert.Equal(100.0, pricing.GetBidPrice(100.0), precision: 10);
+        }
+
+        // 8. A negative spread in the table is not usable and must be rejected loudly.
+        [Fact]
+        public void NegativeSpreadInDatabase_IsRejected()
+        {
+            ISpreadPricingService pricing = PricingWithSpread(-0.1);
+
+            Assert.Throws<InvalidOperationException>(() => pricing.GetAskPrice(100.0));
         }
     }
 }
