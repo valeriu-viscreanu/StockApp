@@ -13,9 +13,15 @@ namespace StockAppTests
         private readonly ISellOrdersService _sellOrdersService;
         private readonly InMemoryAccountRepository _accountRepository;
         private readonly InMemoryCashRepository _cashRepository;
+        private readonly FakeStockQuoteService _quoteService;
 
         public SellOrdersServiceTests()
         {
+            // No spread, so orders settle at the same prices these tests submit.
+            _quoteService = new FakeStockQuoteService();
+            _quoteService.SetMidPrice("MSFT", 200);
+            _quoteService.SetMidPrice("AAPL", 150);
+
             _accountRepository = new InMemoryAccountRepository();
             _cashRepository = new InMemoryCashRepository();
 
@@ -28,7 +34,8 @@ namespace StockAppTests
                 new SellOrderMapper(),
                 new InMemoryUserOperationRepository(),
                 _accountRepository,
-                new InMemoryOrderStatusRepository());
+                new InMemoryOrderStatusRepository(),
+                _quoteService);
         }
 
         // Ensures a seeded Account (with a large balance) and matching Cash holding exist for

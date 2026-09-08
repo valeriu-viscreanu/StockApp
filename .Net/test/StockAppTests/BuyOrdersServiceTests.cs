@@ -12,9 +12,15 @@ namespace StockAppTests
     {
         private readonly IBuyOrdersService _buyOrdersService;
         private readonly InMemoryAccountRepository _accountRepository;
+        private readonly FakeStockQuoteService _quoteService;
 
         public BuyOrdersServiceTests()
         {
+            // No spread, so orders settle at the same prices these tests submit.
+            _quoteService = new FakeStockQuoteService();
+            _quoteService.SetMidPrice("MSFT", 200);
+            _quoteService.SetMidPrice("AAPL", 150);
+
             _accountRepository = new InMemoryAccountRepository();
             _accountRepository.Add(new Account
             {
@@ -31,7 +37,8 @@ namespace StockAppTests
                 new BuyOrderMapper(),
                 new InMemoryUserOperationRepository(),
                 _accountRepository,
-                new InMemoryOrderStatusRepository());
+                new InMemoryOrderStatusRepository(),
+                _quoteService);
         }
 
         private void SeedAccount(Guid userId, double balance = 1_000_000.0)

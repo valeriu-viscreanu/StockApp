@@ -13,6 +13,7 @@ namespace StockApp.Application.Services
         private readonly IUserOperationRepository _userOperationRepository;
         private readonly IAccountRepository _accountRepository;
         private readonly IOrderStatusRepository _orderStatusRepository;
+        private readonly IStockQuoteService _stockQuoteService;
 
         public SellOrdersService(
             ISellOrderRepository sellOrderRepository,
@@ -21,8 +22,10 @@ namespace StockApp.Application.Services
             ISellOrderMapper sellOrderMapper,
             IUserOperationRepository userOperationRepository,
             IAccountRepository accountRepository,
-            IOrderStatusRepository orderStatusRepository)
+            IOrderStatusRepository orderStatusRepository,
+            IStockQuoteService stockQuoteService)
         {
+            _stockQuoteService = stockQuoteService;
             _sellOrderRepository = sellOrderRepository;
             _cashRepository = cashRepository;
             _sellOrderValidator = sellOrderValidator;
@@ -42,13 +45,21 @@ namespace StockApp.Application.Services
             _sellOrderValidator.Validate(sellOrderRequest);
 
             var sellOrder = _sellOrderMapper.MapToEntity(sellOrderRequest);
-            var pendingStatus = await _orderStatusRepository.GetByName("Pending");
-            sellOrder.OrderStatusID = pendingStatus?.OrderStatusID ?? Guid.Empty;
-            sellOrder.OrderStatus = pendingStatus!;
-            _sellOrderRepository.Add(sellOrder);
 
-            // Update balance and holdings (Cash)
-            var account = _accountRepository.GetByUserID(sellOrderRequest.UserID) 
+            // Settle at the server's own bid price. The price the client submitted is
+            // only ever a display hint, so it is never trusted for the money math.
+            var quote = await _stockQuoteService.GetStockPriceQuote(sellOrder.StockSymbol);
+            if (quote?.BidPrice is not > 0)
+            {
+                throw new InvalidOperationException(
+                    $"Unable to price {sellOrder.StockSymbol} right now. Please try again.");
+            }
+
+            sellOrder.Price = quote.BidPrice.Value;
+
+            // Check the account and the holdings before anything is written, so a
+            // rejected order leaves no order row and no ledger entry behind.
+            var account = _accountRepository.GetByUserID(sellOrderRequest.UserID)
                 ?? throw new InvalidOperationException("User has no account");
 
             var cash = _cashRepository.GetBySymbol(account.AccountID, sellOrderRequest.StockSymbol);
@@ -57,6 +68,12 @@ namespace StockApp.Application.Services
                 throw new InvalidOperationException($"Insufficient shares of {sellOrder.StockSymbol} to complete the sale");
             }
 
+            var pendingStatus = await _orderStatusRepository.GetByName("Pending");
+            sellOrder.OrderStatusID = pendingStatus?.OrderStatusID ?? Guid.Empty;
+            sellOrder.OrderStatus = pendingStatus!;
+            _sellOrderRepository.Add(sellOrder);
+
+            // Update balance and holdings (Cash)
             double totalRevenue = sellOrder.Price * sellOrder.Quantity;
             account.Balance += totalRevenue;
             _accountRepository.Update(account);

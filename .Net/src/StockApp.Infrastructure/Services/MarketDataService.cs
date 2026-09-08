@@ -12,12 +12,14 @@ namespace StockApp.Infrastructure.Services
     public class MarketDataService : IMarketDataService
     {
         private readonly HttpClient _httpClient;
+        private readonly ISpreadPricingService _spreadPricingService;
         private static readonly ConcurrentDictionary<string, (StockQuoteResponse Quote, DateTime Expiry)> _quoteCache = new();
         private const string YahooBaseUrl = "https://query1.finance.yahoo.com";
 
-        public MarketDataService(HttpClient httpClient)
+        public MarketDataService(HttpClient httpClient, ISpreadPricingService spreadPricingService)
         {
             _httpClient = httpClient;
+            _spreadPricingService = spreadPricingService;
         }
 
         private HttpRequestMessage CreateYahooRequest(string url)
@@ -91,7 +93,9 @@ namespace StockApp.Infrastructure.Services
                     HighPriceDay = meta.RegularMarketDayHigh,
                     LowPriceDay = meta.RegularMarketDayLow,
                     OpenPriceDay = meta.RegularMarketOpen,
-                    PreviousClosePrice = previousClose
+                    PreviousClosePrice = previousClose,
+                    BidPrice = _spreadPricingService.GetBidPrice(currentPrice),
+                    AskPrice = _spreadPricingService.GetAskPrice(currentPrice)
                 };
             }
             catch

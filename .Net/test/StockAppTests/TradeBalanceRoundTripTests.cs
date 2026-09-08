@@ -25,6 +25,10 @@ namespace StockAppTests
             var cashRepository = new InMemoryCashRepository();
             var userOperationRepository = new InMemoryUserOperationRepository();
 
+            // No spread, so a buy/sell round trip returns exactly to the starting balance.
+            var quoteService = new FakeStockQuoteService();
+            quoteService.SetMidPrice("MSFT", 50);
+
             IBuyOrdersService buyOrdersService = new BuyOrdersService(
                 new InMemoryBuyOrderRepository(),
                 cashRepository,
@@ -32,7 +36,8 @@ namespace StockAppTests
                 new BuyOrderMapper(),
                 userOperationRepository,
                 accountRepository,
-                new InMemoryOrderStatusRepository());
+                new InMemoryOrderStatusRepository(),
+                quoteService);
 
             ISellOrdersService sellOrdersService = new SellOrdersService(
                 new InMemorySellOrderRepository(),
@@ -41,7 +46,8 @@ namespace StockAppTests
                 new SellOrderMapper(),
                 userOperationRepository,
                 accountRepository,
-                new InMemoryOrderStatusRepository());
+                new InMemoryOrderStatusRepository(),
+                quoteService);
 
             return new TestServices
             {
