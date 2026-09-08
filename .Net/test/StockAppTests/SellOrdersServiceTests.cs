@@ -1,5 +1,6 @@
 using StockApp.Application.DTO;
 using StockApp.Application.Mappers;
+using StockApp.Domain.Entities;
 using StockApp.Infrastructure.Repositories;
 using StockApp.Application.ServiceContracts;
 using StockApp.Application.Services;
@@ -10,17 +11,51 @@ namespace StockAppTests
     public class SellOrdersServiceTests
     {
         private readonly ISellOrdersService _sellOrdersService;
+        private readonly InMemoryAccountRepository _accountRepository;
+        private readonly InMemoryCashRepository _cashRepository;
 
         public SellOrdersServiceTests()
         {
+            _accountRepository = new InMemoryAccountRepository();
+            _cashRepository = new InMemoryCashRepository();
+
+            SeedHolding(Guid.Empty, "MSFT", "Microsoft", 1_000_000);
+
             _sellOrdersService = new SellOrdersService(
                 new InMemorySellOrderRepository(),
-                new InMemoryCashRepository(),
+                _cashRepository,
                 new DataAnnotationsRequestValidator<SellOrderRequest>(),
                 new SellOrderMapper(),
                 new InMemoryUserOperationRepository(),
-                new InMemoryAccountRepository(),
+                _accountRepository,
                 new InMemoryOrderStatusRepository());
+        }
+
+        // Ensures a seeded Account (with a large balance) and matching Cash holding exist for
+        // the given user, so a sell order for that symbol/user can succeed.
+        private void SeedHolding(Guid userId, string symbol, string name, uint quantity)
+        {
+            var account = _accountRepository.GetByUserID(userId);
+            if (account == null)
+            {
+                account = new Account
+                {
+                    AccountID = Guid.NewGuid(),
+                    UserID = userId,
+                    Balance = 1_000_000.0,
+                    DateOfBirth = DateTime.Parse("1990-01-01")
+                };
+                _accountRepository.Add(account);
+            }
+
+            _cashRepository.Add(new Cash
+            {
+                CashID = Guid.NewGuid(),
+                AccountID = account.AccountID,
+                StockSymbol = symbol,
+                StockName = name,
+                Quantity = quantity
+            });
         }
 
         #region CreateSellOrder
@@ -221,6 +256,8 @@ namespace StockAppTests
                 Price = 100,
                 UserID = Guid.NewGuid()
             };
+            SeedHolding(request1.UserID, "MSFT", "Microsoft", 100);
+            SeedHolding(request1.UserID, "AAPL", "Apple", 100);
 
             SellOrderRequest request2 = new SellOrderRequest
             {
