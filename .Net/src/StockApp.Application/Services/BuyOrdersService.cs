@@ -58,9 +58,18 @@ namespace StockApp.Application.Services
                 Description = $"Bought {buyOrder.Quantity} shares of {buyOrder.StockSymbol} at {buyOrder.Price:C}"
             });
 
-            // Update holdings (Cash)
-            var account = _accountRepository.GetByUserID(buyOrder.UserID) 
+            // Update balance and holdings (Cash)
+            var account = _accountRepository.GetByUserID(buyOrder.UserID)
                 ?? throw new InvalidOperationException("User has no account");
+
+            double totalCost = buyOrder.Price * buyOrder.Quantity;
+            if (account.Balance < totalCost)
+            {
+                throw new InvalidOperationException("Insufficient funds for this purchase.");
+            }
+
+            account.Balance -= totalCost;
+            _accountRepository.Update(account);
 
             var cash = _cashRepository.GetBySymbol(account.AccountID, buyOrder.StockSymbol);
             if (cash == null)

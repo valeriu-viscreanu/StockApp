@@ -15,7 +15,6 @@ namespace StockApp.Controllers
         private readonly IStockQuoteService _stockQuoteService;
         private readonly IBuyOrdersService _buyOrdersService;
         private readonly ISellOrdersService _sellOrdersService;
-        private readonly IAccountProfileService _accountProfileService;
         private readonly IMarketDataService _marketDataService;
         private readonly ICashRepository _cashRepository;
         private readonly IAccountRepository _accountRepository;
@@ -60,7 +59,6 @@ namespace StockApp.Controllers
             IStockQuoteService stockQuoteService,
             IBuyOrdersService buyOrdersService,
             ISellOrdersService sellOrdersService,
-            IAccountProfileService accountProfileService,
             IMarketDataService marketDataService,
             ICashRepository cashRepository,
             IAccountRepository accountRepository)
@@ -69,7 +67,6 @@ namespace StockApp.Controllers
             _stockQuoteService = stockQuoteService;
             _buyOrdersService = buyOrdersService;
             _sellOrdersService = sellOrdersService;
-            _accountProfileService = accountProfileService;
             _marketDataService = marketDataService;
             _cashRepository = cashRepository;
             _accountRepository = accountRepository;
@@ -179,11 +176,6 @@ namespace StockApp.Controllers
                 if (Guid.TryParse(userIdString, out Guid userId))
                 {
                     buyOrderRequest.UserID = userId;
-                    double totalCost = buyOrderRequest.Price * buyOrderRequest.Quantity;
-                    if (!_accountProfileService.DeductBalance(userId, totalCost))
-                    {
-                        return BadRequest(new { message = "Insufficient funds for this purchase." });
-                    }
                 }
 
                 var response = await _buyOrdersService.CreateBuyOrder(buyOrderRequest);
@@ -192,6 +184,10 @@ namespace StockApp.Controllers
             catch (ArgumentException)
             {
                 return BadRequest();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -254,13 +250,6 @@ namespace StockApp.Controllers
                 }
 
                 var response = await _sellOrdersService.CreateSellOrder(sellOrderRequest);
-
-                // Only add balance after order is successfully processed
-                if (Guid.TryParse(userIdString, out Guid validUserId))
-                {
-                    double totalProceeds = sellOrderRequest.Price * sellOrderRequest.Quantity;
-                    _accountProfileService.AddBalance(validUserId, totalProceeds);
-                }
 
                 return CreatedAtAction(nameof(GetOrders), response);
             }

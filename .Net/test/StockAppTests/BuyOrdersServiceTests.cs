@@ -1,5 +1,6 @@
 using StockApp.Application.DTO;
 using StockApp.Application.Mappers;
+using StockApp.Domain.Entities;
 using StockApp.Infrastructure.Repositories;
 using StockApp.Application.ServiceContracts;
 using StockApp.Application.Services;
@@ -10,17 +11,38 @@ namespace StockAppTests
     public class BuyOrdersServiceTests
     {
         private readonly IBuyOrdersService _buyOrdersService;
+        private readonly InMemoryAccountRepository _accountRepository;
 
         public BuyOrdersServiceTests()
         {
+            _accountRepository = new InMemoryAccountRepository();
+            _accountRepository.Add(new Account
+            {
+                AccountID = Guid.NewGuid(),
+                UserID = Guid.Empty,
+                Balance = 1_000_000.0,
+                DateOfBirth = DateTime.Parse("1990-01-01")
+            });
+
             _buyOrdersService = new BuyOrdersService(
                 new InMemoryBuyOrderRepository(),
                 new InMemoryCashRepository(),
                 new DataAnnotationsRequestValidator<BuyOrderRequest>(),
                 new BuyOrderMapper(),
                 new InMemoryUserOperationRepository(),
-                new InMemoryAccountRepository(),
+                _accountRepository,
                 new InMemoryOrderStatusRepository());
+        }
+
+        private void SeedAccount(Guid userId, double balance = 1_000_000.0)
+        {
+            _accountRepository.Add(new Account
+            {
+                AccountID = Guid.NewGuid(),
+                UserID = userId,
+                Balance = balance,
+                DateOfBirth = DateTime.Parse("1990-01-01")
+            });
         }
 
         #region CreateBuyOrder
@@ -221,6 +243,7 @@ namespace StockAppTests
                 Price = 100,
                 UserID = Guid.NewGuid()
             };
+            SeedAccount(request1.UserID);
 
             BuyOrderRequest request2 = new BuyOrderRequest
             {

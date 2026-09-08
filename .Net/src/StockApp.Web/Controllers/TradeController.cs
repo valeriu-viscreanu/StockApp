@@ -99,17 +99,19 @@ namespace StockApp.Controllers
             if (Guid.TryParse(userIdString, out Guid userId))
             {
                 buyOrderRequest.UserID = userId;
-                double totalCost = buyOrderRequest.Price * buyOrderRequest.Quantity;
-                if (!_accountProfileService.DeductBalance(userId, totalCost))
-                {
-                    TempData["Error"] = "Insufficient funds for this purchase.";
-                    return RedirectToAction("Trade", new { stock = buyOrderRequest.StockSymbol });
-                }
             }
 
-            BuyOrderResponse buyOrderResponse = await _buyOrdersService.CreateBuyOrder(buyOrderRequest);
+            try
+            {
+                BuyOrderResponse buyOrderResponse = await _buyOrdersService.CreateBuyOrder(buyOrderRequest);
 
-            return RedirectToAction("Orders");
+                return RedirectToAction("Orders");
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["Error"] = ex.Message;
+                return RedirectToAction("Trade", new { stock = buyOrderRequest.StockSymbol });
+            }
         }
 
         [Route("[action]")]
@@ -126,13 +128,6 @@ namespace StockApp.Controllers
             try
             {
                 SellOrderResponse sellOrderResponse = await _sellOrdersService.CreateSellOrder(sellOrderRequest);
-
-                // Add balance after successful sale
-                if (Guid.TryParse(userIdString, out Guid validUserId))
-                {
-                    double totalProceeds = sellOrderRequest.Price * sellOrderRequest.Quantity;
-                    _accountProfileService.AddBalance(validUserId, totalProceeds);
-                }
 
                 return RedirectToAction("Orders");
             }
