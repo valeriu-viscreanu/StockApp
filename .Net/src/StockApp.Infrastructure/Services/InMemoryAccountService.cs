@@ -13,7 +13,8 @@ namespace StockApp.Infrastructure.Services
                 {
                     IsSuccess = true,
                     UserID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                    Email = loginRequest.Email
+                    Email = loginRequest.Email,
+                    RoleName = "Admin"
                 };
             }
             if (loginRequest.Email == "admin1@test.com" && loginRequest.Password == "123")
@@ -22,7 +23,8 @@ namespace StockApp.Infrastructure.Services
                 {
                     IsSuccess = true,
                     UserID = Guid.Parse("00000000-0000-0000-0000-000000000002"),
-                    Email = loginRequest.Email
+                    Email = loginRequest.Email,
+                    RoleName = "Customer"
                 };
             }
             if (loginRequest.Email == "advisor@test.com" && loginRequest.Password == "123")
@@ -31,7 +33,8 @@ namespace StockApp.Infrastructure.Services
                 {
                     IsSuccess = true,
                     UserID = Guid.Parse("00000000-0000-0000-0000-000000000003"), // Matching the Advisor role seed ID for consistency
-                    Email = loginRequest.Email
+                    Email = loginRequest.Email,
+                    RoleName = "Advisor"
                 };
             }
             return new LoginResponse { IsSuccess = false };

@@ -19,5 +19,22 @@ namespace StockApp.Infrastructure.Database.Repositories
                 .OrderByDescending(s => s.UpdatedAt)
                 .FirstOrDefault();
         }
+
+        public SpreadSetting UpdateSpreadPercentage(double spreadPercentage)
+        {
+            var setting = GetCurrent();
+
+            if (setting == null)
+            {
+                setting = new SpreadSetting { SpreadSettingID = Guid.NewGuid() };
+                _dbContext.SpreadSettings.Add(setting);
+            }
+
+            setting.SpreadPercentage = spreadPercentage;
+            setting.UpdatedAt = DateTime.UtcNow;
+            _dbContext.SaveChanges();
+
+            return setting;
+        }
     }
 }

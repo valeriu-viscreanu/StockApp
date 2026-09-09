@@ -39,7 +39,7 @@ namespace StockApp.Controllers
                 return Unauthorized(new { message = "Invalid email or password" });
             }
 
-            var accessToken = GenerateJwtToken(loginResponse.Email!, loginResponse.UserID);
+            var accessToken = GenerateJwtToken(loginResponse.Email!, loginResponse.UserID, loginResponse.RoleName);
             var refreshToken = await _refreshTokenService.CreateRefreshToken(loginRequest.Email!);
 
             return Ok(new 
@@ -90,7 +90,10 @@ namespace StockApp.Controllers
             // Note: Since we don't have UserID in RefreshToken, we might need to store it or look it up.
             // For now, I'll pass Guid.Empty or try to find it if possible. 
             // In a real app, RefreshToken would link to a User.
-            var newAccessToken = GenerateJwtToken(refreshToken.Email, Guid.Empty);
+            // NOTE: RefreshToken stores only an email, so neither the user id nor the
+            // role can be recovered here. A refreshed token therefore carries no role
+            // and an empty user id - see the comment above.
+            var newAccessToken = GenerateJwtToken(refreshToken.Email, Guid.Empty, null);
 
             return Ok(new
             {
@@ -99,7 +102,7 @@ namespace StockApp.Controllers
             });
         }
 
-        private string GenerateJwtToken(string email, Guid userId)
+        private string GenerateJwtToken(string email, Guid userId, string? roleName)
         {
             var jwtKey = _configuration["Jwt:Key"]
                 ?? throw new InvalidOperationException(
@@ -108,13 +111,20 @@ namespace StockApp.Controllers
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.Name, email),
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            // Drives [Authorize(Roles = "...")]. Omitted when the user has no role,
+            // rather than inventing one.
+            if (!string.IsNullOrWhiteSpace(roleName))
+            {
+                claims.Add(new Claim(ClaimTypes.Role, roleName));
+            }
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],

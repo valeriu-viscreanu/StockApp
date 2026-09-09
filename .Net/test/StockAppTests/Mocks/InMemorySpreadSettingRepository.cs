@@ -36,5 +36,11 @@ namespace StockAppTests.Mocks
             ReadCount++;
             return _current;
         }
+
+        public SpreadSetting UpdateSpreadPercentage(double spreadPercentage)
+        {
+            Set(spreadPercentage);
+            return _current!;
+        }
     }
 }

@@ -84,10 +84,12 @@ public class ApplicationDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasData(
+                // The default administrator account
                 new ApplicationUser
                 {
                     UserID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                    Email = "admin@test.com"
+                    Email = "admin@test.com",
+                    RoleID = Guid.Parse("10000000-0000-0000-0000-000000000002")
                 },
                 new ApplicationUser
                 {

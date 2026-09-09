@@ -48,7 +48,12 @@ namespace StockApp.Application.DTO
         [MaxLength(20)]
         public string? PhoneNumber { get; set; }
 
-        // Optional: if not provided, user is created with no role
+        /// <summary>
+        /// Ignored. Self-registration always creates a Customer; only an
+        /// administrator can grant another role. Kept so existing clients that
+        /// still send it do not fail model binding.
+        /// </summary>
+        [Obsolete("Ignored by the server. Registration always creates a Customer.")]
         public Guid? RoleID { get; set; }
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StockApp.Infrastructure.Database;
@@ -6,7 +7,9 @@ namespace StockApp.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    // Was anonymous, purely to populate a role picker on the registration form.
+    // Registration no longer honours a chosen role, so this is now an admin tool.
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
     public class UserRoleApiController : ControllerBase
     {
         private readonly ApplicationDbContext _dbContext;

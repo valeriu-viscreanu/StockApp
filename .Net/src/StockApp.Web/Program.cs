@@ -74,9 +74,6 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<TradingOptions>(builder.Configuration.GetSection("TradingOptions"));
 builder.Services.AddHttpClient();
 
-// Scoped rather than singleton: the spread is read from the database per request,
-// so it can be edited without a restart. MarketDataService follows suit because it
-// depends on it (its quote cache is static, so nothing is lost by the change).
 builder.Services.AddScoped<ISpreadPricingService, SpreadPricingService>();
 builder.Services.AddScoped<IMarketDataService, MarketDataService>();
 builder.Services.AddScoped<IStockProfileService>(sp => sp.GetRequiredService<IMarketDataService>());

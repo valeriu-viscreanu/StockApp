@@ -50,7 +50,9 @@ namespace StockApp.Infrastructure.Database.Services
             {
                 UserID = userId,
                 Email = registerRequest.Email,
-                RoleID = registerRequest.RoleID ?? Guid.Parse("10000000-0000-0000-0000-000000000001") // Default to Customer
+                // Always Customer. The role a caller asks for is deliberately ignored:
+                // self-registration must not be able to grant Admin or Advisor.
+                RoleID = Guid.Parse("10000000-0000-0000-0000-000000000001")
             };
 
             var newAccount = new Account
