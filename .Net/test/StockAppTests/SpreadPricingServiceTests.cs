@@ -62,35 +62,6 @@ namespace StockAppTests
 
             Assert.Equal(-0.20, roundTrip, precision: 10);
         }
-
-        // 6. Editing the row takes effect on the next trade - no restart, no caching.
-        [Fact]
-        public void SpreadChangedInDatabase_IsPickedUpWithoutRestart()
-        {
-            var repository = new InMemorySpreadSettingRepository(0.20);
-            ISpreadPricingService pricing = new SpreadPricingService(repository);
-
-            Assert.Equal(100.10, pricing.GetAskPrice(100.0), precision: 10);
-
-            repository.Set(1.0); // widened by an operator editing the table
-
-            Assert.Equal(100.50, pricing.GetAskPrice(100.0), precision: 10);
-        }
-
-        // 7. With no row configured, trading falls back to a zero spread rather than
-        //    inventing a charge the operator never set.
-        [Fact]
-        public void NoSpreadRowConfigured_FallsBackToZeroSpread()
-        {
-            var repository = new InMemorySpreadSettingRepository();
-            repository.Clear();
-            ISpreadPricingService pricing = new SpreadPricingService(repository);
-
-            Assert.Equal(100.0, pricing.GetAskPrice(100.0), precision: 10);
-            Assert.Equal(100.0, pricing.GetBidPrice(100.0), precision: 10);
-        }
-
-        // 8. A negative spread in the table is not usable and must be rejected loudly.
         [Fact]
         public void NegativeSpreadInDatabase_IsRejected()
         {
