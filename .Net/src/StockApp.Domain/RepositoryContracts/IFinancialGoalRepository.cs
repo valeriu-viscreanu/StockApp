@@ -4,11 +4,11 @@ namespace StockApp.Domain.RepositoryContracts
 {
     public interface IFinancialGoalRepository
     {
-        void Add(FinancialGoal goal);
-        void Update(FinancialGoal goal);
-        void Delete(Guid goalId);
-        FinancialGoal? GetByID(Guid goalId);
-        List<FinancialGoal> GetByUserID(Guid userId);
-        List<GoalType> GetGoalTypes();
+        Task AddAsync(FinancialGoal goal);
+        Task UpdateAsync(FinancialGoal goal);
+        Task DeleteAsync(Guid goalId);
+        Task<FinancialGoal?> GetByIDAsync(Guid goalId);
+        Task<List<FinancialGoal>> GetByUserIDAsync(Guid userId);
+        Task<List<GoalType>> GetGoalTypesAsync();
     }
 }

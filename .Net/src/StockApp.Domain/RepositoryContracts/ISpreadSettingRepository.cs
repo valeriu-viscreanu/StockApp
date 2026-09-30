@@ -7,12 +7,12 @@ namespace StockApp.Domain.RepositoryContracts
         /// <summary>
         /// The spread setting currently in force, or null if none is configured.
         /// </summary>
-        SpreadSetting? GetCurrent();
+        Task<SpreadSetting?> GetCurrentAsync();
 
         /// <summary>
         /// Stores the spread in force, updating the existing row if there is one
         /// and creating it otherwise. Returns the saved setting.
         /// </summary>
-        SpreadSetting UpdateSpreadPercentage(double spreadPercentage);
+        Task<SpreadSetting> UpdateSpreadPercentageAsync(double spreadPercentage);
     }
 }

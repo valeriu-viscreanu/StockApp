@@ -1,6 +1,5 @@
 using StockApp.Application.ServiceContracts;
 using StockApp.Domain.Entities;
-using StockApp.Domain.RepositoryContracts;
 using StockApp.Infrastructure.Database;
 using System;
 using System.Linq;
@@ -10,12 +9,10 @@ namespace StockApp.Infrastructure.Database.Services
     public class AccountProfileService : IAccountProfileService
     {
         private readonly ApplicationDbContext _dbContext;
-        private readonly IUserOperationRepository _userOperationRepository;
 
-        public AccountProfileService(ApplicationDbContext dbContext, IUserOperationRepository userOperationRepository)
+        public AccountProfileService(ApplicationDbContext dbContext)
         {
             _dbContext = dbContext;
-            _userOperationRepository = userOperationRepository;
         }
 
         public double GetBalance(Guid userID)
@@ -35,9 +32,8 @@ namespace StockApp.Infrastructure.Database.Services
             }
 
             account.Balance -= amount;
-            _dbContext.SaveChanges();
 
-            _userOperationRepository.Add(new UserOperation
+            _dbContext.UserOperations.Add(new UserOperation
             {
                 UserOperationID = Guid.NewGuid(),
                 UserID = userID,
@@ -46,6 +42,8 @@ namespace StockApp.Infrastructure.Database.Services
                 Amount = amount,
                 Description = $"Withdrawal of {amount:C} from account"
             });
+
+            _dbContext.SaveChanges();
 
             return true;
         }
@@ -56,13 +54,12 @@ namespace StockApp.Infrastructure.Database.Services
             if (account == null)
             {
                 // In a real app we might throw or create account
-                return; 
+                return;
             }
 
             account.Balance += amount;
-            _dbContext.SaveChanges();
 
-            _userOperationRepository.Add(new UserOperation
+            _dbContext.UserOperations.Add(new UserOperation
             {
                 UserOperationID = Guid.NewGuid(),
                 UserID = userID,
@@ -71,6 +68,8 @@ namespace StockApp.Infrastructure.Database.Services
                 Amount = amount,
                 Description = $"Deposit of {amount:C} to account"
             });
+
+            _dbContext.SaveChanges();
         }
 
         public DateTime? GetDateOfBirth(Guid userID)

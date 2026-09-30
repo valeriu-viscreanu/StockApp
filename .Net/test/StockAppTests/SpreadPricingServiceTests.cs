@@ -16,16 +16,16 @@ namespace StockAppTests
 
         // 1. Half the spread is added above the mid for buyers.
         [Fact]
-        public void GetAskPrice_AddsHalfTheSpreadAboveMid()
+        public async Task GetAskPrice_AddsHalfTheSpreadAboveMid()
         {
-            Assert.Equal(100.10, PricingWithSpread(0.20).GetAskPrice(100.0), precision: 10);
+            Assert.Equal(100.10, await PricingWithSpread(0.20).GetAskPriceAsync(100.0), precision: 10);
         }
 
         // 2. Half the spread is taken off the mid for sellers.
         [Fact]
-        public void GetBidPrice_SubtractsHalfTheSpreadBelowMid()
+        public async Task GetBidPrice_SubtractsHalfTheSpreadBelowMid()
         {
-            Assert.Equal(99.90, PricingWithSpread(0.20).GetBidPrice(100.0), precision: 10);
+            Assert.Equal(99.90, await PricingWithSpread(0.20).GetBidPriceAsync(100.0), precision: 10);
         }
 
         // 3. The gap between bid and ask is exactly the configured percentage of mid.
@@ -33,41 +33,42 @@ namespace StockAppTests
         [InlineData(0.20, 100.0)]
         [InlineData(1.5, 250.0)]
         [InlineData(0.05, 499.70)]
-        public void BidAskGap_IsTheConfiguredPercentageOfMid(double spreadPercentage, double mid)
+        public async Task BidAskGap_IsTheConfiguredPercentageOfMid(double spreadPercentage, double mid)
         {
             ISpreadPricingService pricing = PricingWithSpread(spreadPercentage);
 
-            double spreadAsFractionOfMid = (pricing.GetAskPrice(mid) - pricing.GetBidPrice(mid)) / mid;
+            double spreadAsFractionOfMid = (await pricing.GetAskPriceAsync(mid) - await pricing.GetBidPriceAsync(mid)) / mid;
 
             Assert.Equal(spreadPercentage / 100.0, spreadAsFractionOfMid, precision: 10);
         }
 
         // 4. A zero spread leaves the mid untouched on both sides.
         [Fact]
-        public void ZeroSpread_LeavesMidUnchanged()
+        public async Task ZeroSpread_LeavesMidUnchanged()
         {
             ISpreadPricingService pricing = PricingWithSpread(0);
 
-            Assert.Equal(100.0, pricing.GetAskPrice(100.0), precision: 10);
-            Assert.Equal(100.0, pricing.GetBidPrice(100.0), precision: 10);
+            Assert.Equal(100.0, await pricing.GetAskPriceAsync(100.0), precision: 10);
+            Assert.Equal(100.0, await pricing.GetBidPriceAsync(100.0), precision: 10);
         }
 
         // 5. Buying then immediately selling at an unchanged mid must lose the spread.
         [Fact]
-        public void BuyThenSellAtSameMid_CostsTheSpread()
+        public async Task BuyThenSellAtSameMid_CostsTheSpread()
         {
             ISpreadPricingService pricing = PricingWithSpread(0.20);
 
-            double roundTrip = pricing.GetBidPrice(100.0) - pricing.GetAskPrice(100.0);
+            double roundTrip = await pricing.GetBidPriceAsync(100.0) - await pricing.GetAskPriceAsync(100.0);
 
             Assert.Equal(-0.20, roundTrip, precision: 10);
         }
+
         [Fact]
-        public void NegativeSpreadInDatabase_IsRejected()
+        public async Task NegativeSpreadInDatabase_IsRejected()
         {
             ISpreadPricingService pricing = PricingWithSpread(-0.1);
 
-            Assert.Throws<InvalidOperationException>(() => pricing.GetAskPrice(100.0));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => pricing.GetAskPriceAsync(100.0));
         }
     }
 }

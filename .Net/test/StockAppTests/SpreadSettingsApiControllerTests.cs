@@ -29,7 +29,7 @@ namespace StockAppTests
 
         // Replicates the [ApiController] model-binding validation step, which a
         // direct call to the action bypasses.
-        private IActionResult UpdateSpread(UpdateSpreadRequest? request)
+        private async Task<IActionResult> UpdateSpread(UpdateSpreadRequest? request)
         {
             _controller.ModelState.Clear();
             if (request != null)
@@ -50,7 +50,7 @@ namespace StockAppTests
                 }
             }
 
-            return _controller.UpdateSpread(request);
+            return await _controller.UpdateSpread(request);
         }
 
         // 1. Only admins may change the spread.
@@ -66,9 +66,9 @@ namespace StockAppTests
 
         // 2. A valid spread is persisted and echoed back.
         [Fact]
-        public void UpdateSpread_ValidPercentage_PersistsTheNewValue()
+        public async Task UpdateSpread_ValidPercentage_PersistsTheNewValue()
         {
-            IActionResult result = UpdateSpread(Request(0.5));
+            IActionResult result = await UpdateSpread(Request(0.5));
 
             Assert.IsType<OkObjectResult>(result);
             Assert.Equal(0.5, _repository.GetCurrent()!.SpreadPercentage, precision: 10);
@@ -76,9 +76,9 @@ namespace StockAppTests
 
         // 3. A negative spread would invert bid and ask, so it is refused.
         [Fact]
-        public void UpdateSpread_NegativePercentage_IsRejectedAndNothingChanges()
+        public async Task UpdateSpread_NegativePercentage_IsRejectedAndNothingChanges()
         {
-            IActionResult result = UpdateSpread(Request(-0.1));
+            IActionResult result = await UpdateSpread(Request(-0.1));
 
             Assert.IsType<BadRequestObjectResult>(result);
             Assert.Equal(0.2, _repository.GetCurrent()!.SpreadPercentage, precision: 10);
@@ -86,9 +86,9 @@ namespace StockAppTests
 
         // 4. An implausibly wide spread is refused rather than silently applied.
         [Fact]
-        public void UpdateSpread_AboveMaximum_IsRejectedAndNothingChanges()
+        public async Task UpdateSpread_AboveMaximum_IsRejectedAndNothingChanges()
         {
-            IActionResult result = UpdateSpread(Request(100.1));
+            IActionResult result = await UpdateSpread(Request(100.1));
 
             Assert.IsType<BadRequestObjectResult>(result);
             Assert.Equal(0.2, _repository.GetCurrent()!.SpreadPercentage, precision: 10);
@@ -96,18 +96,18 @@ namespace StockAppTests
 
         // 5. A missing body is refused rather than throwing.
         [Fact]
-        public void UpdateSpread_NullRequest_IsRejected()
+        public async Task UpdateSpread_NullRequest_IsRejected()
         {
-            IActionResult result = UpdateSpread(null);
+            IActionResult result = await UpdateSpread(null);
 
             Assert.IsType<BadRequestObjectResult>(result);
         }
 
         // 6. Zero is a legitimate setting - it means trade at mid.
         [Fact]
-        public void UpdateSpread_Zero_IsAccepted()
+        public async Task UpdateSpread_Zero_IsAccepted()
         {
-            IActionResult result = UpdateSpread(Request(0));
+            IActionResult result = await UpdateSpread(Request(0));
 
             Assert.IsType<OkObjectResult>(result);
             Assert.Equal(0, _repository.GetCurrent()!.SpreadPercentage, precision: 10);
@@ -115,14 +115,14 @@ namespace StockAppTests
 
         // 7. The saved value is what trading actually prices against, with no restart.
         [Fact]
-        public void UpdateSpread_TakesEffectOnTheNextPricedTrade()
+        public async Task UpdateSpread_TakesEffectOnTheNextPricedTrade()
         {
             ISpreadPricingService pricing = new SpreadPricingService(_repository);
-            Assert.Equal(100.10, pricing.GetAskPrice(100.0), precision: 10);
+            Assert.Equal(100.10, await pricing.GetAskPriceAsync(100.0), precision: 10);
 
-            UpdateSpread(Request(1.0));
+            await UpdateSpread(Request(1.0));
 
-            Assert.Equal(100.50, pricing.GetAskPrice(100.0), precision: 10);
+            Assert.Equal(100.50, await pricing.GetAskPriceAsync(100.0), precision: 10);
         }
     }
 }

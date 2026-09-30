@@ -14,46 +14,48 @@ namespace StockApp.Infrastructure.Database.Repositories
             _db = db;
         }
 
-        public void Add(FinancialGoal goal)
+        public async Task AddAsync(FinancialGoal goal)
         {
             _db.FinancialGoals.Add(goal);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void Update(FinancialGoal goal)
+        public async Task UpdateAsync(FinancialGoal goal)
         {
             _db.FinancialGoals.Update(goal);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void Delete(Guid goalId)
+        public async Task DeleteAsync(Guid goalId)
         {
-            var goal = _db.FinancialGoals.Find(goalId);
+            var goal = await _db.FinancialGoals.FindAsync(goalId);
             if (goal != null)
             {
                 _db.FinancialGoals.Remove(goal);
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
             }
         }
 
-        public FinancialGoal? GetByID(Guid goalId)
+        public async Task<FinancialGoal?> GetByIDAsync(Guid goalId)
         {
-            return _db.FinancialGoals
+            return await _db.FinancialGoals
+                .AsNoTracking()
                 .Include(g => g.GoalType)
-                .FirstOrDefault(g => g.FinancialGoalID == goalId);
+                .FirstOrDefaultAsync(g => g.FinancialGoalID == goalId);
         }
 
-        public List<FinancialGoal> GetByUserID(Guid userId)
+        public async Task<List<FinancialGoal>> GetByUserIDAsync(Guid userId)
         {
-            return _db.FinancialGoals
+            return await _db.FinancialGoals
+                .AsNoTracking()
                 .Include(g => g.GoalType)
                 .Where(g => g.UserID == userId)
-                .ToList();
+                .ToListAsync();
         }
 
-        public List<GoalType> GetGoalTypes()
+        public async Task<List<GoalType>> GetGoalTypesAsync()
         {
-            return _db.GoalTypes.ToList();
+            return await _db.GoalTypes.AsNoTracking().ToListAsync();
         }
     }
 }

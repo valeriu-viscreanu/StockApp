@@ -6,10 +6,10 @@ namespace StockApp.Domain.RepositoryContracts
 {
     public interface ICashRepository
     {
-        void Add(Cash cash);
-        void Update(Cash cash);
-        void Delete(Guid cashID);
-        Cash? GetBySymbol(Guid accountID, string stockSymbol);
-        List<Cash> GetByAccountID(Guid accountID);
+        Task AddAsync(Cash cash);
+        Task UpdateAsync(Cash cash);
+        Task DeleteAsync(Guid cashID);
+        Task<Cash?> GetBySymbolAsync(Guid accountID, string stockSymbol);
+        Task<List<Cash>> GetByAccountIDAsync(Guid accountID);
     }
 }

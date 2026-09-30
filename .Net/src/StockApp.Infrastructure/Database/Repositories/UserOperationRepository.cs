@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using StockApp.Domain.Entities;
 using StockApp.Domain.RepositoryContracts;
 
@@ -12,18 +13,19 @@ namespace StockApp.Infrastructure.Database.Repositories
             _dbContext = dbContext;
         }
 
-        public void Add(UserOperation userOperation)
+        public async Task AddAsync(UserOperation userOperation)
         {
             _dbContext.UserOperations.Add(userOperation);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
 
-        public IEnumerable<UserOperation> GetByUserId(Guid userId)
+        public async Task<IEnumerable<UserOperation>> GetByUserIdAsync(Guid userId)
         {
-            return _dbContext.UserOperations
+            return await _dbContext.UserOperations
+                .AsNoTracking()
                 .Where(uo => uo.UserID == userId)
                 .OrderByDescending(uo => uo.TimeStamp)
-                .ToList();
+                .ToListAsync();
         }
     }
 }

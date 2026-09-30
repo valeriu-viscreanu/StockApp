@@ -12,18 +12,19 @@ namespace StockApp.Application.Services
             _spreadSettingRepository = spreadSettingRepository;
         }
 
-        public double GetAskPrice(double midPrice) => midPrice * (1 + HalfSpreadFraction());
+        public async Task<double> GetAskPriceAsync(double midPrice) => midPrice * (1 + await HalfSpreadFraction());
 
-        public double GetBidPrice(double midPrice) => midPrice * (1 - HalfSpreadFraction());
+        public async Task<double> GetBidPriceAsync(double midPrice) => midPrice * (1 - await HalfSpreadFraction());
 
         /// <summary>
         /// Half the configured spread, as a fraction of the mid price. Read on every
         /// call rather than cached, so editing the row takes effect immediately.
         /// </summary>
-        private double HalfSpreadFraction()
+        private async Task<double> HalfSpreadFraction()
         {
             // No row configured yet: trade at mid rather than invent a charge.
-            double spreadPercentage = _spreadSettingRepository.GetCurrent()?.SpreadPercentage ?? 0;
+            var current = await _spreadSettingRepository.GetCurrentAsync();
+            double spreadPercentage = current?.SpreadPercentage ?? 0;
 
             if (spreadPercentage < 0)
             {

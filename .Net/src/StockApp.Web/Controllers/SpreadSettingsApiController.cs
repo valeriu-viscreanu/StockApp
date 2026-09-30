@@ -19,7 +19,7 @@ namespace StockApp.Controllers
         }
 
         [HttpPut]
-        public IActionResult UpdateSpread([FromBody] UpdateSpreadRequest? request)
+        public async Task<IActionResult> UpdateSpread([FromBody] UpdateSpreadRequest? request)
         {
             if (request == null)
             {
@@ -31,7 +31,7 @@ namespace StockApp.Controllers
                 return BadRequest(ModelState);
             }
 
-            var saved = _spreadSettingRepository.UpdateSpreadPercentage(request.SpreadPercentage);
+            var saved = await _spreadSettingRepository.UpdateSpreadPercentageAsync(request.SpreadPercentage);
 
             return Ok(new
             {

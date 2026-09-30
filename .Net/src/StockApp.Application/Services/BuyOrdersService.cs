@@ -59,7 +59,7 @@ namespace StockApp.Application.Services
 
             // Check the account and the funds before anything is written, so a
             // rejected order leaves no order row and no ledger entry behind.
-            var account = _accountRepository.GetByUserID(buyOrder.UserID)
+            var account = await _accountRepository.GetByUserIDAsync(buyOrder.UserID)
                 ?? throw new InvalidOperationException("User has no account");
 
             double totalCost = buyOrder.Price * buyOrder.Quantity;
@@ -71,9 +71,9 @@ namespace StockApp.Application.Services
             var pendingStatus = await _orderStatusRepository.GetByName("Pending");
             buyOrder.OrderStatusID = pendingStatus?.OrderStatusID ?? Guid.Empty;
             buyOrder.OrderStatus = pendingStatus!;
-            _buyOrderRepository.Add(buyOrder);
+            await _buyOrderRepository.AddAsync(buyOrder);
 
-            _userOperationRepository.Add(new Domain.Entities.UserOperation
+            await _userOperationRepository.AddAsync(new Domain.Entities.UserOperation
             {
                 UserOperationID = Guid.NewGuid(),
                 UserID = buyOrder.UserID,
@@ -86,12 +86,12 @@ namespace StockApp.Application.Services
 
             // Update balance and holdings (Cash)
             account.Balance -= totalCost;
-            _accountRepository.Update(account);
+            await _accountRepository.UpdateAsync(account);
 
-            var cash = _cashRepository.GetBySymbol(account.AccountID, buyOrder.StockSymbol);
+            var cash = await _cashRepository.GetBySymbolAsync(account.AccountID, buyOrder.StockSymbol);
             if (cash == null)
             {
-                _cashRepository.Add(new Domain.Entities.Cash
+                await _cashRepository.AddAsync(new Domain.Entities.Cash
                 {
                     CashID = Guid.NewGuid(),
                     AccountID = account.AccountID,
@@ -103,7 +103,7 @@ namespace StockApp.Application.Services
             else
             {
                 cash.Quantity += buyOrder.Quantity;
-                _cashRepository.Update(cash);
+                await _cashRepository.UpdateAsync(cash);
             }
 
             // Simulate order processing
@@ -112,19 +112,15 @@ namespace StockApp.Application.Services
             var processedStatus = await _orderStatusRepository.GetByName("Processed");
             buyOrder.OrderStatusID = processedStatus?.OrderStatusID ?? Guid.Empty;
             buyOrder.OrderStatus = processedStatus!;
-            _buyOrderRepository.Update(buyOrder);
+            await _buyOrderRepository.UpdateAsync(buyOrder);
 
             return _buyOrderMapper.MapToResponse(buyOrder);
         }
 
         public async Task<List<BuyOrderResponse>> GetBuyOrders(Guid userID)
         {
-            var buyOrderResponses = _buyOrderRepository
-                .GetByUserID(userID)
-                .Select(_buyOrderMapper.MapToResponse)
-                .ToList();
-
-            return await Task.FromResult(buyOrderResponses);
+            var orders = await _buyOrderRepository.GetByUserIDAsync(userID);
+            return orders.Select(_buyOrderMapper.MapToResponse).ToList();
         }
     }
 }

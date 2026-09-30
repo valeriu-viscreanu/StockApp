@@ -1,8 +1,8 @@
 using StockApp.Domain.Entities;
 using StockApp.Domain.RepositoryContracts;
 using StockApp.Infrastructure.Database;
+using Microsoft.EntityFrameworkCore;
 using System;
-using System.Linq;
 
 namespace StockApp.Infrastructure.Database.Repositories
 {
@@ -15,15 +15,15 @@ namespace StockApp.Infrastructure.Database.Repositories
             _db = db;
         }
 
-        public Account? GetByUserID(Guid userID)
+        public async Task<Account?> GetByUserIDAsync(Guid userID)
         {
-            return _db.Accounts.FirstOrDefault(a => a.UserID == userID);
+            return await _db.Accounts.AsNoTracking().FirstOrDefaultAsync(a => a.UserID == userID);
         }
 
-        public void Update(Account account)
+        public async Task UpdateAsync(Account account)
         {
             _db.Accounts.Update(account);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
     }
 }

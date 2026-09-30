@@ -19,7 +19,7 @@ namespace StockApp.Controllers
         }
 
         [HttpGet]
-        public ActionResult<UserDetailsResponse> GetUserDetails()
+        public async Task<ActionResult<UserDetailsResponse>> GetUserDetails()
         {
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
@@ -27,7 +27,7 @@ namespace StockApp.Controllers
                 return Unauthorized();
             }
 
-            var details = _userDetailsRepository.GetByUserID(userId);
+            var details = await _userDetailsRepository.GetByUserIDAsync(userId);
             if (details == null)
             {
                 return Ok(new UserDetailsResponse());
@@ -48,7 +48,7 @@ namespace StockApp.Controllers
         }
 
         [HttpPost]
-        public ActionResult UpdateUserDetails(UserDetailsResponse updateRequest)
+        public async Task<ActionResult> UpdateUserDetails(UserDetailsResponse updateRequest)
         {
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out Guid userId))
@@ -56,10 +56,10 @@ namespace StockApp.Controllers
                 return Unauthorized();
             }
 
-            var details = _userDetailsRepository.GetByUserID(userId);
+            var details = await _userDetailsRepository.GetByUserIDAsync(userId);
             if (details == null)
             {
-                _userDetailsRepository.Add(new Domain.Entities.UserDetails
+                await _userDetailsRepository.AddAsync(new Domain.Entities.UserDetails
                 {
                     DetailsID = Guid.NewGuid(),
                     UserID = userId,
@@ -85,7 +85,7 @@ namespace StockApp.Controllers
                 details.Country = updateRequest.Country;
                 details.AdditionalInfo = updateRequest.AdditionalInfo;
                 details.PhoneNumber = updateRequest.PhoneNumber;
-                _userDetailsRepository.Update(details);
+                await _userDetailsRepository.UpdateAsync(details);
             }
 
             return Ok();

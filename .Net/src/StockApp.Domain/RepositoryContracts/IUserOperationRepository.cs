@@ -4,7 +4,7 @@ namespace StockApp.Domain.RepositoryContracts
 {
     public interface IUserOperationRepository
     {
-        void Add(UserOperation userOperation);
-        IEnumerable<UserOperation> GetByUserId(Guid userId);
+        Task AddAsync(UserOperation userOperation);
+        Task<IEnumerable<UserOperation>> GetByUserIdAsync(Guid userId);
     }
 }

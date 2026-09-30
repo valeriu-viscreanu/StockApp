@@ -8,9 +8,9 @@ namespace StockApp.Application.ServiceContracts
     public interface ISpreadPricingService
     {
         /// <summary>Price a buyer pays: mid plus half the spread.</summary>
-        double GetAskPrice(double midPrice);
+        Task<double> GetAskPriceAsync(double midPrice);
 
         /// <summary>Price a seller receives: mid minus half the spread.</summary>
-        double GetBidPrice(double midPrice);
+        Task<double> GetBidPriceAsync(double midPrice);
     }
 }

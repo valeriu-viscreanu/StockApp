@@ -94,8 +94,8 @@ namespace StockApp.Infrastructure.Services
                     LowPriceDay = meta.RegularMarketDayLow,
                     OpenPriceDay = meta.RegularMarketOpen,
                     PreviousClosePrice = previousClose,
-                    BidPrice = _spreadPricingService.GetBidPrice(currentPrice),
-                    AskPrice = _spreadPricingService.GetAskPrice(currentPrice)
+                    BidPrice = await _spreadPricingService.GetBidPriceAsync(currentPrice),
+                    AskPrice = await _spreadPricingService.GetAskPriceAsync(currentPrice)
                 };
             }
             catch

@@ -13,29 +13,30 @@ public class BuyOrderRepository : IBuyOrderRepository
         _dbContext = dbContext;
     }
 
-    public void Add(BuyOrder order)
+    public async Task AddAsync(BuyOrder order)
     {
         order.BuyOrderID = Guid.NewGuid();
         _dbContext.BuyOrders.Add(order);
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
     }
 
-    public void Update(BuyOrder order)
+    public async Task UpdateAsync(BuyOrder order)
     {
         _dbContext.BuyOrders.Update(order);
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
     }
 
-    public List<BuyOrder> GetAll()
+    public async Task<List<BuyOrder>> GetAllAsync()
     {
-        return _dbContext.BuyOrders.Include(o => o.OrderStatus).ToList();
+        return await _dbContext.BuyOrders.AsNoTracking().Include(o => o.OrderStatus).ToListAsync();
     }
 
-    public List<BuyOrder> GetByUserID(Guid userID)
+    public async Task<List<BuyOrder>> GetByUserIDAsync(Guid userID)
     {
-        return _dbContext.BuyOrders
+        return await _dbContext.BuyOrders
+            .AsNoTracking()
             .Include(o => o.OrderStatus)
             .Where(bo => bo.UserID == userID)
-            .ToList();
+            .ToListAsync();
     }
 }

@@ -8,24 +8,26 @@ namespace StockApp.Infrastructure.Repositories
     {
         private readonly List<BuyOrder> _orders = new();
 
-        public void Add(BuyOrder order)
+        public Task AddAsync(BuyOrder order)
         {
             _orders.Add(order);
+            return Task.CompletedTask;
         }
 
-        public void Update(BuyOrder order)
+        public Task UpdateAsync(BuyOrder order)
         {
             // In-memory: object reference is already updated in the list
+            return Task.CompletedTask;
         }
 
-        public List<BuyOrder> GetAll()
+        public Task<List<BuyOrder>> GetAllAsync()
         {
-            return _orders.ToList();
+            return Task.FromResult(_orders.ToList());
         }
 
-        public List<BuyOrder> GetByUserID(Guid userID)
+        public Task<List<BuyOrder>> GetByUserIDAsync(Guid userID)
         {
-            return _orders.Where(o => o.UserID == userID).ToList();
+            return Task.FromResult(_orders.Where(o => o.UserID == userID).ToList());
         }
     }
 }

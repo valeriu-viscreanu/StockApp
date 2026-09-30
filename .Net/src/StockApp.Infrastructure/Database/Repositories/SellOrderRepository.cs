@@ -13,29 +13,30 @@ public class SellOrderRepository : ISellOrderRepository
         _dbContext = dbContext;
     }
 
-    public void Add(SellOrder order)
+    public async Task AddAsync(SellOrder order)
     {
         order.SellOrderID = Guid.NewGuid();
         _dbContext.SellOrders.Add(order);
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
     }
 
-    public void Update(SellOrder order)
+    public async Task UpdateAsync(SellOrder order)
     {
         _dbContext.SellOrders.Update(order);
-        _dbContext.SaveChanges();
+        await _dbContext.SaveChangesAsync();
     }
 
-    public List<SellOrder> GetAll()
+    public async Task<List<SellOrder>> GetAllAsync()
     {
-        return _dbContext.SellOrders.Include(o => o.OrderStatus).ToList();
+        return await _dbContext.SellOrders.AsNoTracking().Include(o => o.OrderStatus).ToListAsync();
     }
 
-    public List<SellOrder> GetByUserID(Guid userID)
+    public async Task<List<SellOrder>> GetByUserIDAsync(Guid userID)
     {
-        return _dbContext.SellOrders
+        return await _dbContext.SellOrders
+            .AsNoTracking()
             .Include(o => o.OrderStatus)
             .Where(so => so.UserID == userID)
-            .ToList();
+            .ToListAsync();
     }
 }

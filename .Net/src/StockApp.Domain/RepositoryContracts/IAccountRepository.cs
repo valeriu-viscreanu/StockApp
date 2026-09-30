@@ -5,7 +5,7 @@ namespace StockApp.Domain.RepositoryContracts
 {
     public interface IAccountRepository
     {
-        Account? GetByUserID(Guid userID);
-        void Update(Account account);
+        Task<Account?> GetByUserIDAsync(Guid userID);
+        Task UpdateAsync(Account account);
     }
 }

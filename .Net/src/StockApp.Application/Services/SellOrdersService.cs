@@ -59,10 +59,10 @@ namespace StockApp.Application.Services
 
             // Check the account and the holdings before anything is written, so a
             // rejected order leaves no order row and no ledger entry behind.
-            var account = _accountRepository.GetByUserID(sellOrderRequest.UserID)
+            var account = await _accountRepository.GetByUserIDAsync(sellOrderRequest.UserID)
                 ?? throw new InvalidOperationException("User has no account");
 
-            var cash = _cashRepository.GetBySymbol(account.AccountID, sellOrderRequest.StockSymbol);
+            var cash = await _cashRepository.GetBySymbolAsync(account.AccountID, sellOrderRequest.StockSymbol);
             if (cash == null || cash.Quantity < sellOrder.Quantity)
             {
                 throw new InvalidOperationException($"Insufficient shares of {sellOrder.StockSymbol} to complete the sale");
@@ -71,24 +71,24 @@ namespace StockApp.Application.Services
             var pendingStatus = await _orderStatusRepository.GetByName("Pending");
             sellOrder.OrderStatusID = pendingStatus?.OrderStatusID ?? Guid.Empty;
             sellOrder.OrderStatus = pendingStatus!;
-            _sellOrderRepository.Add(sellOrder);
+            await _sellOrderRepository.AddAsync(sellOrder);
 
             // Update balance and holdings (Cash)
             double totalRevenue = sellOrder.Price * sellOrder.Quantity;
             account.Balance += totalRevenue;
-            _accountRepository.Update(account);
+            await _accountRepository.UpdateAsync(account);
 
             cash.Quantity -= sellOrder.Quantity;
             if (cash.Quantity == 0)
             {
-                _cashRepository.Delete(cash.CashID);
+                await _cashRepository.DeleteAsync(cash.CashID);
             }
             else
             {
-                _cashRepository.Update(cash);
+                await _cashRepository.UpdateAsync(cash);
             }
 
-            _userOperationRepository.Add(new Domain.Entities.UserOperation
+            await _userOperationRepository.AddAsync(new Domain.Entities.UserOperation
             {
                 UserOperationID = Guid.NewGuid(),
                 UserID = sellOrder.UserID,
@@ -105,19 +105,15 @@ namespace StockApp.Application.Services
             var processedStatus = await _orderStatusRepository.GetByName("Processed");
             sellOrder.OrderStatusID = processedStatus?.OrderStatusID ?? Guid.Empty;
             sellOrder.OrderStatus = processedStatus!;
-            _sellOrderRepository.Update(sellOrder);
+            await _sellOrderRepository.UpdateAsync(sellOrder);
 
             return _sellOrderMapper.MapToResponse(sellOrder);
         }
 
         public async Task<List<SellOrderResponse>> GetSellOrders(Guid userID)
         {
-            var sellOrderResponses = _sellOrderRepository
-                .GetByUserID(userID)
-                .Select(_sellOrderMapper.MapToResponse)
-                .ToList();
-
-            return await Task.FromResult(sellOrderResponses);
+            var orders = await _sellOrderRepository.GetByUserIDAsync(userID);
+            return orders.Select(_sellOrderMapper.MapToResponse).ToList();
         }
     }
 }

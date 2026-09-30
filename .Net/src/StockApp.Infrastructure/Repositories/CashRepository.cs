@@ -4,7 +4,6 @@ using StockApp.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace StockApp.Infrastructure.Repositories
 {
@@ -17,36 +16,38 @@ namespace StockApp.Infrastructure.Repositories
             _db = db;
         }
 
-        public void Add(Cash cash)
+        public async Task AddAsync(Cash cash)
         {
             _db.CashAllocations.Add(cash);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public void Delete(Guid cashID)
+        public async Task DeleteAsync(Guid cashID)
         {
-            var cash = _db.CashAllocations.Find(cashID);
+            var cash = await _db.CashAllocations.FindAsync(cashID);
             if (cash != null)
             {
                 _db.CashAllocations.Remove(cash);
-                _db.SaveChanges();
+                await _db.SaveChangesAsync();
             }
         }
 
-        public Cash? GetBySymbol(Guid accountID, string stockSymbol)
+        public async Task<Cash?> GetBySymbolAsync(Guid accountID, string stockSymbol)
         {
-            return _db.CashAllocations.FirstOrDefault(h => h.AccountID == accountID && h.StockSymbol == stockSymbol);
+            return await _db.CashAllocations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(h => h.AccountID == accountID && h.StockSymbol == stockSymbol);
         }
 
-        public List<Cash> GetByAccountID(Guid accountID)
+        public async Task<List<Cash>> GetByAccountIDAsync(Guid accountID)
         {
-            return _db.CashAllocations.Where(h => h.AccountID == accountID).ToList();
+            return await _db.CashAllocations.AsNoTracking().Where(h => h.AccountID == accountID).ToListAsync();
         }
 
-        public void Update(Cash cash)
+        public async Task UpdateAsync(Cash cash)
         {
             _db.CashAllocations.Update(cash);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
     }
 }

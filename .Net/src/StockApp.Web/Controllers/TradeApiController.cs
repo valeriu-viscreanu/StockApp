@@ -138,12 +138,13 @@ namespace StockApp.Controllers
             var buyOrders = await _buyOrdersService.GetBuyOrders(userId);
             var sellOrders = await _sellOrdersService.GetSellOrders(userId);
             
-            var account = _accountRepository.GetByUserID(userId);
+            var account = await _accountRepository.GetByUserIDAsync(userId);
             List<HoldingResponse> holdings = new();
-            
+
             if (account != null)
             {
-                holdings = _cashRepository.GetByAccountID(account.AccountID)
+                var cash = await _cashRepository.GetByAccountIDAsync(account.AccountID);
+                holdings = cash
                     .Select(h => new HoldingResponse
                     {
                         StockSymbol = h.StockSymbol,
@@ -235,11 +236,11 @@ namespace StockApp.Controllers
                 {
                     sellOrderRequest.UserID = userId;
                     
-                    var account = _accountRepository.GetByUserID(userId);
+                    var account = await _accountRepository.GetByUserIDAsync(userId);
                     long currentQuantity = 0;
                     if (account != null)
                     {
-                        var cash = _cashRepository.GetBySymbol(account.AccountID, sellOrderRequest.StockSymbol);
+                        var cash = await _cashRepository.GetBySymbolAsync(account.AccountID, sellOrderRequest.StockSymbol);
                         currentQuantity = cash?.Quantity ?? 0;
                     }
 

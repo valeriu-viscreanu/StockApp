@@ -19,12 +19,12 @@ namespace StockApp.Web.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetOperations()
+        public async Task<IActionResult> GetOperations()
         {
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (Guid.TryParse(userIdString, out Guid userId))
             {
-                var operations = _userOperationRepository.GetByUserId(userId);
+                var operations = await _userOperationRepository.GetByUserIdAsync(userId);
                 return Ok(operations);
             }
             return Unauthorized(new { message = "User ID not found in token." });

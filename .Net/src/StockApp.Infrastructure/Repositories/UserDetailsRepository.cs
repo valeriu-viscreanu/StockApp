@@ -1,7 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using StockApp.Domain.Entities;
 using StockApp.Domain.RepositoryContracts;
 using StockApp.Infrastructure.Database;
-using System.Linq;
 
 namespace StockApp.Infrastructure.Repositories
 {
@@ -14,21 +14,21 @@ namespace StockApp.Infrastructure.Repositories
             _db = db;
         }
 
-        public void Add(UserDetails userDetails)
+        public async Task AddAsync(UserDetails userDetails)
         {
             _db.UserDetails.Add(userDetails);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
 
-        public UserDetails? GetByUserID(Guid userID)
+        public async Task<UserDetails?> GetByUserIDAsync(Guid userID)
         {
-            return _db.UserDetails.FirstOrDefault(ud => ud.UserID == userID);
+            return await _db.UserDetails.AsNoTracking().FirstOrDefaultAsync(ud => ud.UserID == userID);
         }
 
-        public void Update(UserDetails userDetails)
+        public async Task UpdateAsync(UserDetails userDetails)
         {
             _db.UserDetails.Update(userDetails);
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
     }
 }

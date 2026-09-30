@@ -37,10 +37,12 @@ namespace StockAppTests.Mocks
             return _current;
         }
 
-        public SpreadSetting UpdateSpreadPercentage(double spreadPercentage)
+        public Task<SpreadSetting?> GetCurrentAsync() => Task.FromResult(GetCurrent());
+
+        public Task<SpreadSetting> UpdateSpreadPercentageAsync(double spreadPercentage)
         {
             Set(spreadPercentage);
-            return _current!;
+            return Task.FromResult(_current!);
         }
     }
 }

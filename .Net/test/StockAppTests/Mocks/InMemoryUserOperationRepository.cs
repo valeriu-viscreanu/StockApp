@@ -8,14 +8,15 @@ namespace StockAppTests.Mocks
     {
         private readonly List<UserOperation> _userOperations = new();
 
-        public void Add(UserOperation userOperation)
+        public Task AddAsync(UserOperation userOperation)
         {
             _userOperations.Add(userOperation);
+            return Task.CompletedTask;
         }
 
-        public IEnumerable<UserOperation> GetByUserId(Guid userId)
+        public Task<IEnumerable<UserOperation>> GetByUserIdAsync(Guid userId)
         {
-            return _userOperations.Where(uo => uo.UserID == userId);
+            return Task.FromResult(_userOperations.Where(uo => uo.UserID == userId));
         }
 
         public List<UserOperation> GetAll() => _userOperations;

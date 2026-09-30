@@ -1,6 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using StockApp.Domain.Entities;
 using StockApp.Domain.RepositoryContracts;
-using System.Linq;
 
 namespace StockApp.Infrastructure.Database.Repositories
 {
@@ -13,16 +13,24 @@ namespace StockApp.Infrastructure.Database.Repositories
             _dbContext = dbContext;
         }
 
-        public SpreadSetting? GetCurrent()
+        public async Task<SpreadSetting?> GetCurrentAsync()
         {
-            return _dbContext.SpreadSettings
+            return await _dbContext
+                .SpreadSettings
+                .AsNoTracking()
                 .OrderByDescending(s => s.UpdatedAt)
-                .FirstOrDefault();
+                .FirstOrDefaultAsync();
         }
 
-        public SpreadSetting UpdateSpreadPercentage(double spreadPercentage)
+        public async Task<SpreadSetting> UpdateSpreadPercentageAsync(double spreadPercentage)
         {
-            var setting = GetCurrent();
+            // Own tracked query rather than GetCurrentAsync(): the fetched entity is
+            // mutated in place below, so it must stay attached for SaveChangesAsync
+            // to pick up the change.
+            var setting = await _dbContext
+                .SpreadSettings
+                .OrderByDescending(s => s.UpdatedAt)
+                .FirstOrDefaultAsync();
 
             if (setting == null)
             {
@@ -32,7 +40,7 @@ namespace StockApp.Infrastructure.Database.Repositories
 
             setting.SpreadPercentage = spreadPercentage;
             setting.UpdatedAt = DateTime.UtcNow;
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return setting;
         }

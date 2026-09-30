@@ -19,27 +19,26 @@ namespace StockApp.Application.Services
         public async Task<FinancialGoalResponse> CreateGoal(FinancialGoalRequest request, Guid userId)
         {
             var goal = _financialGoalMapper.MapToEntity(request, userId);
-            _financialGoalRepository.Add(goal);
-            return await Task.FromResult(_financialGoalMapper.MapToResponse(goal));
+            await _financialGoalRepository.AddAsync(goal);
+            return _financialGoalMapper.MapToResponse(goal);
         }
 
         public async Task<List<FinancialGoalResponse>> GetGoalsByUserId(Guid userId)
         {
-            var goals = _financialGoalRepository.GetByUserID(userId);
-            var responses = goals.Select(g => _financialGoalMapper.MapToResponse(g)).ToList();
-            return await Task.FromResult(responses);
+            var goals = await _financialGoalRepository.GetByUserIDAsync(userId);
+            return goals.Select(g => _financialGoalMapper.MapToResponse(g)).ToList();
         }
 
         public async Task<FinancialGoalResponse?> GetGoalById(Guid goalId)
         {
-            var goal = _financialGoalRepository.GetByID(goalId);
+            var goal = await _financialGoalRepository.GetByIDAsync(goalId);
             if (goal == null) return null;
-            return await Task.FromResult(_financialGoalMapper.MapToResponse(goal));
+            return _financialGoalMapper.MapToResponse(goal);
         }
 
         public async Task<bool> UpdateGoal(Guid goalId, FinancialGoalRequest request)
         {
-            var goal = _financialGoalRepository.GetByID(goalId);
+            var goal = await _financialGoalRepository.GetByIDAsync(goalId);
             if (goal == null) return false;
 
             goal.Title = request.Title;
@@ -49,22 +48,22 @@ namespace StockApp.Application.Services
             goal.MonthlyContribution = request.MonthlyContribution;
             goal.TargetDate = request.TargetDate;
 
-            _financialGoalRepository.Update(goal);
-            return await Task.FromResult(true);
+            await _financialGoalRepository.UpdateAsync(goal);
+            return true;
         }
 
         public async Task<bool> DeleteGoal(Guid goalId)
         {
-            var goal = _financialGoalRepository.GetByID(goalId);
+            var goal = await _financialGoalRepository.GetByIDAsync(goalId);
             if (goal == null) return false;
 
-            _financialGoalRepository.Delete(goalId);
-            return await Task.FromResult(true);
+            await _financialGoalRepository.DeleteAsync(goalId);
+            return true;
         }
 
         public async Task<bool> AddContribution(Guid goalId, double amount)
         {
-            var goal = _financialGoalRepository.GetByID(goalId);
+            var goal = await _financialGoalRepository.GetByIDAsync(goalId);
             if (goal == null) return false;
 
             goal.CurrentAmount += amount;
@@ -73,18 +72,18 @@ namespace StockApp.Application.Services
                 goal.IsCompleted = true;
             }
 
-            _financialGoalRepository.Update(goal);
-            return await Task.FromResult(true);
+            await _financialGoalRepository.UpdateAsync(goal);
+            return true;
         }
 
         public async Task<List<GoalTypeResponse>> GetGoalTypes()
         {
-            var goalTypes = _financialGoalRepository.GetGoalTypes();
-            return await Task.FromResult(goalTypes.Select(gt => new GoalTypeResponse
+            var goalTypes = await _financialGoalRepository.GetGoalTypesAsync();
+            return goalTypes.Select(gt => new GoalTypeResponse
             {
                 GoalTypeID = gt.GoalTypeID,
                 Name = gt.Name
-            }).ToList());
+            }).ToList();
         }
     }
 }

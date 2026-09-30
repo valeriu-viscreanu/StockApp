@@ -8,30 +8,33 @@ namespace StockAppTests.Mocks
     {
         private readonly List<Cash> _cashAllocations = new();
 
-        public void Add(Cash cash)
+        public Task AddAsync(Cash cash)
         {
             _cashAllocations.Add(cash);
+            return Task.CompletedTask;
         }
 
-        public void Update(Cash cash)
+        public Task UpdateAsync(Cash cash)
         {
             // Object reference is already updated
+            return Task.CompletedTask;
         }
 
-        public void Delete(Guid cashID)
+        public Task DeleteAsync(Guid cashID)
         {
             var item = _cashAllocations.FirstOrDefault(c => c.CashID == cashID);
             if (item != null) _cashAllocations.Remove(item);
+            return Task.CompletedTask;
         }
 
-        public List<Cash> GetByAccountID(Guid accountID)
+        public Task<List<Cash>> GetByAccountIDAsync(Guid accountID)
         {
-            return _cashAllocations.Where(c => c.AccountID == accountID).ToList();
+            return Task.FromResult(_cashAllocations.Where(c => c.AccountID == accountID).ToList());
         }
 
-        public Cash? GetBySymbol(Guid accountID, string symbol)
+        public Task<Cash?> GetBySymbolAsync(Guid accountID, string symbol)
         {
-            return _cashAllocations.FirstOrDefault(c => c.AccountID == accountID && c.StockSymbol == symbol);
+            return Task.FromResult(_cashAllocations.FirstOrDefault(c => c.AccountID == accountID && c.StockSymbol == symbol));
         }
     }
 
@@ -44,14 +47,15 @@ namespace StockAppTests.Mocks
             _accounts.Add(account);
         }
 
-        public Account? GetByUserID(Guid userID)
+        public Task<Account?> GetByUserIDAsync(Guid userID)
         {
-            return _accounts.FirstOrDefault(a => a.UserID == userID);
+            return Task.FromResult(_accounts.FirstOrDefault(a => a.UserID == userID));
         }
 
-        public void Update(Account account)
+        public Task UpdateAsync(Account account)
         {
             // Object reference is already updated
+            return Task.CompletedTask;
         }
     }
 }
